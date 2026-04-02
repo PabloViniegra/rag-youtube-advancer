@@ -12,6 +12,9 @@ const COVERAGE_INCLUDES = [
   // Phase 4 — Storage
   'src/lib/storage/store.ts',
   'src/app/api/store/route.ts',
+  // Phase 5 — Retrieval
+  'src/lib/retrieval/retrieve.ts',
+  'src/app/api/retrieve/route.ts',
 ] as const
 
 export default defineConfig({
