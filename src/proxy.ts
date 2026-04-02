@@ -4,7 +4,13 @@ import { supabaseAnonKey, supabaseUrl } from '@/lib/env'
 import type { Database } from '@/lib/supabase/types'
 
 // Routes that require authentication
-const PROTECTED_ROUTES = ['/dashboard', '/settings', '/api/videos', '/api/rag']
+const PROTECTED_ROUTES = [
+  '/dashboard',
+  '/settings',
+  '/api/videos',
+  '/api/rag',
+  '/api/transcript',
+]
 // Routes that should redirect to /dashboard if already authenticated
 const AUTH_ROUTES = ['/login', '/signup']
 // Public root routes that redirect authenticated users to /dashboard

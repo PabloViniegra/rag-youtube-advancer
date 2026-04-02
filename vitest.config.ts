@@ -7,6 +7,8 @@ const COVERAGE_INCLUDES = [
   'src/lib/env.ts',
   'src/lib/utils.ts',
   'src/lib/auth/actions.ts',
+  'src/lib/youtube/extract-video-id.ts',
+  'src/lib/youtube/transcript.ts',
 ] as const
 
 export default defineConfig({
@@ -18,6 +20,14 @@ export default defineConfig({
   test: {
     environment: 'node',
     setupFiles: ['./vitest.setup.ts'],
+    server: {
+      deps: {
+        // youtube-transcript has a packaging issue: package.json has "type":"module"
+        // but its "main" field points to a CJS file. Inlining forces Vite to
+        // transform it via its own pipeline, resolving the ESM/CJS conflict.
+        inline: ['youtube-transcript'],
+      },
+    },
     coverage: {
       provider: 'v8',
       include: [...COVERAGE_INCLUDES],
