@@ -18,7 +18,7 @@ export default async function AuthErrorPage({
 }: AuthErrorPageProps) {
   const params = await searchParams
   const reason = typeof params?.reason === 'string' ? params.reason : 'default'
-  const message = ERROR_MESSAGES[reason] ?? ERROR_MESSAGES['default']
+  const message = ERROR_MESSAGES[reason] ?? ERROR_MESSAGES.default
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4">

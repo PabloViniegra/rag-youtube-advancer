@@ -6,7 +6,7 @@ interface UserAvatarProps {
 export function UserAvatar({ name, avatarUrl }: UserAvatarProps) {
   if (avatarUrl) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
+      // biome-ignore lint/performance/noImgElement: External avatar URLs vary by provider and are user-generated.
       <img
         src={avatarUrl}
         alt={name}
