@@ -110,10 +110,40 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       {/* ── RIGHT PANEL — Cream form panel ── */}
       <div className="flex w-full flex-col items-center justify-center bg-background px-6 py-12 md:w-1/2 md:px-12 lg:px-20">
         <div className="w-full max-w-sm">
+          {/* Mobile-only brand strip — left panel is hidden on small screens */}
+          <div className="mb-8 flex items-center gap-3 md:hidden">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+                className="text-primary"
+              >
+                <path
+                  d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2Z"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="m10 8 6 4-6 4V8Z"
+                  fill="currentColor"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            <span className="font-headline text-sm font-extrabold uppercase tracking-widest text-on-surface">
+              YouTube Intelligence
+            </span>
+          </div>
+
           {/* Back link */}
           <Link
             href="/"
-            className="mb-10 inline-flex items-center gap-1.5 font-body text-sm text-on-surface-variant transition-colors hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded"
+            className="mb-10 inline-flex items-center gap-1.5 rounded py-2 font-body text-sm text-on-surface-variant transition-colors hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
             <svg
               width="14"
@@ -161,14 +191,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             Al continuar, aceptas nuestros{' '}
             <Link
               href="/legal/terminos"
-              className="text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 rounded"
+              className="rounded px-0.5 py-1 text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50"
             >
               Términos de Servicio
             </Link>{' '}
             y la{' '}
             <Link
               href="/legal/privacidad"
-              className="text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50 rounded"
+              className="rounded px-0.5 py-1 text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50"
             >
               Política de Privacidad
             </Link>

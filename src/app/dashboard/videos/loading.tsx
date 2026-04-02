@@ -1,14 +1,30 @@
+/**
+ * Loading skeleton for /dashboard/videos
+ *
+ * Mirrors the layout of videos/page.tsx:
+ *  - Editorial header: overline chip + h1 + subline + CTA button
+ *  - Asymmetric card grid (same 1-col → 2-col → 3-col breakpoints)
+ *
+ * animate-pulse is suppressed globally for prefers-reduced-motion users
+ * via the @media block in globals.css.
+ */
+
 const SKELETON_KEYS = ['sk-1', 'sk-2', 'sk-3', 'sk-4', 'sk-5', 'sk-6'] as const
 
 export default function VideosLoading() {
   return (
     <div className="flex flex-col gap-8" aria-busy="true">
-      {/* ── Header skeleton ── */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      {/* ── Page header skeleton — mirrors editorial header ── */}
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-outline-variant pb-6">
         <div className="flex flex-col gap-2">
-          <div className="h-8 w-36 animate-pulse rounded-lg bg-surface-container" />
-          <div className="h-4 w-64 animate-pulse rounded-md bg-surface-container" />
+          {/* Overline */}
+          <div className="h-3 w-28 animate-pulse rounded bg-surface-container" />
+          {/* h1 */}
+          <div className="h-9 w-36 animate-pulse rounded-lg bg-surface-container md:w-48" />
+          {/* Subline */}
+          <div className="h-3.5 w-60 animate-pulse rounded-md bg-surface-container" />
         </div>
+        {/* CTA button */}
         <div className="h-10 w-32 animate-pulse rounded-xl bg-surface-container" />
       </div>
 

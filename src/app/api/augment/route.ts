@@ -37,6 +37,10 @@ import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
 
 type ProfileRow = Database['public']['Tables']['profiles']['Row']
+type VideoTitleRow = Pick<
+  Database['public']['Tables']['videos']['Row'],
+  'id' | 'title'
+>
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -136,25 +140,57 @@ export async function POST(
 
   // Step 4 — retrieve relevant sections
   try {
-    const retrieval = await retrieveSections(supabase, {
+    const primaryRetrievalInput = {
       query: body.query,
       userId: user.id,
       matchThreshold: body.matchThreshold ?? AUGMENT_DEFAULTS.matchThreshold,
       matchCount: body.matchCount ?? AUGMENT_DEFAULTS.matchCount,
-    })
+    }
+
+    let retrieval = await retrieveSections(supabase, primaryRetrievalInput)
+
+    if (retrieval.matches.length === 0) {
+      const fallbackThresholds =
+        primaryRetrievalInput.matchThreshold > 0 ? [0, -1] : [-1]
+
+      for (const threshold of fallbackThresholds) {
+        retrieval = await retrieveSections(supabase, {
+          ...primaryRetrievalInput,
+          matchThreshold: threshold,
+        })
+
+        if (retrieval.matches.length > 0) break
+      }
+    }
 
     if (retrieval.matches.length === 0) {
       return errorResponse(
-        'No relevant video sections found for the given query.',
+        'No encontré contexto suficiente para esa pregunta. Prueba con otras palabras o menciona una idea concreta del video.',
         AUGMENT_API_ERROR.NO_CONTEXT,
         404,
       )
     }
 
+    // Step 4b — enrich matches with video titles (secondary query, best-effort)
+    const uniqueVideoIds = [...new Set(retrieval.matches.map((m) => m.videoId))]
+    const { data: videosData } = await supabase
+      .from('videos')
+      .select('id, title')
+      .in('id', uniqueVideoIds)
+
+    const videoTitleMap = new Map(
+      ((videosData ?? []) as VideoTitleRow[]).map((v) => [v.id, v.title]),
+    )
+
+    const enrichedMatches = retrieval.matches.map((m) => ({
+      ...m,
+      videoTitle: videoTitleMap.get(m.videoId) ?? null,
+    }))
+
     // Step 5 — augment: inject context and generate answer
     const result = await augmentAnswer({
       query: body.query,
-      matches: retrieval.matches,
+      matches: enrichedMatches,
     })
 
     return NextResponse.json(result, { status: 200 })

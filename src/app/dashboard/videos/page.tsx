@@ -30,27 +30,34 @@ export default async function VideosPage() {
     .order('created_at', { ascending: false })
 
   const videoList = (error || !videos ? [] : videos) as VideoRow[]
+  const count = videoList.length
 
   return (
     <div className="flex flex-col gap-8">
-      {/* ── Page header ── */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="font-headline text-2xl font-extrabold text-on-surface">
+      {/* ── Page header — editorial bold treatment ── */}
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-outline-variant pb-6">
+        <div className="flex min-w-0 flex-col gap-1.5">
+          {/* Overline */}
+          <span className="font-headline text-xs font-bold uppercase tracking-widest text-primary">
+            Segundo cerebro
+          </span>
+          {/* Display headline */}
+          <h1 className="font-headline text-3xl font-extrabold leading-tight text-on-surface md:text-4xl">
             Mis videos
           </h1>
+          {/* Subline — data as copy */}
           <p className="font-body text-sm text-on-surface-variant">
-            {videoList.length > 0
-              ? `${videoList.length} video${videoList.length === 1 ? '' : 's'} indexado${videoList.length === 1 ? '' : 's'} en tu segundo cerebro`
+            {count > 0
+              ? `${count} video${count === 1 ? '' : 's'} indexado${count === 1 ? '' : 's'} en tu base de conocimiento`
               : 'Indexa videos de YouTube y conviértelos en conocimiento consultable'}
           </p>
         </div>
 
         <Link
           href="/dashboard/videos/new"
-          className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 font-body text-sm font-semibold text-on-primary shadow-sm transition-all hover:bg-primary-dim active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 font-body text-sm font-bold text-on-primary shadow-sm transition-all hover:bg-primary-dim active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         >
-          <AddIcon />
+          <PlusIcon />
           Añadir video
         </Link>
       </div>
@@ -60,9 +67,14 @@ export default async function VideosPage() {
         <VideoEmptyState />
       ) : (
         <section aria-label="Lista de videos indexados">
+          {/* Asymmetric grid: first card is featured (wider), rest are standard */}
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {videoList.map((video) => (
-              <VideoCard key={video.id} video={video} />
+            {videoList.map((video, index) => (
+              <VideoCard
+                key={video.id}
+                video={video}
+                variant={index === 0 ? 'featured' : 'default'}
+              />
             ))}
           </div>
         </section>
@@ -71,7 +83,7 @@ export default async function VideosPage() {
   )
 }
 
-function AddIcon() {
+function PlusIcon() {
   return (
     <svg
       width="16"

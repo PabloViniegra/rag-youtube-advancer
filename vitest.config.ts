@@ -34,6 +34,8 @@ export default defineConfig({
     },
   },
   test: {
+    // Default environment for API route tests (node).
+    // Component tests override via `@vitest-environment jsdom` docblock comment.
     environment: 'node',
     setupFiles: ['./vitest.setup.ts'],
     server: {

@@ -24,12 +24,14 @@ export interface RetrievalInput {
  * @field videoId    - UUID of the parent videos row.
  * @field content    - Text content of the matched section.
  * @field similarity - Cosine similarity score between query and section vectors.
+ * @field videoTitle - Title of the parent video (enriched post-retrieval, optional).
  */
 export interface VideoSectionMatch {
   id: string
   videoId: string
   content: string
   similarity: number
+  videoTitle?: string | null
 }
 
 /**

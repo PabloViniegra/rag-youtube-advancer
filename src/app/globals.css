@@ -86,6 +86,170 @@
 }
 
 /* ============================================================
+   Base Typography — Optical defaults
+   Applied globally to normalize rendering.
+   ============================================================ */
+
+@layer base {
+  html {
+    font-kerning: normal;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    line-height: 1.6;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    line-height: 1.15;
+    font-kerning: normal;
+    text-wrap: balance;
+  }
+
+  /* Tabular numbers for data cells — override per-context */
+  [data-tabular-nums] {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ============================================================
+   Motion Tokens — Easing curves & durations
+   Named after use, not physics.
+   ============================================================ */
+
+@theme {
+  /* Easings */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-quart: cubic-bezier(0.5, 0, 0.75, 0);
+
+  /* Durations */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+}
+
+/* ============================================================
+   Keyframes — used via Tailwind animate-* utilities below
+   ============================================================ */
+
+@layer base {
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-in-left {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slide-out-left {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+
+  /* SVG stroke draw — for checkmark / success icons */
+  @keyframes stroke-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+}
+
+/* ============================================================
+   Animation utilities — Tailwind-compatible custom classes
+   ============================================================ */
+
+@layer utilities {
+  .animate-fade-up {
+    animation: fade-up var(--duration-slow) var(--ease-out-expo) both;
+  }
+
+  .animate-fade-in {
+    animation: fade-in var(--duration-normal) var(--ease-out-quart) both;
+  }
+
+  .animate-slide-in-left {
+    animation: slide-in-left var(--duration-normal) var(--ease-out-expo) both;
+  }
+
+  .animate-slide-out-left {
+    animation: slide-out-left 200ms var(--ease-in-quart) both;
+  }
+
+  .animate-fade-out {
+    animation: fade-out 200ms var(--ease-in-quart) both;
+  }
+
+  /* Stagger helpers — set --i via inline style="--i:N" */
+  .stagger-item {
+    animation-delay: calc(var(--i, 0) * 60ms);
+  }
+}
+
+/* ============================================================
+   Motion — Respect user preferences
+   Suppress all animation/transition for users who prefer
+   reduced motion (vestibular disorders, epilepsy, etc.).
+   ============================================================ */
+
+@layer base {
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ============================================================
    Dark Mode — Bloomberg Charcoal
    Thermal inversion of the light palette. Same hue angles,
    same warm undertone (h≈35), inverted lightness.
@@ -96,7 +260,6 @@
 
 @layer base {
   .dark {
-    /* Primary — Light Crimson (more luminous on dark bg) */
     --color-primary: oklch(62% 0.2 25);
     --color-primary-dim: oklch(56% 0.2 25);
     --color-primary-container: oklch(22% 0.06 25);

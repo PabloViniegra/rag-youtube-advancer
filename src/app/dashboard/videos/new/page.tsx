@@ -8,10 +8,21 @@
  */
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ingestVideo } from '@/lib/pipeline/ingest'
 import type { IngestResult } from '@/lib/pipeline/types'
 import { INGEST_ERROR } from '@/lib/pipeline/types'
+import { cn } from '@/lib/utils'
+
+// ── Loading messages ─────────────────────────────────────────────────────────
+
+const LOADING_MESSAGES = [
+  'Analizando el contenido del video…',
+  'Esto puede tardar unos segundos…',
+  'Procesando la transcripción…',
+  'Optimizando fragmentos para búsqueda…',
+  'Casi listo, generando embeddings…',
+] as const satisfies readonly string[]
 
 // ── Phase labels ──────────────────────────────────────────────────────────────
 
@@ -47,8 +58,6 @@ const GENERIC_INGEST_MESSAGES = [
   'Invalid store response.',
 ] as const satisfies readonly string[]
 
-// ── State types ───────────────────────────────────────────────────────────────
-
 const FORM_STATE = {
   IDLE: 'idle',
   LOADING: 'loading',
@@ -77,6 +86,18 @@ export default function NuevoVideoPage() {
   const [successData, setSuccessData] = useState<SuccessData | null>(null)
   const [errorData, setErrorData] = useState<ErrorData | null>(null)
 
+  // Keep a stable ref so the useEffect cleanup can always cancel it, even if
+  // the component unmounts mid-ingestion.
+  const phaseTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (phaseTimerRef.current !== null) {
+        clearInterval(phaseTimerRef.current)
+      }
+    }
+  }, [])
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setFormState(FORM_STATE.LOADING)
@@ -84,7 +105,7 @@ export default function NuevoVideoPage() {
     setSuccessData(null)
     setErrorData(null)
 
-    const phaseTimer = setInterval(() => {
+    phaseTimerRef.current = setInterval(() => {
       setPhaseIndex((prev) => Math.min(prev + 1, PHASE_LABELS.length - 1))
     }, 2500)
 
@@ -101,7 +122,10 @@ export default function NuevoVideoPage() {
         message: 'Error inesperado. Inténtalo de nuevo.',
       }
     } finally {
-      clearInterval(phaseTimer)
+      if (phaseTimerRef.current !== null) {
+        clearInterval(phaseTimerRef.current)
+        phaseTimerRef.current = null
+      }
     }
 
     if (result.ok) {
@@ -130,7 +154,7 @@ export default function NuevoVideoPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8 max-w-xl">
+    <div className="flex w-full flex-col gap-8 max-w-xl">
       <div className="flex flex-col gap-1">
         <h1 className="font-headline text-2xl font-extrabold text-on-surface">
           Añadir video
@@ -279,8 +303,17 @@ interface PhaseProgressProps {
 }
 
 function PhaseProgress({ phaseIndex }: PhaseProgressProps) {
+  const [msgIndex, setMsgIndex] = useState(0)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setMsgIndex((prev) => (prev + 1) % LOADING_MESSAGES.length)
+    }, 3000)
+    return () => clearInterval(timer)
+  }, [])
+
   return (
-    <div aria-live="polite" className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <ol className="flex flex-col gap-2">
         {PHASE_LABELS.map((label, i) => (
           <PhaseStep
@@ -296,8 +329,12 @@ function PhaseProgress({ phaseIndex }: PhaseProgressProps) {
           />
         ))}
       </ol>
-      <p className="text-center font-body text-xs text-on-surface-variant">
-        Esto puede tardar unos segundos…
+      <p
+        aria-live="polite"
+        aria-atomic="true"
+        className="text-center font-body text-xs text-on-surface-variant transition-opacity duration-300"
+      >
+        {LOADING_MESSAGES[msgIndex]}
       </p>
     </div>
   )
@@ -313,13 +350,13 @@ function PhaseStep({ label, state }: PhaseStepProps) {
     <li className="flex items-center gap-3">
       <PhaseStepIcon state={state} />
       <span
-        className={`font-body text-sm ${
-          state === PHASE_STEP_STATE.active
-            ? 'font-semibold text-on-surface'
-            : state === PHASE_STEP_STATE.done
-              ? 'text-on-surface-variant line-through'
-              : 'text-on-surface-variant/40'
-        }`}
+        className={cn(
+          'font-body text-sm',
+          state === PHASE_STEP_STATE.active && 'font-semibold text-on-surface',
+          state === PHASE_STEP_STATE.done &&
+            'text-on-surface-variant line-through',
+          state === PHASE_STEP_STATE.pending && 'text-on-surface-variant/40',
+        )}
       >
         {label}
       </span>
@@ -424,9 +461,10 @@ function SuccessCard({ data, onReset }: SuccessCardProps) {
   return (
     <section
       aria-labelledby="success-heading"
-      className="flex flex-col items-center gap-6 rounded-2xl border border-outline-variant bg-background p-8 shadow-sm text-center"
+      className="flex flex-col items-center gap-6 rounded-2xl border border-outline-variant bg-background p-6 sm:p-8 shadow-sm text-center animate-fade-up"
     >
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+      {/* Animated check icon */}
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 animate-fade-in">
         <svg
           width="28"
           height="28"
@@ -441,41 +479,83 @@ function SuccessCard({ data, onReset }: SuccessCardProps) {
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
+            pathLength="1"
+            strokeDasharray="1"
+            className="[stroke-dashoffset:1] [animation:stroke-draw_0.5s_var(--ease-out-expo)_0.15s_both]"
           />
         </svg>
       </div>
 
-      <div className="flex flex-col gap-2">
+      {/* Heading + stat */}
+      <div className="flex flex-col gap-3">
         <h2
           id="success-heading"
           className="font-headline text-xl font-bold text-on-surface"
         >
           ¡Video indexado!
         </h2>
+        {/* Stat callout — make the number the hero */}
+        <div className="inline-flex items-baseline gap-1.5 rounded-xl bg-primary-container px-4 py-2">
+          <span
+            data-tabular-nums
+            className="font-headline text-3xl font-extrabold text-primary"
+          >
+            {data.sectionCount}
+          </span>
+          <span className="font-body text-sm text-on-primary-container">
+            fragmentos en memoria
+          </span>
+        </div>
         <p className="font-body text-sm text-on-surface-variant">
-          Se han almacenado{' '}
-          <strong className="font-semibold text-on-surface">
-            {data.sectionCount} fragmentos
-          </strong>{' '}
-          en tu Segunda Mente.
+          Tu cerebro ya tiene contexto. Hazle una pregunta.
         </p>
       </div>
 
+      {/* CTAs — search is the primary "aha moment" action */}
       <div className="flex w-full flex-col gap-3 sm:flex-row">
         <Link
-          href="/dashboard/videos"
-          className="flex-1 inline-flex items-center justify-center rounded-xl border border-outline-variant px-4 py-2.5 font-body text-sm font-semibold text-on-surface transition-all hover:bg-surface-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          href="/dashboard/search"
+          className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-body text-sm font-bold text-on-primary transition-all hover:bg-primary-dim active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         >
-          Ver mis videos
+          <SearchIcon />
+          Buscar en mi cerebro
         </Link>
         <button
           type="button"
           onClick={onReset}
-          className="flex-1 inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 font-body text-sm font-semibold text-on-primary transition-all hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          className="flex-1 inline-flex items-center justify-center rounded-xl border border-outline-variant px-4 py-3 font-body text-sm font-semibold text-on-surface transition-all hover:bg-surface-container active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         >
           Añadir otro video
         </button>
       </div>
+
+      {/* Subtle secondary link — proper tap target */}
+      <Link
+        href="/dashboard/videos"
+        className="inline-flex min-h-[44px] items-center px-2 font-body text-xs text-on-surface-variant transition-colors hover:text-on-surface focus-visible:outline-none focus-visible:rounded focus-visible:ring-1 focus-visible:ring-primary/40"
+      >
+        Ver todos mis videos →
+      </Link>
     </section>
+  )
+}
+
+function SearchIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="m21 21-4.35-4.35"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
   )
 }

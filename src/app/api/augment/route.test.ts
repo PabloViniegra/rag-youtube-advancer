@@ -86,13 +86,27 @@ function mockAuthAndProfile(
   user: { id: string } | null,
   profile: MockProfile | null = null,
 ) {
-  const singleMock = vi.fn().mockResolvedValue({
+  const profileSingleMock = vi.fn().mockResolvedValue({
     data: profile,
     error: profile ? null : { message: 'not found' },
   })
-  const eqMock = vi.fn().mockReturnValue({ single: singleMock })
-  const selectMock = vi.fn().mockReturnValue({ eq: eqMock })
-  const fromMock = vi.fn().mockReturnValue({ select: selectMock })
+  const profileEqMock = vi.fn().mockReturnValue({ single: profileSingleMock })
+  const profileSelectMock = vi.fn().mockReturnValue({ eq: profileEqMock })
+
+  const videosInMock = vi.fn().mockResolvedValue({ data: [], error: null })
+  const videosSelectMock = vi.fn().mockReturnValue({ in: videosInMock })
+
+  const fromMock = vi.fn((table: string) => {
+    if (table === 'profiles') {
+      return { select: profileSelectMock }
+    }
+
+    if (table === 'videos') {
+      return { select: videosSelectMock }
+    }
+
+    return { select: vi.fn() }
+  })
 
   createClientMock.mockResolvedValue({
     auth: {
@@ -233,6 +247,74 @@ describe('POST /api/augment', () => {
     expect(body.code).toBe(AUGMENT_API_ERROR.NO_CONTEXT)
   })
 
+  it('retries retrieval with threshold 0 when strict retrieval returns no matches', async () => {
+    mockAuthAndProfile(
+      { id: 'user-1' },
+      { role: 'user', subscription_active: true },
+    )
+    vi.mocked(retrieveSections)
+      .mockResolvedValueOnce({ matches: [], count: 0 })
+      .mockResolvedValueOnce(RETRIEVAL_RESULT)
+    vi.mocked(augmentAnswer).mockResolvedValue(AUGMENT_RESULT)
+
+    const res = await POST(buildRequest(VALID_BODY))
+    expect(res.status).toBe(200)
+
+    expect(retrieveSections).toHaveBeenCalledTimes(2)
+    expect(retrieveSections).toHaveBeenNthCalledWith(
+      1,
+      expect.anything(),
+      expect.objectContaining({
+        matchThreshold: AUGMENT_DEFAULTS.matchThreshold,
+      }),
+    )
+    expect(retrieveSections).toHaveBeenNthCalledWith(
+      2,
+      expect.anything(),
+      expect.objectContaining({
+        matchThreshold: 0,
+      }),
+    )
+  })
+
+  it('retries with threshold -1 when threshold 0 still returns no matches', async () => {
+    mockAuthAndProfile(
+      { id: 'user-1' },
+      { role: 'user', subscription_active: true },
+    )
+    vi.mocked(retrieveSections)
+      .mockResolvedValueOnce({ matches: [], count: 0 })
+      .mockResolvedValueOnce({ matches: [], count: 0 })
+      .mockResolvedValueOnce(RETRIEVAL_RESULT)
+    vi.mocked(augmentAnswer).mockResolvedValue(AUGMENT_RESULT)
+
+    const res = await POST(buildRequest(VALID_BODY))
+    expect(res.status).toBe(200)
+
+    expect(retrieveSections).toHaveBeenCalledTimes(3)
+    expect(retrieveSections).toHaveBeenNthCalledWith(
+      1,
+      expect.anything(),
+      expect.objectContaining({
+        matchThreshold: AUGMENT_DEFAULTS.matchThreshold,
+      }),
+    )
+    expect(retrieveSections).toHaveBeenNthCalledWith(
+      2,
+      expect.anything(),
+      expect.objectContaining({
+        matchThreshold: 0,
+      }),
+    )
+    expect(retrieveSections).toHaveBeenNthCalledWith(
+      3,
+      expect.anything(),
+      expect.objectContaining({
+        matchThreshold: -1,
+      }),
+    )
+  })
+
   // ── Success ─────────────────────────────────────────────────────────────────
 
   it('returns 200 with answer, sources and sourceCount on success', async () => {
@@ -304,7 +386,12 @@ describe('POST /api/augment', () => {
 
     expect(augmentAnswer).toHaveBeenCalledWith({
       query: VALID_BODY.query,
-      matches: MATCHES,
+      matches: [
+        {
+          ...MATCHES[0],
+          videoTitle: null,
+        },
+      ],
     })
   })
 

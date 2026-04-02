@@ -226,12 +226,14 @@ describe('POST /api/embed', () => {
 
   // ── Error handling ────────────────────────────────────────────────────────
 
-  it('returns 500 when embedChunks throws unexpectedly', async () => {
+  it('returns 500 when embedChunks throws a non-provider error', async () => {
     mockAuthAndProfile(
       { id: 'user-1' },
       { role: 'user', subscription_active: true },
     )
-    vi.mocked(embedChunks).mockRejectedValue(new Error('gateway error'))
+    // Throw a non-object value so resolveProviderFailure returns null
+    // and the catch-all 500 branch is reached.
+    vi.mocked(embedChunks).mockRejectedValue('unexpected string error')
 
     const res = await POST(buildRequest({ chunks: ['some chunk'] }))
     expect(res.status).toBe(500)

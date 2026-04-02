@@ -40,7 +40,7 @@ export default function RootLayout({
       className={`${plusJakartaSans.variable} ${outfit.variable}`}
       suppressHydrationWarning
     >
-      <body className="bg-background text-on-surface font-body antialiased min-h-screen">
+      <body className="min-h-screen overflow-x-hidden bg-background font-body text-on-surface antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
         </ThemeProvider>
