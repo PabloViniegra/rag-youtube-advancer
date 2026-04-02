@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Dark mode — class-based via next-themes (.dark on <html>) */
+@custom-variant dark (&:is(.dark, .dark *));
+
 /* ============================================================
    Design System — YouTube Intelligence
    Light editorial theme — Bold. Precise. Relentless.
@@ -80,4 +83,84 @@
   --font-headline: var(--font-outfit);
   --font-body: var(--font-plus-jakarta-sans);
   --font-label: var(--font-plus-jakarta-sans);
+}
+
+/* ============================================================
+   Dark Mode — Bloomberg Charcoal
+   Thermal inversion of the light palette. Same hue angles,
+   same warm undertone (h≈35), inverted lightness.
+   Applied via .dark class on <html> (next-themes).
+   Must be inside @layer base so Tailwind v4 / Turbopack
+   includes it in the compiled CSS bundle.
+   ============================================================ */
+
+@layer base {
+  .dark {
+    /* Primary — Light Crimson (more luminous on dark bg) */
+    --color-primary: oklch(62% 0.2 25);
+    --color-primary-dim: oklch(56% 0.2 25);
+    --color-primary-container: oklch(22% 0.06 25);
+    --color-primary-fixed: oklch(62% 0.2 25);
+    --color-primary-fixed-dim: oklch(56% 0.2 25);
+    --color-on-primary: oklch(97% 0.01 80);
+    --color-on-primary-container: oklch(90% 0.06 25);
+    --color-on-primary-fixed: oklch(97% 0.01 80);
+    --color-on-primary-fixed-variant: oklch(80% 0.14 25);
+    --color-inverse-primary: oklch(42% 0.2 25);
+    --color-surface-tint: oklch(62% 0.2 25);
+
+    /* Secondary — Bright Amber */
+    --color-secondary: oklch(72% 0.16 70);
+    --color-secondary-dim: oklch(64% 0.16 70);
+    --color-secondary-container: oklch(22% 0.06 70);
+    --color-secondary-fixed: oklch(22% 0.06 70);
+    --color-secondary-fixed-dim: oklch(18% 0.05 70);
+    --color-on-secondary: oklch(12% 0.04 60);
+    --color-on-secondary-container: oklch(90% 0.06 65);
+    --color-on-secondary-fixed: oklch(90% 0.06 65);
+    --color-on-secondary-fixed-variant: oklch(72% 0.12 68);
+
+    /* Tertiary — Light Slate */
+    --color-tertiary: oklch(62% 0.06 260);
+    --color-tertiary-dim: oklch(55% 0.06 260);
+    --color-tertiary-container: oklch(22% 0.04 260);
+    --color-tertiary-fixed: oklch(22% 0.04 260);
+    --color-tertiary-fixed-dim: oklch(18% 0.03 260);
+    --color-on-tertiary: oklch(12% 0.02 260);
+    --color-on-tertiary-container: oklch(90% 0.02 260);
+    --color-on-tertiary-fixed: oklch(90% 0.02 260);
+    --color-on-tertiary-fixed-variant: oklch(62% 0.04 260);
+
+    /* Background — Warm Charcoal */
+    --color-background: oklch(12% 0.02 35);
+    --color-on-background: oklch(92% 0.02 80);
+
+    /* Surfaces — Warm charcoal scale */
+    --color-surface: oklch(15% 0.02 35);
+    --color-surface-dim: oklch(10% 0.02 35);
+    --color-surface-bright: oklch(24% 0.02 35);
+    --color-surface-container: oklch(17% 0.02 35);
+    --color-surface-container-low: oklch(13% 0.02 35);
+    --color-surface-container-high: oklch(19% 0.02 35);
+    --color-surface-container-highest: oklch(24% 0.02 35);
+    --color-surface-container-lowest: oklch(11% 0.02 35);
+    --color-surface-variant: oklch(20% 0.02 35);
+    --color-on-surface: oklch(92% 0.02 80);
+    --color-on-surface-variant: oklch(68% 0.02 40);
+
+    /* Outline */
+    --color-outline: oklch(40% 0.02 35);
+    --color-outline-variant: oklch(28% 0.02 35);
+
+    /* Inverse — cream alternating sections on dark */
+    --color-inverse-surface: oklch(90% 0.015 80);
+    --color-inverse-on-surface: oklch(18% 0.025 35);
+
+    /* Error */
+    --color-error: oklch(62% 0.22 30);
+    --color-error-dim: oklch(55% 0.22 30);
+    --color-error-container: oklch(22% 0.08 30);
+    --color-on-error: oklch(12% 0.04 30);
+    --color-on-error-container: oklch(90% 0.06 30);
+  }
 }
