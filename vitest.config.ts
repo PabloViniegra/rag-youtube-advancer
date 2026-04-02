@@ -9,6 +9,9 @@ const COVERAGE_INCLUDES = [
   'src/lib/auth/actions.ts',
   'src/lib/youtube/extract-video-id.ts',
   'src/lib/youtube/transcript.ts',
+  // Phase 4 — Storage
+  'src/lib/storage/store.ts',
+  'src/app/api/store/route.ts',
 ] as const
 
 export default defineConfig({
