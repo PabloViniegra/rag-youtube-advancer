@@ -15,6 +15,9 @@ const COVERAGE_INCLUDES = [
   // Phase 5 — Retrieval
   'src/lib/retrieval/retrieve.ts',
   'src/app/api/retrieve/route.ts',
+  // Phase 6 — Augmentation
+  'src/lib/augmentation/augment.ts',
+  'src/app/api/augment/route.ts',
 ] as const
 
 export default defineConfig({
