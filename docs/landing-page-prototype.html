@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>YouTube Intelligence - Monetización RAG</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "inverse-on-surface": "#565555",
+                "on-tertiary-fixed": "#003840",
+                "secondary-fixed-dim": "#cabaff",
+                "on-secondary-fixed": "#3b00a0",
+                "surface-container-low": "#131313",
+                "on-primary": "#650000",
+                "secondary-dim": "#7e51ff",
+                "on-primary-fixed": "#000000",
+                "on-surface": "#ffffff",
+                "surface-variant": "#262626",
+                "primary-fixed-dim": "#ff5b47",
+                "on-tertiary-container": "#004d57",
+                "inverse-primary": "#c10100",
+                "surface-container-lowest": "#000000",
+                "on-tertiary": "#005762",
+                "on-secondary-fixed-variant": "#591bdc",
+                "secondary-container": "#591adc",
+                "secondary-fixed": "#d8caff",
+                "on-tertiary-fixed-variant": "#005762",
+                "surface": "#0e0e0e",
+                "primary-fixed": "#ff7763",
+                "surface-dim": "#0e0e0e",
+                "surface-container-highest": "#262626",
+                "on-error-container": "#ffb2b9",
+                "on-background": "#ffffff",
+                "tertiary": "#81ecff",
+                "on-primary-fixed-variant": "#600000",
+                "tertiary-container": "#00e3fd",
+                "primary-dim": "#eb0000",
+                "secondary": "#a68cff",
+                "error-container": "#a70138",
+                "tertiary-fixed": "#00e3fd",
+                "surface-container-high": "#201f1f",
+                "surface-container": "#1a1919",
+                "primary": "#ff8e7d",
+                "error-dim": "#d73357",
+                "surface-tint": "#ff8e7d",
+                "background": "#0e0e0e",
+                "surface-bright": "#2c2c2c",
+                "outline": "#767575",
+                "outline-variant": "#484847",
+                "on-error": "#490013",
+                "on-secondary": "#25006b",
+                "primary-container": "#ff7763",
+                "error": "#ff6e84",
+                "inverse-surface": "#fcf9f8",
+                "tertiary-fixed-dim": "#00d4ec",
+                "on-surface-variant": "#adaaaa",
+                "on-primary-container": "#4f0000",
+                "on-secondary-container": "#e4daff",
+                "tertiary-dim": "#00d4ec"
+              },
+              fontFamily: {
+                "headline": ["Manrope"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+              },
+              borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(38, 38, 38, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glow-hover:hover {
+            box-shadow: 0 0 20px rgba(235, 0, 0, 0.3);
+        }
+        .text-gradient-primary {
+            background: linear-gradient(to right, #ff8e7d, #ff5b47);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body antialiased">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#0e0e0e]/60 backdrop-blur-xl">
+<div class="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
+<div class="text-xl font-bold tracking-tighter text-white uppercase font-headline">
+                YOUTUBE INTELLIGENCE
+            </div>
+<div class="hidden md:flex gap-8 items-center">
+<a class="font-manrope text-sm font-semibold tracking-tight text-white border-b-2 border-red-600 pb-1" href="#">Features</a>
+<a class="font-manrope text-sm font-semibold tracking-tight text-[#adaaaa] hover:text-white transition-colors duration-300" href="#">Pricing</a>
+<a class="font-manrope text-sm font-semibold tracking-tight text-[#adaaaa] hover:text-white transition-colors duration-300" href="#">Testimonials</a>
+</div>
+<button class="bg-gradient-to-r from-primary to-primary-container text-on-primary-container px-6 py-2 rounded-xl font-headline font-bold text-sm scale-95 active:duration-100 transition-all hover:brightness-110">
+                Get Started
+            </button>
+</div>
+</nav>
+<main class="pt-24">
+<!-- Hero Section -->
+<section class="relative px-6 py-20 md:py-32 overflow-hidden">
+<!-- Background Decoration -->
+<div class="absolute top-0 right-0 w-1/2 h-full bg-primary/5 blur-[120px] rounded-full -translate-y-1/2"></div>
+<div class="max-w-5xl mx-auto text-center relative z-10">
+<div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-container-highest mb-8 border border-outline-variant/15">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-xs font-label font-medium text-on-surface-variant tracking-wider uppercase">Impulsado por RAG AI Technology</span>
+</div>
+<h1 class="text-5xl md:text-7xl font-headline font-extrabold tracking-tight mb-6 leading-[1.1]">
+                    Maximiza tus Ingresos en <br/>
+<span class="text-gradient-primary">YouTube con IA</span>
+</h1>
+<p class="text-lg md:text-xl text-on-surface-variant max-w-2xl mx-auto mb-12 font-body leading-relaxed">
+                    Transforma tus videos en activos inteligentes. Nuestra tecnología RAG analiza cada frame y palabra para generar estrategias de monetización de alto impacto.
+                </p>
+<!-- URL Input Component -->
+<div class="max-w-2xl mx-auto bg-surface-container-low p-2 rounded-xl border border-outline-variant/15 flex flex-col md:flex-row gap-2">
+<div class="flex-1 flex items-center px-4 gap-3 bg-surface-container-lowest rounded-lg border border-transparent focus-within:border-tertiary/30 transition-all">
+<span class="material-symbols-outlined text-on-surface-variant">link</span>
+<input class="w-full bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-on-surface-variant/50 py-4 font-body" placeholder="Pega el link de tu video de YouTube aquí" type="text"/>
+</div>
+<button class="bg-primary text-on-primary-container px-8 py-4 rounded-lg font-headline font-bold hover:brightness-110 transition-all">
+                        Analizar Ahora
+                    </button>
+</div>
+</div>
+</section>
+<!-- Process Section -->
+<section class="px-6 py-20 bg-surface-container-low">
+<div class="max-w-7xl mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+<div class="flex flex-col items-center text-center">
+<div class="w-16 h-16 rounded-2xl bg-surface-container-highest flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary text-3xl">content_paste</span>
+</div>
+<h3 class="text-xl font-headline font-bold mb-3">Pega el Link</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">Solo necesitas la URL. Nosotros nos encargamos de extraer toda la información relevante de tu video.</p>
+</div>
+<div class="flex flex-col items-center text-center">
+<div class="w-16 h-16 rounded-2xl bg-surface-container-highest flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-tertiary text-3xl">psychology</span>
+</div>
+<h3 class="text-xl font-headline font-bold mb-3">IA Procesa</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">Nuestra red neuronal RAG analiza el contenido, la audiencia y las tendencias actuales en segundos.</p>
+</div>
+<div class="flex flex-col items-center text-center">
+<div class="w-16 h-16 rounded-2xl bg-surface-container-highest flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-secondary text-3xl">rocket_launch</span>
+</div>
+<h3 class="text-xl font-headline font-bold mb-3">Toma el Control</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">Recibe insights accionables y herramientas listas para aumentar tu CTR y retención.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- AI Tools Preview (Bento Grid) -->
+<section class="px-6 py-24 max-w-7xl mx-auto">
+<div class="mb-16">
+<h2 class="text-3xl md:text-4xl font-headline font-extrabold mb-4">Herramientas de Inteligencia</h2>
+<p class="text-on-surface-variant">Optimización quirúrgica para cada aspecto de tu canal.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:h-[600px]">
+<!-- Main Analytics Card -->
+<div class="md:col-span-8 bg-surface-container-low rounded-3xl overflow-hidden border border-outline-variant/15 flex flex-col">
+<div class="p-8">
+<span class="px-3 py-1 rounded-full bg-secondary-container/20 text-secondary text-xs font-bold uppercase tracking-wider mb-4 inline-block">Featured</span>
+<h3 class="text-2xl font-headline font-bold mb-2">Análisis Predictivo de Retención</h3>
+<p class="text-on-surface-variant text-sm">Visualiza los puntos de fuga antes de publicar.</p>
+</div>
+<div class="mt-auto px-8 pb-8">
+<div class="relative h-48 bg-surface-container-highest rounded-2xl overflow-hidden">
+<img class="w-full h-full object-cover opacity-60" data-alt="Modern abstract data visualization dashboard with glowing neon lines representing audience retention and engagement metrics on a dark interface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6i84HsJgoPXi9WbUivShOuOZfeBCIP7qFv-14jI4EVUbHcEWNITuu50XXa63LyhkZ7wUrYGUVRoOmHoG2pqEywW2n9wyjI-RgyrbUKgXBvknztbnDoPEP2UxhVlVDso5omq7sYax9nzb2t1Rg_swjIcq4TJ4nBFeGVqBIp-AfClMCTsbanWPzIFlPWxrI7i7o9zpCB4bzDRVGt4CwYveEvnhlHEpUOzYrSew1kYl1jBFN-52DQT26V-KiZSalGNL0Yhvum4rYVuFK"/>
+</div>
+</div>
+</div>
+<!-- Hook Generator Card -->
+<div class="md:col-span-4 bg-surface-container-low rounded-3xl p-8 border border-outline-variant/15 flex flex-col">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary">auto_fix_high</span>
+</div>
+<h3 class="text-xl font-headline font-bold mb-4">Hook Generator</h3>
+<div class="space-y-3">
+<div class="p-3 bg-surface-container-highest rounded-lg text-xs font-body border-l-2 border-primary">"Lo que nadie te contó sobre..."</div>
+<div class="p-3 bg-surface-container-highest rounded-lg text-xs font-body border-l-2 border-primary">"El error que te está costando..."</div>
+<div class="p-3 bg-surface-container-highest rounded-lg text-xs font-body border-l-2 border-primary opacity-50">Generando más hooks...</div>
+</div>
+</div>
+<!-- SEO Optimizer -->
+<div class="md:col-span-4 bg-surface-container-low rounded-3xl p-8 border border-outline-variant/15">
+<h3 class="text-xl font-headline font-bold mb-2">SEO Optimizer</h3>
+<p class="text-on-surface-variant text-sm mb-6">Títulos y descripciones que rankean.</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 rounded-full bg-surface-container-highest text-[10px] text-tertiary border border-tertiary/20">#youtube_tips</span>
+<span class="px-3 py-1 rounded-full bg-surface-container-highest text-[10px] text-tertiary border border-tertiary/20">#ai_growth</span>
+<span class="px-3 py-1 rounded-full bg-surface-container-highest text-[10px] text-tertiary border border-tertiary/20">#passive_income</span>
+</div>
+</div>
+<!-- Thumbnail Ideas -->
+<div class="md:col-span-8 bg-surface-container-low rounded-3xl overflow-hidden border border-outline-variant/15 flex items-center p-8">
+<div class="w-1/2">
+<h3 class="text-xl font-headline font-bold mb-2">Thumbnail Engine</h3>
+<p class="text-on-surface-variant text-sm">Conceptos visuales basados en psicología de clics.</p>
+</div>
+<div class="w-1/2 flex gap-4 overflow-hidden">
+<div class="w-32 h-24 bg-surface-container-highest rounded-lg flex-shrink-0 relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Futuristic glowing YouTube logo with digital artifacts and neon red lighting against a deep black background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAKViVs3oClIFHPCKuGwfdZxEt4T4zPrbM11g0D9v_S-RT-428kiM1KJQa87czaR3IT0IUwknj-7h-3tjjSALlm1ILjXZ6Rx4h2X-VOowVPVE8Lik133yUhKnwOfFRUgkwh9121wkZptrJ5d5SVMG7QOW9hHtLYXESEtK-lVCO3sBT2FvemXRXC8xM93w8JBXr3maD8gUkU5KYssEHgkfLde3x-YJkMDOV2jp1Jb4DkFR-0-Q7elh7CA0HW3umx1hW23AL3cmemu9q"/>
+</div>
+<div class="w-32 h-24 bg-surface-container-highest rounded-lg flex-shrink-0 relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Vibrant digital thumbnail art featuring a smiling young content creator with expressive lighting and bold cinematic color grading" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWypcPi2WWVkI6q95c9j5rRWZesBwAegw6RREHeVDCoxwx6dQRH35y-u66slWUKkpkQKL82RiTeAgRV22dYO2TLZtlWJwOwZBGEuposSQJdEA5jbzXxlfGpm7Gxn6bOoqKS81r9xXupSXb1kINh7iCzn-drLaz55bMW8zckPb15WhEjxbGOWsaA5_gJHyP-pf2DPh7SxEOgsFOCVcbT7J1tFjb76R4HEwck8mY4lVYixRTPvNEU5BDxSX4OWv3Dj1qLFANOEuG4Vla"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- AI Insight Component (Signature) -->
+<section class="px-6 py-20 bg-surface-container-lowest">
+<div class="max-w-4xl mx-auto">
+<div class="relative p-1 rounded-2xl bg-gradient-to-br from-secondary/30 via-transparent to-primary/30">
+<div class="bg-surface-container p-10 rounded-2xl border border-outline-variant/15">
+<div class="flex items-start gap-6">
+<div class="w-12 h-12 rounded-full bg-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-secondary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div>
+<h4 class="text-xl font-headline font-bold mb-4">¿Sabías que el 80% de los espectadores abandonan en los primeros 10 segundos?</h4>
+<p class="text-on-surface-variant font-body mb-6 italic">"Nuestra IA detectó que cambiar tu introducción por una pregunta directa podría aumentar tu RPM en un 15% según el análisis del nicho de tecnología."</p>
+<button class="text-secondary font-headline font-bold text-sm flex items-center gap-2 hover:translate-x-1 transition-transform">
+                                    Ver más insights inteligentes <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="px-6 py-32 relative overflow-hidden">
+<div class="max-w-4xl mx-auto text-center">
+<h2 class="text-4xl md:text-6xl font-headline font-black mb-8 leading-tight">
+                    ¿Listo para llevar tu canal al siguiente nivel?
+                </h2>
+<div class="flex flex-col md:flex-row gap-4 justify-center">
+<button class="bg-primary text-on-primary-container px-10 py-5 rounded-xl font-headline font-extrabold text-lg shadow-xl shadow-primary/20 hover:scale-105 transition-all">
+                        Empieza Gratis
+                    </button>
+<button class="bg-surface-container-highest text-on-surface px-10 py-5 rounded-xl font-headline font-extrabold text-lg border border-outline-variant/20 hover:bg-surface-bright transition-all">
+                        Ver Demo
+                    </button>
+</div>
+<p class="mt-8 text-on-surface-variant font-label text-sm">No se requiere tarjeta de crédito • 14 días de prueba full</p>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full border-t border-[#484847]/15 bg-[#0e0e0e]">
+<div class="flex flex-col md:flex-row justify-between items-center px-12 py-10 w-full max-w-7xl mx-auto gap-8">
+<div class="text-lg font-black text-white font-headline">
+                YOUTUBE INTELLIGENCE
+            </div>
+<div class="flex gap-8 items-center">
+<a class="font-inter text-xs text-[#adaaaa] hover:text-red-500 transition-all" href="#">Terms of Service</a>
+<a class="font-inter text-xs text-[#adaaaa] hover:text-red-500 transition-all" href="#">Privacy Policy</a>
+<a class="font-inter text-xs text-[#adaaaa] hover:text-red-500 transition-all" href="#">Twitter</a>
+<a class="font-inter text-xs text-[#adaaaa] hover:text-red-500 transition-all" href="#">YouTube</a>
+</div>
+<div class="font-inter text-xs text-[#adaaaa]">
+                © 2024 YouTube Intelligence. All rights reserved.
+            </div>
+</div>
+</footer>
+</body></html>
