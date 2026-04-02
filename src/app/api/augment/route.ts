@@ -1,0 +1,168 @@
+/**
+ * POST /api/augment
+ *
+ * Full RAG Phase 6 — Augmentation endpoint.
+ * Retrieves the most relevant video sections for a user query and uses the
+ * LLM (via Vercel AI Gateway) to generate a grounded answer.
+ *
+ * Request body:
+ *   { query: string; matchThreshold?: number; matchCount?: number }
+ *
+ * Success (200):
+ *   { answer: string; sources: VideoSectionMatch[]; sourceCount: number }
+ *
+ * Error responses:
+ *   400 — missing / invalid request body
+ *   401 — unauthenticated
+ *   403 — no active subscription and not admin
+ *   404 — no relevant context sections found
+ *   500 — unexpected server error
+ *
+ * Authorization:
+ *   The user must have `subscription_active = true` OR `role = 'admin'`
+ *   (RLS rule from AGENTS.md §5).
+ *
+ * Runtime: Node.js (default).
+ */
+import { NextResponse } from 'next/server'
+import { augmentAnswer } from '@/lib/augmentation/augment'
+import type {
+  AugmentErrorResponse,
+  AugmentRequest,
+  AugmentSuccessResponse,
+} from '@/lib/augmentation/types'
+import { AUGMENT_API_ERROR, AUGMENT_DEFAULTS } from '@/lib/augmentation/types'
+import { retrieveSections } from '@/lib/retrieval/retrieve'
+import { createClient } from '@/lib/supabase/server'
+import type { Database } from '@/lib/supabase/types'
+
+type ProfileRow = Database['public']['Tables']['profiles']['Row']
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function errorResponse(
+  message: string,
+  code: AugmentErrorResponse['code'],
+  status: number,
+): NextResponse<AugmentErrorResponse> {
+  return NextResponse.json({ error: message, code }, { status })
+}
+
+function isAugmentRequest(body: unknown): body is AugmentRequest {
+  if (typeof body !== 'object' || body === null) return false
+  const b = body as Record<string, unknown>
+
+  if (typeof b.query !== 'string' || b.query.trim() === '') return false
+
+  if (b.matchThreshold !== undefined) {
+    if (
+      typeof b.matchThreshold !== 'number' ||
+      b.matchThreshold < 0 ||
+      b.matchThreshold > 1
+    )
+      return false
+  }
+
+  if (b.matchCount !== undefined) {
+    if (
+      typeof b.matchCount !== 'number' ||
+      !Number.isInteger(b.matchCount) ||
+      b.matchCount < 1
+    )
+      return false
+  }
+
+  return true
+}
+
+// ─── Route Handler ────────────────────────────────────────────────────────────
+
+export async function POST(
+  request: Request,
+): Promise<NextResponse<AugmentSuccessResponse | AugmentErrorResponse>> {
+  const supabase = await createClient()
+
+  // Step 1 — authentication
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return errorResponse(
+      'Authentication required.',
+      AUGMENT_API_ERROR.UNAUTHORIZED,
+      401,
+    )
+  }
+
+  // Step 2 — authorization: subscription_active OR admin
+  const { data: profileData } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+
+  const profile = profileData as ProfileRow | null
+  const isAdmin = profile?.role === 'admin'
+  const hasSubscription = profile?.subscription_active === true
+
+  if (!isAdmin && !hasSubscription) {
+    return errorResponse(
+      'An active subscription is required to use this feature.',
+      AUGMENT_API_ERROR.FORBIDDEN,
+      403,
+    )
+  }
+
+  // Step 3 — parse and validate request body
+  let body: unknown
+  try {
+    body = await request.json()
+  } catch {
+    return errorResponse(
+      'Request body must be valid JSON.',
+      AUGMENT_API_ERROR.INVALID_BODY,
+      400,
+    )
+  }
+
+  if (!isAugmentRequest(body)) {
+    return errorResponse(
+      'Invalid request body. Expected: { query: string; matchThreshold?: number; matchCount?: number }.',
+      AUGMENT_API_ERROR.INVALID_BODY,
+      400,
+    )
+  }
+
+  // Step 4 — retrieve relevant sections
+  try {
+    const retrieval = await retrieveSections(supabase, {
+      query: body.query,
+      userId: user.id,
+      matchThreshold: body.matchThreshold ?? AUGMENT_DEFAULTS.matchThreshold,
+      matchCount: body.matchCount ?? AUGMENT_DEFAULTS.matchCount,
+    })
+
+    if (retrieval.matches.length === 0) {
+      return errorResponse(
+        'No relevant video sections found for the given query.',
+        AUGMENT_API_ERROR.NO_CONTEXT,
+        404,
+      )
+    }
+
+    // Step 5 — augment: inject context and generate answer
+    const result = await augmentAnswer({
+      query: body.query,
+      matches: retrieval.matches,
+    })
+
+    return NextResponse.json(result, { status: 200 })
+  } catch {
+    return errorResponse(
+      'An unexpected error occurred while generating the answer.',
+      AUGMENT_API_ERROR.INTERNAL_ERROR,
+      500,
+    )
+  }
+}
