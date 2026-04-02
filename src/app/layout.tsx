@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Outfit, Plus_Jakarta_Sans } from 'next/font/google'
+import { ThemeProvider } from '@/components/providers/theme-provider'
 import './globals.css'
 
 // Outfit — geometric with rounded terminals, bold without feeling angular
@@ -37,9 +38,12 @@ export default function RootLayout({
     <html
       lang="es"
       className={`${plusJakartaSans.variable} ${outfit.variable}`}
+      suppressHydrationWarning
     >
       <body className="bg-background text-on-surface font-body antialiased min-h-screen">
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )
