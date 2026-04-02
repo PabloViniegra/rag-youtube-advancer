@@ -7,7 +7,7 @@ interface HeroSectionProps {
 
 export function HeroSection({ isAuthenticated }: HeroSectionProps) {
   const analyzeHref = isAuthenticated
-    ? '/dashboard/videos/nuevo'
+    ? '/dashboard/videos/new'
     : '/login?redirectTo=/dashboard'
 
   return (

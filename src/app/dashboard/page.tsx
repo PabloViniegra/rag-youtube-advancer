@@ -123,7 +123,7 @@ export default async function DashboardPage() {
         </div>
 
         <Link
-          href="/dashboard/videos/nuevo"
+          href="/dashboard/videos/new"
           className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-6 font-body text-sm font-semibold text-on-primary shadow-sm transition-all hover:bg-primary-dim active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         >
           <svg
@@ -151,19 +151,19 @@ export default async function DashboardPage() {
         </h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <QuickAction
-            href="/dashboard/videos/nuevo"
+            href="/dashboard/videos/new"
             title="Indexar video"
             description="Añade una URL de YouTube a tu cerebro"
             icon={PlusIcon}
           />
           <QuickAction
-            href="/dashboard/buscar"
+            href="/dashboard/search"
             title="Buscar en tu cerebro"
             description="Consulta tus videos con lenguaje natural"
             icon={SearchIcon}
           />
           <QuickAction
-            href="/dashboard/ajustes"
+            href="/dashboard/settings"
             title="Actualizar a Pro"
             description="Desbloquea búsquedas ilimitadas por $5/mes"
             icon={SparkleIcon}

@@ -71,6 +71,22 @@ function isStoreRequest(body: unknown): body is StoreRequest {
   )
 }
 
+function extractErrorMessage(error: unknown): string | null {
+  if (error instanceof Error && error.message.trim() !== '') {
+    return error.message
+  }
+
+  if (typeof error === 'object' && error !== null) {
+    const record = error as Record<string, unknown>
+    const message = record.message
+    if (typeof message === 'string' && message.trim() !== '') {
+      return message
+    }
+  }
+
+  return null
+}
+
 // ─── Route Handler ────────────────────────────────────────────────────────────
 
 export async function POST(
@@ -140,9 +156,11 @@ export async function POST(
     })
 
     return NextResponse.json(result, { status: 200 })
-  } catch {
+  } catch (error) {
+    const details = extractErrorMessage(error)
     return errorResponse(
-      'An unexpected error occurred while storing the video sections.',
+      details ??
+        'An unexpected error occurred while storing the video sections.',
       STORE_API_ERROR.INTERNAL_ERROR,
       500,
     )

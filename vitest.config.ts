@@ -18,6 +18,13 @@ const COVERAGE_INCLUDES = [
   // Phase 6 — Augmentation
   'src/lib/augmentation/augment.ts',
   'src/app/api/augment/route.ts',
+  // Pipeline orchestrator
+  'src/lib/pipeline/types.ts',
+  'src/lib/pipeline/ingest.ts',
+  // Dashboard pages
+  'src/app/dashboard/videos/new/page.tsx',
+  'src/app/dashboard/videos/[id]/page.tsx',
+  'src/app/dashboard/search/page.tsx',
 ] as const
 
 export default defineConfig({

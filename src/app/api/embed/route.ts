@@ -35,6 +35,28 @@ import type { Database } from '@/lib/supabase/types'
 
 type ProfileRow = Database['public']['Tables']['profiles']['Row']
 
+const EMBED_PROVIDER_ERROR = {
+  CUSTOMER_VERIFICATION_REQUIRED: 'customer_verification_required',
+} as const
+
+type EmbedProviderErrorType =
+  (typeof EMBED_PROVIDER_ERROR)[keyof typeof EMBED_PROVIDER_ERROR]
+
+interface ProviderErrorPayload {
+  type?: string
+  message?: string
+}
+
+interface ProviderErrorData {
+  error?: ProviderErrorPayload
+}
+
+interface EmbedProviderErrorLike {
+  statusCode?: number
+  message?: string
+  data?: ProviderErrorData
+}
+
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
 function errorResponse(
@@ -53,6 +75,90 @@ function isEmbedRequest(body: unknown): body is EmbedRequest {
     record.chunks.length > 0 &&
     record.chunks.every((c) => typeof c === 'string' && c.trim() !== '')
   )
+}
+
+function extractEmbedProviderError(
+  error: unknown,
+): EmbedProviderErrorLike | null {
+  if (typeof error !== 'object' || error === null) return null
+  const value = error as Record<string, unknown>
+
+  const statusCode =
+    typeof value.statusCode === 'number' ? value.statusCode : undefined
+  const message = typeof value.message === 'string' ? value.message : undefined
+
+  let data: ProviderErrorData | undefined
+  const dataRaw = value.data
+  if (typeof dataRaw === 'object' && dataRaw !== null) {
+    const dataRecord = dataRaw as Record<string, unknown>
+    const errorRaw = dataRecord.error
+    if (typeof errorRaw === 'object' && errorRaw !== null) {
+      const errorRecord = errorRaw as Record<string, unknown>
+      data = {
+        error: {
+          type:
+            typeof errorRecord.type === 'string' ? errorRecord.type : undefined,
+          message:
+            typeof errorRecord.message === 'string'
+              ? errorRecord.message
+              : undefined,
+        },
+      }
+    }
+  }
+
+  if (statusCode === undefined && message === undefined && data === undefined) {
+    return null
+  }
+
+  return { statusCode, message, data }
+}
+
+function resolveProviderFailure(
+  error: unknown,
+): { status: number; message: string } | null {
+  const providerError = extractEmbedProviderError(error)
+  if (!providerError) return null
+
+  const providerCause =
+    typeof error === 'object' && error !== null
+      ? (error as { cause?: unknown }).cause
+      : null
+
+  const causeError = extractEmbedProviderError(providerCause)
+
+  const providerType =
+    (providerError.data?.error?.type as EmbedProviderErrorType | undefined) ??
+    (causeError?.data?.error?.type as EmbedProviderErrorType | undefined)
+  const providerMessage =
+    providerError.data?.error?.message ?? causeError?.data?.error?.message
+
+  if (
+    providerType === EMBED_PROVIDER_ERROR.CUSTOMER_VERIFICATION_REQUIRED ||
+    providerMessage?.includes('valid credit card on file') === true
+  ) {
+    return {
+      status: 503,
+      message:
+        'Vercel AI Gateway billing is not enabled. Add a valid credit card in Vercel AI Gateway and try again.',
+    }
+  }
+
+  if (providerError.message) {
+    return {
+      status: providerError.statusCode ?? 502,
+      message: `Embedding provider error: ${providerError.message}`,
+    }
+  }
+
+  if (providerMessage) {
+    return {
+      status: 502,
+      message: `Embedding provider error: ${providerMessage}`,
+    }
+  }
+
+  return null
 }
 
 // ─── Route Handler ────────────────────────────────────────────────────────────
@@ -125,7 +231,16 @@ export async function POST(
       { data: embedded, count: embedded.length },
       { status: 200 },
     )
-  } catch {
+  } catch (error) {
+    const providerFailure = resolveProviderFailure(error)
+    if (providerFailure) {
+      return errorResponse(
+        providerFailure.message,
+        EMBED_API_ERROR.INTERNAL_ERROR,
+        providerFailure.status,
+      )
+    }
+
     return errorResponse(
       'An unexpected error occurred while generating embeddings.',
       EMBED_API_ERROR.INTERNAL_ERROR,

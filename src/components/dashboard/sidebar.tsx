@@ -50,9 +50,9 @@ export function DashboardSidebar({
       <nav className="flex flex-1 flex-col gap-1 p-3" aria-label="Principal">
         <NavItem href="/dashboard" label="Inicio" icon={HomeIcon} />
         <NavItem href="/dashboard/videos" label="Mis videos" icon={VideoIcon} />
-        <NavItem href="/dashboard/buscar" label="Buscar" icon={SearchIcon} />
+        <NavItem href="/dashboard/search" label="Buscar" icon={SearchIcon} />
         <NavItem
-          href="/dashboard/ajustes"
+          href="/dashboard/settings"
           label="Ajustes"
           icon={SettingsIcon}
         />
