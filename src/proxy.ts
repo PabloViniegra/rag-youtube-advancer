@@ -10,6 +10,7 @@ const PROTECTED_ROUTES = [
   '/api/videos',
   '/api/rag',
   '/api/transcript',
+  '/api/chunk',
 ]
 // Routes that should redirect to /dashboard if already authenticated
 const AUTH_ROUTES = ['/login', '/signup']
