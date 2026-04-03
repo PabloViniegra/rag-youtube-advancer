@@ -43,7 +43,7 @@ export function BentoGrid() {
         {/* Hook generator card */}
         <div className="md:col-span-4 bg-surface-container-low rounded-3xl p-8 border border-outline-variant/40 flex flex-col">
           <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-6">
-            <Wand2 className="text-primary" size={20} />
+            <Wand2 className="text-primary" size={20} aria-hidden="true" />
           </div>
           <h3 className="text-xl font-headline font-bold mb-4">
             Hook Generator

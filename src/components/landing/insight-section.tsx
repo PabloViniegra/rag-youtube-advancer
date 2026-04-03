@@ -6,6 +6,11 @@ import {
   TrendingUp,
 } from 'lucide-react'
 
+/** Visually hidden but readable by screen readers */
+function VisuallyHidden({ children }: { children: React.ReactNode }) {
+  return <span className="sr-only">{children}</span>
+}
+
 export function InsightSection() {
   return (
     <section className="px-6 py-24 bg-surface-container-low">
@@ -58,7 +63,13 @@ export function InsightSection() {
                   4.2
                 </span>
                 <span className="text-sm text-on-surface-variant">/10</span>
-                <TrendingDown className="text-error ml-0.5" size={15} />
+                <TrendingDown
+                  className="text-error ml-0.5"
+                  size={15}
+                  aria-hidden="true"
+                />
+                {/* Text alternative for the color+icon trend indicator */}
+                <VisuallyHidden>(tendencia a la baja)</VisuallyHidden>
               </div>
             </div>
 
@@ -70,7 +81,12 @@ export function InsightSection() {
                 <span className="text-2xl font-headline font-extrabold text-error tabular-nums">
                   68%
                 </span>
-                <AlertCircle className="text-error ml-0.5" size={15} />
+                <AlertCircle
+                  className="text-error ml-0.5"
+                  size={15}
+                  aria-hidden="true"
+                />
+                <VisuallyHidden>(alerta: valor crítico)</VisuallyHidden>
               </div>
             </div>
 
@@ -93,7 +109,12 @@ export function InsightSection() {
                 <span className="text-2xl font-headline font-extrabold text-secondary tabular-nums">
                   +18%
                 </span>
-                <TrendingUp className="text-secondary ml-0.5" size={15} />
+                <TrendingUp
+                  className="text-secondary ml-0.5"
+                  size={15}
+                  aria-hidden="true"
+                />
+                <VisuallyHidden>(tendencia al alza)</VisuallyHidden>
               </div>
             </div>
           </div>
@@ -124,6 +145,7 @@ export function InsightSection() {
                     <CheckCircle2
                       className="text-secondary shrink-0 mt-0.5"
                       size={16}
+                      aria-hidden="true"
                     />
                     <div>
                       <p className="text-sm font-body font-semibold text-on-surface mb-1">
@@ -151,10 +173,10 @@ export function InsightSection() {
             </p>
             <button
               type="button"
-              className="flex items-center gap-1.5 text-sm font-headline font-bold text-primary hover:text-primary-dim transition-colors"
+              className="flex items-center gap-1.5 text-sm font-headline font-bold text-primary hover:text-primary-dim transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded"
             >
               Ver análisis completo
-              <ChevronRight size={16} />
+              <ChevronRight size={16} aria-hidden="true" />
             </button>
           </div>
         </div>

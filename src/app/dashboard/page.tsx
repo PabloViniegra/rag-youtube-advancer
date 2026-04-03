@@ -199,8 +199,9 @@ function OnboardStep({
           : 'border-outline-variant bg-background',
       )}
     >
-      {/* Step number — large, de-emphasized unless highlight */}
+      {/* Step number — large, decorative; hidden from AT (heading conveys step identity) */}
       <span
+        aria-hidden="true"
         className={cn(
           'select-none font-headline text-5xl font-extrabold leading-none',
           highlight ? 'text-primary' : 'text-outline-variant',

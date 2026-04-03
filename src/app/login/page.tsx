@@ -59,9 +59,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
         {/* Hero copy */}
         <div className="relative z-10 flex flex-col gap-6">
-          <h1 className="font-headline text-4xl font-extrabold leading-tight text-on-primary">
+          <p className="font-headline text-4xl font-extrabold leading-tight text-on-primary">
             Tu segundo cerebro para YouTube
-          </h1>
+          </p>
           <p className="font-body text-base leading-relaxed text-on-primary/65">
             Convierte cualquier video en conocimiento accionable. Busca, resume
             y extrae insights con IA en segundos.
@@ -164,11 +164,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             Volver al inicio
           </Link>
 
-          {/* Heading */}
+          {/* Heading — h1 because on mobile the left panel (which has the other h1) is hidden */}
           <div className="mb-8 flex flex-col gap-2">
-            <h2 className="font-headline text-2xl font-extrabold text-on-surface">
+            <h1 className="font-headline text-2xl font-extrabold text-on-surface">
               Accede a tu cuenta
-            </h2>
+            </h1>
             <p className="font-body text-sm text-on-surface-variant">
               Elige tu proveedor para continuar
             </p>
@@ -177,13 +177,19 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           {/* OAuth buttons */}
           <LoginForm redirectTo={redirectTo} />
 
-          {/* Divider */}
-          <div className="my-6 flex items-center gap-3" aria-hidden="true">
-            <div className="h-px flex-1 bg-outline-variant" />
+          {/* Divider — content is meaningful: explains passwordless auth */}
+          <div className="my-6 flex items-center gap-3">
+            <div
+              className="h-px flex-1 bg-outline-variant"
+              aria-hidden="true"
+            />
             <span className="font-body text-xs text-on-surface-variant">
               Sin contraseña necesaria
             </span>
-            <div className="h-px flex-1 bg-outline-variant" />
+            <div
+              className="h-px flex-1 bg-outline-variant"
+              aria-hidden="true"
+            />
           </div>
 
           {/* Terms */}

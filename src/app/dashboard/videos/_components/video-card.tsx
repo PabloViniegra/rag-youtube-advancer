@@ -58,13 +58,15 @@ export function VideoCard({ video, variant = 'default' }: VideoCardProps) {
           />
         </ViewTransition>
 
-        {/* Crimson overlay on hover — editorial "Ver detalles" CTA (pointer devices) */}
+        {/* Crimson overlay on hover — editorial "Ver detalles" CTA (pointer devices only).
+            Hidden from AT: tabIndex={-1} + aria-hidden. The footer link is the canonical target. */}
         <div className="absolute inset-0 flex items-end bg-gradient-to-t from-primary/90 via-primary/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <Link
             href={`/dashboard/videos/${video.id}`}
             className="w-full px-4 pb-4 font-headline text-sm font-bold text-on-primary focus-visible:outline-none"
             aria-label={`Ver detalles de ${video.title ?? video.youtube_id}`}
             tabIndex={-1}
+            aria-hidden="true"
           >
             Ver detalles →
           </Link>

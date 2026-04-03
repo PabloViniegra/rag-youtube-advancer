@@ -14,7 +14,7 @@ export default async function Home() {
   return (
     <>
       <Navbar isAuthenticated={isAuthenticated} />
-      <main className="pt-24">
+      <main id="main-content" className="pt-24">
         <HeroSection isAuthenticated={isAuthenticated} />
         <ProcessSection />
         <BentoGrid />
