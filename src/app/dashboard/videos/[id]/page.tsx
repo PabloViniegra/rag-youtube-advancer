@@ -1,12 +1,15 @@
 import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
+import type { IntelligenceReport } from '@/lib/intelligence/types'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
+import { IntelligenceReportView } from '../_components/intelligence-report'
 import { VideoDetailHeader } from './_components/video-detail-header'
 import { VideoSectionsList } from './_components/video-sections-list'
 
 type VideoRow = Database['public']['Tables']['videos']['Row']
 type SectionRow = Database['public']['Tables']['video_sections']['Row']
+type ReportRow = Database['public']['Tables']['intelligence_reports']['Row']
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -57,14 +60,28 @@ export default async function VideoDetailPage({ params }: PageProps) {
 
   const typedVideo = video as VideoRow
 
-  // Fetch sections for this video
-  const { data: sections } = await supabase
-    .from('video_sections')
-    .select('id, content')
-    .eq('video_id', id)
-    .order('id')
+  // Fetch sections + intelligence report in parallel to avoid waterfall
+  const [sectionsResult, reportResult] = await Promise.all([
+    supabase
+      .from('video_sections')
+      .select('id, content')
+      .eq('video_id', id)
+      .order('id'),
+    supabase
+      .from('intelligence_reports')
+      .select('report')
+      .eq('video_id', id)
+      .maybeSingle(),
+  ])
 
-  const typedSections = (sections ?? []) as Pick<SectionRow, 'id' | 'content'>[]
+  const typedSections = (sectionsResult.data ?? []) as Pick<
+    SectionRow,
+    'id' | 'content'
+  >[]
+
+  const reportData = reportResult.data
+    ? ((reportResult.data as ReportRow).report as unknown as IntelligenceReport)
+    : null
 
   return (
     <div className="flex flex-col gap-10">
@@ -75,6 +92,9 @@ export default async function VideoDetailPage({ params }: PageProps) {
           sectionCount={typedSections.length}
         />
       </div>
+
+      {/* Informe de inteligencia — solo si está disponible */}
+      {reportData ? <IntelligenceReportView report={reportData} /> : null}
 
       {/* Sections list */}
       <VideoSectionsList sections={typedSections} />

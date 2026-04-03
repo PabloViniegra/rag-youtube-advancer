@@ -33,6 +33,10 @@ vi.mock('./_components/video-sections-list', () => ({
   VideoSectionsList: () => null,
 }))
 
+vi.mock('../_components/intelligence-report', () => ({
+  IntelligenceReportView: () => null,
+}))
+
 // ─── Imports (after mocks) ────────────────────────────────────────────────────
 
 import VideoDetailPage, { generateMetadata } from './page'
@@ -67,6 +71,7 @@ type SupabaseMockConfig = {
   videoData: unknown
   videoError: unknown
   sectionsData: unknown
+  reportData?: unknown
 }
 
 function mockSupabase({
@@ -74,6 +79,7 @@ function mockSupabase({
   videoData,
   videoError,
   sectionsData,
+  reportData = null,
 }: SupabaseMockConfig) {
   const getUserResult = { data: { user } }
 
@@ -97,6 +103,13 @@ function mockSupabase({
   const sectionsEq = vi.fn().mockReturnValue({ order: sectionsOrdered })
   const sectionsSelect = vi.fn().mockReturnValue({ eq: sectionsEq })
 
+  // Build the query chain for intelligence_reports table
+  const reportMaybeSingle = vi
+    .fn()
+    .mockResolvedValue({ data: reportData, error: null })
+  const reportEq = vi.fn().mockReturnValue({ maybeSingle: reportMaybeSingle })
+  const reportSelect = vi.fn().mockReturnValue({ eq: reportEq })
+
   const fromMock = vi.fn().mockImplementation((table: string) => {
     if (table === 'videos') {
       return {
@@ -109,6 +122,9 @@ function mockSupabase({
     }
     if (table === 'video_sections') {
       return { select: sectionsSelect }
+    }
+    if (table === 'intelligence_reports') {
+      return { select: reportSelect }
     }
     return {}
   })

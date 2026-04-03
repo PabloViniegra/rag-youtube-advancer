@@ -107,7 +107,12 @@ describe('NuevoVideoPage', () => {
 
   it('renders SuccessCard on successful ingestion', async () => {
     const user = userEvent.setup()
-    resolveWith({ ok: true, videoId: 'vid-abc', sectionCount: 12 })
+    resolveWith({
+      ok: true,
+      videoId: 'vid-abc',
+      sectionCount: 12,
+      report: null,
+    })
 
     render(<NuevoVideoPage />)
 
@@ -124,7 +129,7 @@ describe('NuevoVideoPage', () => {
 
   it('resets form when "Añadir otro video" is clicked', async () => {
     const user = userEvent.setup()
-    resolveWith({ ok: true, videoId: 'vid-abc', sectionCount: 5 })
+    resolveWith({ ok: true, videoId: 'vid-abc', sectionCount: 5, report: null })
 
     render(<NuevoVideoPage />)
 

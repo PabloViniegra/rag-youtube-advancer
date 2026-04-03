@@ -7,12 +7,13 @@
  * Calls the `ingestVideo` Server Action and shows phase progress while waiting.
  */
 
-import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { ingestVideo } from '@/lib/pipeline/ingest'
 import type { IngestResult } from '@/lib/pipeline/types'
 import { INGEST_ERROR } from '@/lib/pipeline/types'
 import { cn } from '@/lib/utils'
+import type { SuccessData } from './_components/success-card'
+import { SuccessCard } from './_components/success-card'
 
 // ── Loading messages ─────────────────────────────────────────────────────────
 
@@ -31,21 +32,23 @@ const PHASE_LABELS = [
   'Dividiendo en fragmentos...',
   'Generando embeddings...',
   'Guardando en base de datos...',
+  'Generando informe de inteligencia...',
 ] as const satisfies readonly string[]
 
 // ── Error messages ────────────────────────────────────────────────────────────
 
-const ERROR_MESSAGES = {
+const ERROR_MESSAGES: Record<string, string> = {
   [INGEST_ERROR.INVALID_URL]: 'La URL de YouTube no es válida.',
   [INGEST_ERROR.TRANSCRIPT_FAILED]:
     'No se pudo extraer la transcripción del video.',
   [INGEST_ERROR.CHUNK_FAILED]: 'Error al procesar el texto del video.',
   [INGEST_ERROR.EMBED_FAILED]: 'Error al generar los embeddings.',
   [INGEST_ERROR.STORE_FAILED]: 'Error al guardar el video en la base de datos.',
+  [INGEST_ERROR.REPORT_FAILED]: 'Error al generar el informe de inteligencia.',
   [INGEST_ERROR.UNAUTHORIZED]: 'Debes iniciar sesión para añadir videos.',
   [INGEST_ERROR.FORBIDDEN]:
     'Necesitas una suscripción activa para añadir videos.',
-} as const satisfies Record<string, string>
+}
 
 const GENERIC_INGEST_MESSAGES = [
   'Transcript extraction failed.',
@@ -66,11 +69,6 @@ const FORM_STATE = {
 } as const
 
 type FormState = (typeof FORM_STATE)[keyof typeof FORM_STATE]
-
-interface SuccessData {
-  videoId: string
-  sectionCount: number
-}
 
 interface ErrorData {
   message: string
@@ -132,6 +130,7 @@ export default function NuevoVideoPage() {
       setSuccessData({
         videoId: result.videoId,
         sectionCount: result.sectionCount,
+        report: result.report,
       })
       setFormState(FORM_STATE.SUCCESS)
     } else {
@@ -153,8 +152,15 @@ export default function NuevoVideoPage() {
     }
   }
 
+  const isSuccess = formState === FORM_STATE.SUCCESS && successData
+
   return (
-    <div className="flex w-full flex-col gap-8 max-w-xl">
+    <div
+      className={cn(
+        'flex w-full flex-col gap-8',
+        isSuccess ? 'max-w-4xl' : 'max-w-xl',
+      )}
+    >
       <div className="flex flex-col gap-1">
         <h1 className="font-headline text-2xl font-extrabold text-on-surface">
           Añadir video
@@ -164,7 +170,7 @@ export default function NuevoVideoPage() {
         </p>
       </div>
 
-      {formState === FORM_STATE.SUCCESS && successData ? (
+      {isSuccess ? (
         <SuccessCard
           data={successData}
           onReset={() => {
@@ -447,115 +453,5 @@ function ErrorBanner({ message }: { message: string }) {
       </svg>
       <p className="font-body text-sm text-on-error-container">{message}</p>
     </div>
-  )
-}
-
-// ── Success card ──────────────────────────────────────────────────────────────
-
-interface SuccessCardProps {
-  data: SuccessData
-  onReset: () => void
-}
-
-function SuccessCard({ data, onReset }: SuccessCardProps) {
-  return (
-    <section
-      aria-labelledby="success-heading"
-      className="flex flex-col items-center gap-6 rounded-2xl border border-outline-variant bg-background p-6 sm:p-8 shadow-sm text-center animate-fade-up"
-    >
-      {/* Animated check icon */}
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 animate-fade-in">
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
-          className="text-primary"
-        >
-          <path
-            d="M20 6L9 17l-5-5"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            pathLength="1"
-            strokeDasharray="1"
-            className="[stroke-dashoffset:1] [animation:stroke-draw_0.5s_var(--ease-out-expo)_0.15s_both]"
-          />
-        </svg>
-      </div>
-
-      {/* Heading + stat */}
-      <div className="flex flex-col gap-3">
-        <h2
-          id="success-heading"
-          className="font-headline text-xl font-bold text-on-surface"
-        >
-          ¡Video indexado!
-        </h2>
-        {/* Stat callout — make the number the hero */}
-        <div className="inline-flex items-baseline gap-1.5 rounded-xl bg-primary-container px-4 py-2">
-          <span
-            data-tabular-nums
-            className="font-headline text-3xl font-extrabold text-primary"
-          >
-            {data.sectionCount}
-          </span>
-          <span className="font-body text-sm text-on-primary-container">
-            fragmentos en memoria
-          </span>
-        </div>
-        <p className="font-body text-sm text-on-surface-variant">
-          Tu cerebro ya tiene contexto. Hazle una pregunta.
-        </p>
-      </div>
-
-      {/* CTAs — search is the primary "aha moment" action */}
-      <div className="flex w-full flex-col gap-3 sm:flex-row">
-        <Link
-          href="/dashboard/search"
-          className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-body text-sm font-bold text-on-primary transition-all hover:bg-primary-dim active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-        >
-          <SearchIcon />
-          Buscar en mi cerebro
-        </Link>
-        <button
-          type="button"
-          onClick={onReset}
-          className="flex-1 inline-flex items-center justify-center rounded-xl border border-outline-variant px-4 py-3 font-body text-sm font-semibold text-on-surface transition-all hover:bg-surface-container active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-        >
-          Añadir otro video
-        </button>
-      </div>
-
-      {/* Subtle secondary link — proper tap target */}
-      <Link
-        href="/dashboard/videos"
-        className="inline-flex min-h-[44px] items-center px-2 font-body text-xs text-on-surface-variant transition-colors hover:text-on-surface focus-visible:outline-none focus-visible:rounded focus-visible:ring-1 focus-visible:ring-primary/40"
-      >
-        Ver todos mis videos →
-      </Link>
-    </section>
-  )
-}
-
-function SearchIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="m21 21-4.35-4.35"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
   )
 }

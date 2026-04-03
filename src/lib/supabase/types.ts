@@ -1,6 +1,35 @@
+// biome-ignore lint/suspicious/noExplicitAny: Supabase JSONB columns use recursive Json
+type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
 export interface Database {
   public: {
     Tables: {
+      intelligence_reports: {
+        Row: {
+          id: string
+          video_id: string
+          report: Json
+          generated_at: string
+        }
+        Insert: {
+          id?: string
+          video_id: string
+          report: Json
+          generated_at?: string
+        }
+        Update: {
+          id?: string
+          video_id?: string
+          report?: Json
+          generated_at?: string
+        }
+      }
       profiles: {
         Row: {
           id: string

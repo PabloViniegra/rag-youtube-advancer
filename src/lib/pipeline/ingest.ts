@@ -3,11 +3,12 @@
 /**
  * Pipeline orchestrator — Server Action
  *
- * Chains all 4 RAG ingestion phases by calling the internal Next.js API routes:
- *   1. POST /api/transcript  — extract full transcript from a YouTube URL
- *   2. POST /api/chunk       — split transcript text into overlapping segments
- *   3. POST /api/embed       — convert segments into 1536-dim vectors
- *   4. POST /api/store       — persist video + embedded sections to Supabase
+ * Chains all 5 RAG ingestion phases by calling the internal Next.js API routes:
+ *   1. POST /api/transcript       — extract full transcript from a YouTube URL
+ *   2. POST /api/chunk            — split transcript text into overlapping segments
+ *   3. POST /api/embed            — convert segments into 1536-dim vectors
+ *   4. POST /api/store            — persist video + embedded sections to Supabase
+ *   5. POST /api/generate-report  — generate Intelligence Report (3 parallel LLM calls)
  *
  * Auth cookies are forwarded to every downstream fetch so Supabase middleware
  * can authenticate each sub-request.
@@ -44,6 +45,11 @@ interface EmbedOk {
 interface StoreOk {
   videoId: string
   count: number
+}
+
+interface ReportOk {
+  reportId: string
+  generatedAt: string
 }
 
 interface ApiErrorPayload {
@@ -97,8 +103,10 @@ function ingestError(code: IngestErrorCode, message: string): IngestError {
   return { ok: false, code, message }
 }
 
-function ingestSuccess(videoId: string, sectionCount: number): IngestSuccess {
-  return { ok: true, videoId, sectionCount }
+function isReportOk(v: unknown): v is ReportOk {
+  if (typeof v !== 'object' || v === null) return false
+  const r = v as Record<string, unknown>
+  return typeof r.reportId === 'string' && typeof r.generatedAt === 'string'
 }
 
 /**
@@ -216,5 +224,27 @@ export async function ingestVideo(input: IngestInput): Promise<IngestResult> {
     return ingestError(INGEST_ERROR.STORE_FAILED, 'Invalid store response.')
   }
 
-  return ingestSuccess(s.data.videoId, s.data.count)
+  const videoId = s.data.videoId
+  const sectionCount = s.data.count
+
+  // ── Phase 5 — Intelligence Report (graceful: failure doesn't block) ─────
+  let report: IngestSuccess['report'] = null
+
+  try {
+    const r = await fetchJson('/api/generate-report', {
+      videoId,
+      transcript: fullText,
+      title,
+    })
+
+    if (r.status === 200 && isReportOk(r.data)) {
+      const data = r.data as { report?: unknown }
+      report = (data.report as IngestSuccess['report']) ?? null
+    }
+  } catch {
+    // Phase 5 failure is graceful — the video is already indexed.
+    // The report can be regenerated later.
+  }
+
+  return { ok: true, videoId, sectionCount, report }
 }
