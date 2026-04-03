@@ -23,7 +23,10 @@ export function DashboardSidebar({
   avatarUrl,
 }: DashboardSidebarProps) {
   return (
-    <aside className="hidden w-56 shrink-0 flex-col bg-on-surface md:flex">
+    <aside
+      className="hidden w-56 shrink-0 flex-col bg-on-surface md:flex"
+      style={{ viewTransitionName: 'dashboard-sidebar' }}
+    >
       {/* ── Brand mark ── */}
       <div className="flex h-16 items-center gap-3 px-5">
         {/* Crimson accent bar */}

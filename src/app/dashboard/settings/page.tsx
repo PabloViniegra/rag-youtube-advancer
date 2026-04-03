@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import { ViewTransition } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
 
@@ -54,23 +55,37 @@ export default async function AjustesPage() {
   const email = profile?.email ?? user.email ?? '—'
 
   return (
-    <div className="flex flex-col gap-8 max-w-2xl">
-      {/* ── Page header ── */}
-      <div className="flex flex-col gap-1">
-        <h1 className="font-headline text-2xl font-extrabold text-on-surface">
-          Ajustes
-        </h1>
-        <p className="font-body text-sm text-on-surface-variant">
-          Gestiona tu cuenta y plan de suscripción.
-        </p>
+    <ViewTransition
+      enter={{
+        'nav-forward': 'slide-from-right',
+        'nav-back': 'slide-from-left',
+        default: 'none',
+      }}
+      exit={{
+        'nav-forward': 'slide-to-left',
+        'nav-back': 'slide-to-right',
+        default: 'none',
+      }}
+      default="none"
+    >
+      <div className="flex flex-col gap-8 max-w-2xl">
+        {/* ── Page header ── */}
+        <div className="flex flex-col gap-1">
+          <h1 className="font-headline text-2xl font-extrabold text-on-surface">
+            Ajustes
+          </h1>
+          <p className="font-body text-sm text-on-surface-variant">
+            Gestiona tu cuenta y plan de suscripción.
+          </p>
+        </div>
+
+        {/* ── Mi cuenta ── */}
+        <AccountSection email={email} plan={plan} />
+
+        {/* ── Plan y facturación ── */}
+        <BillingSection plan={plan} />
       </div>
-
-      {/* ── Mi cuenta ── */}
-      <AccountSection email={email} plan={plan} />
-
-      {/* ── Plan y facturación ── */}
-      <BillingSection plan={plan} />
-    </div>
+    </ViewTransition>
   )
 }
 

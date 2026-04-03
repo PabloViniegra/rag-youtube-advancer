@@ -9,32 +9,36 @@
  * via the @media block in globals.css.
  */
 
+import { ViewTransition } from 'react'
+
 const SKELETON_KEYS = ['sk-1', 'sk-2', 'sk-3', 'sk-4', 'sk-5', 'sk-6'] as const
 
 export default function VideosLoading() {
   return (
-    <div className="flex flex-col gap-8" aria-busy="true">
-      {/* ── Page header skeleton — mirrors editorial header ── */}
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-outline-variant pb-6">
-        <div className="flex flex-col gap-2">
-          {/* Overline */}
-          <div className="h-3 w-28 animate-pulse rounded bg-surface-container" />
-          {/* h1 */}
-          <div className="h-9 w-36 animate-pulse rounded-lg bg-surface-container md:w-48" />
-          {/* Subline */}
-          <div className="h-3.5 w-60 animate-pulse rounded-md bg-surface-container" />
+    <ViewTransition exit="slide-down" default="none">
+      <div className="flex flex-col gap-8" aria-busy="true">
+        {/* ── Page header skeleton — mirrors editorial header ── */}
+        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-outline-variant pb-6">
+          <div className="flex flex-col gap-2">
+            {/* Overline */}
+            <div className="h-3 w-28 animate-pulse rounded bg-surface-container" />
+            {/* h1 */}
+            <div className="h-9 w-36 animate-pulse rounded-lg bg-surface-container md:w-48" />
+            {/* Subline */}
+            <div className="h-3.5 w-60 animate-pulse rounded-md bg-surface-container" />
+          </div>
+          {/* CTA button */}
+          <div className="h-10 w-32 animate-pulse rounded-xl bg-surface-container" />
         </div>
-        {/* CTA button */}
-        <div className="h-10 w-32 animate-pulse rounded-xl bg-surface-container" />
-      </div>
 
-      {/* ── Cards skeleton grid ── */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {SKELETON_KEYS.map((key) => (
-          <VideoCardSkeleton key={key} />
-        ))}
+        {/* ── Cards skeleton grid ── */}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {SKELETON_KEYS.map((key) => (
+            <VideoCardSkeleton key={key} />
+          ))}
+        </div>
       </div>
-    </div>
+    </ViewTransition>
   )
 }
 

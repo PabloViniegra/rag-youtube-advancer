@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { ViewTransition } from 'react'
 import { getCurrentUser } from '@/lib/auth/actions'
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
@@ -45,81 +46,97 @@ export default async function DashboardPage() {
   const hasVideos = videoCount > 0
 
   return (
-    <div className="flex flex-col gap-10">
-      {/* ── Hero greeting — asymmetric, editorial ── */}
-      <div className="relative flex flex-col gap-2 border-b border-outline-variant pb-8">
-        {/* Overline label */}
-        <span className="font-headline text-xs font-bold uppercase tracking-widest text-primary">
-          Tu segundo cerebro
-        </span>
+    <ViewTransition
+      enter={{
+        'nav-forward': 'slide-from-right',
+        'nav-back': 'slide-from-left',
+        default: 'slide-up',
+      }}
+      exit={{
+        'nav-forward': 'slide-to-left',
+        'nav-back': 'slide-to-right',
+        default: 'none',
+      }}
+      default="none"
+    >
+      <div className="flex flex-col gap-10">
+        {/* ── Hero greeting — asymmetric, editorial ── */}
+        <div className="relative flex flex-col gap-2 border-b border-outline-variant pb-8">
+          {/* Overline label */}
+          <span className="font-headline text-xs font-bold uppercase tracking-widest text-primary">
+            Tu segundo cerebro
+          </span>
 
-        {/* Display headline — dramatic scale */}
-        <h1 className="break-words font-headline text-4xl font-extrabold leading-[1.1] text-on-surface md:text-5xl">
-          Hola, <span className="text-primary">{displayName}.</span>
-        </h1>
+          {/* Display headline — dramatic scale */}
+          <h1 className="break-words font-headline text-4xl font-extrabold leading-[1.1] text-on-surface md:text-5xl">
+            Hola, <span className="text-primary">{displayName}.</span>
+          </h1>
 
-        <p className="max-w-lg font-body text-base text-on-surface-variant">
-          {hasVideos
-            ? `Tienes ${videoCount} video${videoCount === 1 ? '' : 's'} indexado${videoCount === 1 ? '' : 's'} y ${sectionCount} fragmentos en memoria.`
-            : 'Pega la URL de un video de YouTube y conviértelo en conocimiento consultable.'}
-        </p>
+          <p className="max-w-lg font-body text-base text-on-surface-variant">
+            {hasVideos
+              ? `Tienes ${videoCount} video${videoCount === 1 ? '' : 's'} indexado${videoCount === 1 ? '' : 's'} y ${sectionCount} fragmentos en memoria.`
+              : 'Pega la URL de un video de YouTube y conviértelo en conocimiento consultable.'}
+          </p>
 
-        {/* Primary CTA — unmissable */}
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Link
-            href="/dashboard/videos/new"
-            className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-6 font-body text-sm font-bold text-on-primary shadow-sm transition-all hover:bg-primary-dim active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-          >
-            <PlusIcon />
-            Indexar video
-          </Link>
-          {hasVideos && (
+          {/* Primary CTA — unmissable */}
+          <div className="mt-4 flex flex-wrap gap-3">
             <Link
-              href="/dashboard/search"
-              className="inline-flex h-11 items-center gap-2 rounded-xl border border-outline-variant bg-background px-6 font-body text-sm font-semibold text-on-surface transition-all hover:border-outline hover:bg-surface-container active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              href="/dashboard/videos/new"
+              transitionTypes={['nav-forward']}
+              className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-6 font-body text-sm font-bold text-on-primary shadow-sm transition-all hover:bg-primary-dim active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
-              <SearchIcon />
-              Buscar en mi cerebro
+              <PlusIcon />
+              Indexar video
             </Link>
-          )}
+            {hasVideos && (
+              <Link
+                href="/dashboard/search"
+                transitionTypes={['nav-forward']}
+                className="inline-flex h-11 items-center gap-2 rounded-xl border border-outline-variant bg-background px-6 font-body text-sm font-semibold text-on-surface transition-all hover:border-outline hover:bg-surface-container active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              >
+                <SearchIcon />
+                Buscar en mi cerebro
+              </Link>
+            )}
+          </div>
         </div>
+
+        {/* ── Stats strip — horizontal, data as hero ── */}
+        {hasVideos && (
+          <div className="grid grid-cols-2 divide-x divide-y divide-outline-variant overflow-hidden rounded-xl border border-outline-variant md:grid-cols-4 md:divide-y-0">
+            <StatCell value={String(videoCount)} label="Videos indexados" />
+            <StatCell
+              value={String(sectionCount)}
+              label="Fragmentos en memoria"
+            />
+            <StatCell value="RAG" label="Motor de búsqueda" />
+            <StatCell value="Free" label="Plan actual" accent />
+          </div>
+        )}
+
+        {/* ── Empty state — onboarding ── */}
+        {!hasVideos && (
+          <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+            <OnboardStep
+              step="01"
+              title="Pega una URL"
+              description="Cualquier video de YouTube con subtítulos en español o inglés."
+            />
+            <OnboardStep
+              step="02"
+              title="Lo indexamos"
+              description="Extraemos el transcript, lo dividimos y lo convertimos en vectores semánticos."
+            />
+            <OnboardStep
+              step="03"
+              title="Pregunta en lenguaje natural"
+              description="Busca ideas, momentos clave o genera ganchos para redes sociales."
+              highlight
+            />
+          </div>
+        )}
       </div>
-
-      {/* ── Stats strip — horizontal, data as hero ── */}
-      {hasVideos && (
-        <div className="grid grid-cols-2 divide-x divide-y divide-outline-variant overflow-hidden rounded-xl border border-outline-variant md:grid-cols-4 md:divide-y-0">
-          <StatCell value={String(videoCount)} label="Videos indexados" />
-          <StatCell
-            value={String(sectionCount)}
-            label="Fragmentos en memoria"
-          />
-          <StatCell value="RAG" label="Motor de búsqueda" />
-          <StatCell value="Free" label="Plan actual" accent />
-        </div>
-      )}
-
-      {/* ── Empty state — onboarding ── */}
-      {!hasVideos && (
-        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-          <OnboardStep
-            step="01"
-            title="Pega una URL"
-            description="Cualquier video de YouTube con subtítulos en español o inglés."
-          />
-          <OnboardStep
-            step="02"
-            title="Lo indexamos"
-            description="Extraemos el transcript, lo dividimos y lo convertimos en vectores semánticos."
-          />
-          <OnboardStep
-            step="03"
-            title="Pregunta en lenguaje natural"
-            description="Busca ideas, momentos clave o genera ganchos para redes sociales."
-            highlight
-          />
-        </div>
-      )}
-    </div>
+    </ViewTransition>
   )
 }
 

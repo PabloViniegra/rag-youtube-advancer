@@ -13,6 +13,15 @@ import { INGEST_ERROR } from '@/lib/pipeline/types'
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
+// ViewTransition is a React canary API — shim it so components render in jsdom
+vi.mock('react', async () => {
+  const actual = await vi.importActual<typeof import('react')>('react')
+  return {
+    ...actual,
+    ViewTransition: ({ children }: { children?: React.ReactNode }) => children,
+  }
+})
+
 // Mock the ingestVideo Server Action
 const mockIngestVideo = vi.fn()
 

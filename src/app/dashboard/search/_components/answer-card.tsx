@@ -7,7 +7,7 @@
  * /delight: Copy button with a 2-second "Copiado ✓" feedback state.
  */
 
-import { useState } from 'react'
+import { useState, ViewTransition } from 'react'
 import type { VideoSectionMatch } from '@/lib/retrieval/types'
 import { SourceCard } from './source-card'
 
@@ -51,40 +51,39 @@ function CopyButton({ text }: { text: string }) {
 
 export function AnswerCard({ data }: { data: AnswerData }) {
   return (
-    <section
-      aria-labelledby="answer-heading"
-      className="flex flex-col gap-6 animate-fade-up"
-    >
-      {/* Answer block — editorial crimson left border */}
-      <div className="border-l-4 border-primary pl-6">
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <h2
-            id="answer-heading"
-            className="font-headline text-xs font-bold uppercase tracking-widest text-primary"
-          >
-            Respuesta
-          </h2>
-          <CopyButton text={data.answer} />
+    <ViewTransition enter="slide-up" default="none">
+      <section aria-labelledby="answer-heading" className="flex flex-col gap-6">
+        {/* Answer block — editorial crimson left border */}
+        <div className="border-l-4 border-primary pl-6">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <h2
+              id="answer-heading"
+              className="font-headline text-xs font-bold uppercase tracking-widest text-primary"
+            >
+              Respuesta
+            </h2>
+            <CopyButton text={data.answer} />
+          </div>
+          <p className="whitespace-pre-wrap break-words font-body text-xl leading-relaxed text-on-surface">
+            {data.answer}
+          </p>
         </div>
-        <p className="whitespace-pre-wrap break-words font-body text-xl leading-relaxed text-on-surface">
-          {data.answer}
-        </p>
-      </div>
 
-      {/* Source fragments */}
-      {data.sources.length > 0 && (
-        <div className="flex flex-col gap-3">
-          <h3 className="font-headline text-xs font-bold uppercase tracking-widest text-on-surface-variant">
-            Qué encontré en tus videos ({data.sourceCount})
-          </h3>
-          <ol className="flex flex-col gap-2">
-            {data.sources.map((source, i) => (
-              <SourceCard key={source.id} source={source} index={i} />
-            ))}
-          </ol>
-        </div>
-      )}
-    </section>
+        {/* Source fragments */}
+        {data.sources.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <h3 className="font-headline text-xs font-bold uppercase tracking-widest text-on-surface-variant">
+              Qué encontré en tus videos ({data.sourceCount})
+            </h3>
+            <ol className="flex flex-col gap-2">
+              {data.sources.map((source, i) => (
+                <SourceCard key={source.id} source={source} index={i} />
+              ))}
+            </ol>
+          </div>
+        )}
+      </section>
+    </ViewTransition>
   )
 }
 

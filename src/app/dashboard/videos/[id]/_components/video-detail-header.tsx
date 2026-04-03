@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { ViewTransition } from 'react'
 import type { Database } from '@/lib/supabase/types'
 
 type VideoRow = Database['public']['Tables']['videos']['Row']
@@ -28,14 +29,20 @@ export function VideoDetailHeader({
     <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
       {/* Thumbnail */}
       <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl bg-surface-container sm:w-64">
-        <Image
-          src={thumbnailUrl}
-          alt={video.title ?? `Video ${video.youtube_id}`}
-          fill
-          sizes="(max-width: 640px) 100vw, 256px"
-          className="object-cover"
-          priority
-        />
+        <ViewTransition
+          name={`video-thumb-${video.id}`}
+          share="morph"
+          default="none"
+        >
+          <Image
+            src={thumbnailUrl}
+            alt={video.title ?? `Video ${video.youtube_id}`}
+            fill
+            sizes="(max-width: 640px) 100vw, 256px"
+            className="object-cover"
+            priority
+          />
+        </ViewTransition>
       </div>
 
       {/* Meta */}
@@ -89,6 +96,7 @@ export function VideoDetailHeader({
         <div className="mt-auto flex flex-wrap gap-3 pt-2">
           <Link
             href={`/dashboard/search?video=${video.youtube_id}`}
+            transitionTypes={['nav-forward']}
             className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 font-body text-sm font-semibold text-on-primary shadow-sm transition-all hover:brightness-110 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
             <SearchIcon />
@@ -97,6 +105,7 @@ export function VideoDetailHeader({
 
           <Link
             href="/dashboard/videos"
+            transitionTypes={['nav-back']}
             className="inline-flex h-10 items-center gap-2 rounded-xl border border-outline-variant px-5 font-body text-sm font-semibold text-on-surface-variant transition-all hover:bg-surface-container hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
             Volver a mis videos

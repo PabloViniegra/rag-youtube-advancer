@@ -7,7 +7,7 @@
  * Calls the `ingestVideo` Server Action and shows phase progress while waiting.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, ViewTransition } from 'react'
 import { ingestVideo } from '@/lib/pipeline/ingest'
 import type { IngestResult } from '@/lib/pipeline/types'
 import { INGEST_ERROR } from '@/lib/pipeline/types'
@@ -155,68 +155,83 @@ export default function NuevoVideoPage() {
   const isSuccess = formState === FORM_STATE.SUCCESS && successData
 
   return (
-    <div
-      className={cn(
-        'flex w-full flex-col gap-8',
-        isSuccess ? 'max-w-4xl' : 'max-w-xl',
-      )}
+    <ViewTransition
+      enter={{
+        'nav-forward': 'slide-from-right',
+        'nav-back': 'slide-from-left',
+        default: 'none',
+      }}
+      exit={{
+        'nav-forward': 'slide-to-left',
+        'nav-back': 'slide-to-right',
+        default: 'none',
+      }}
+      default="none"
     >
-      <div className="flex flex-col gap-1">
-        <h1 className="font-headline text-2xl font-extrabold text-on-surface">
-          Añadir video
-        </h1>
-        <p className="font-body text-sm text-on-surface-variant">
-          Pega la URL de un video de YouTube para indexarlo en tu Segunda Mente.
-        </p>
-      </div>
+      <div
+        className={cn(
+          'flex w-full flex-col gap-8',
+          isSuccess ? 'max-w-4xl' : 'max-w-xl',
+        )}
+      >
+        <div className="flex flex-col gap-1">
+          <h1 className="font-headline text-2xl font-extrabold text-on-surface">
+            Añadir video
+          </h1>
+          <p className="font-body text-sm text-on-surface-variant">
+            Pega la URL de un video de YouTube para indexarlo en tu Segunda
+            Mente.
+          </p>
+        </div>
 
-      {isSuccess ? (
-        <SuccessCard
-          data={successData}
-          onReset={() => {
-            setUrl('')
-            setTitle('')
-            setFormState(FORM_STATE.IDLE)
-          }}
-        />
-      ) : (
-        <section
-          aria-labelledby="form-heading"
-          className="flex flex-col gap-6 rounded-2xl border border-outline-variant bg-background p-6 shadow-sm"
-        >
-          <h2 id="form-heading" className="sr-only">
-            Formulario de ingesta
-          </h2>
-
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col gap-5"
-            noValidate
+        {isSuccess ? (
+          <SuccessCard
+            data={successData}
+            onReset={() => {
+              setUrl('')
+              setTitle('')
+              setFormState(FORM_STATE.IDLE)
+            }}
+          />
+        ) : (
+          <section
+            aria-labelledby="form-heading"
+            className="flex flex-col gap-6 rounded-2xl border border-outline-variant bg-background p-6 shadow-sm"
           >
-            <UrlField
-              value={url}
-              onChange={setUrl}
-              disabled={formState === FORM_STATE.LOADING}
-            />
-            <TitleField
-              value={title}
-              onChange={setTitle}
-              disabled={formState === FORM_STATE.LOADING}
-            />
+            <h2 id="form-heading" className="sr-only">
+              Formulario de ingesta
+            </h2>
 
-            {formState === FORM_STATE.ERROR && errorData && (
-              <ErrorBanner message={errorData.message} />
-            )}
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col gap-5"
+              noValidate
+            >
+              <UrlField
+                value={url}
+                onChange={setUrl}
+                disabled={formState === FORM_STATE.LOADING}
+              />
+              <TitleField
+                value={title}
+                onChange={setTitle}
+                disabled={formState === FORM_STATE.LOADING}
+              />
 
-            {formState === FORM_STATE.LOADING ? (
-              <PhaseProgress phaseIndex={phaseIndex} />
-            ) : (
-              <SubmitButton disabled={!url.trim()} />
-            )}
-          </form>
-        </section>
-      )}
-    </div>
+              {formState === FORM_STATE.ERROR && errorData && (
+                <ErrorBanner message={errorData.message} />
+              )}
+
+              {formState === FORM_STATE.LOADING ? (
+                <PhaseProgress phaseIndex={phaseIndex} />
+              ) : (
+                <SubmitButton disabled={!url.trim()} />
+              )}
+            </form>
+          </section>
+        )}
+      </div>
+    </ViewTransition>
   )
 }
 

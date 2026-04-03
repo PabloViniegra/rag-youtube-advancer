@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { ViewTransition } from 'react'
 import type { Database } from '@/lib/supabase/types'
 import { cn } from '@/lib/utils'
 
@@ -39,17 +40,23 @@ export function VideoCard({ video, variant = 'default' }: VideoCardProps) {
           isFeatured ? 'aspect-[21/9]' : 'aspect-video',
         )}
       >
-        <Image
-          src={thumbnailUrl}
-          alt={video.title ?? `Video ${video.youtube_id}`}
-          fill
-          sizes={
-            isFeatured
-              ? '(max-width: 640px) 100vw, 66vw'
-              : '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
-          }
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-        />
+        <ViewTransition
+          name={`video-thumb-${video.id}`}
+          share="morph"
+          default="none"
+        >
+          <Image
+            src={thumbnailUrl}
+            alt={video.title ?? `Video ${video.youtube_id}`}
+            fill
+            sizes={
+              isFeatured
+                ? '(max-width: 640px) 100vw, 66vw'
+                : '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
+            }
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          />
+        </ViewTransition>
 
         {/* Crimson overlay on hover — editorial "Ver detalles" CTA (pointer devices) */}
         <div className="absolute inset-0 flex items-end bg-gradient-to-t from-primary/90 via-primary/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">

@@ -17,6 +17,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
+// ViewTransition is a React canary API — shim it so components render in jsdom
+vi.mock('react', async () => {
+  const actual = await vi.importActual<typeof import('react')>('react')
+  return {
+    ...actual,
+    ViewTransition: ({ children }: { children?: React.ReactNode }) => children,
+  }
+})
+
 // next/link renders as a plain <a> in tests
 vi.mock('next/link', () => ({
   default: ({

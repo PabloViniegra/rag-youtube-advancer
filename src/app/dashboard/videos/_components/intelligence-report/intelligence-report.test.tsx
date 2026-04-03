@@ -12,6 +12,15 @@ import type { IntelligenceReport as IntelligenceReportData } from '@/lib/intelli
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
+// ViewTransition is a React canary API — shim it so components render in jsdom
+vi.mock('react', async () => {
+  const actual = await vi.importActual<typeof import('react')>('react')
+  return {
+    ...actual,
+    ViewTransition: ({ children }: { children?: React.ReactNode }) => children,
+  }
+})
+
 // Clipboard API used by CopyButton
 Object.assign(navigator, {
   clipboard: { writeText: vi.fn().mockResolvedValue(undefined) },

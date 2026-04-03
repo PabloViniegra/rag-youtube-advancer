@@ -200,6 +200,126 @@
 }
 
 /* ============================================================
+   View Transition API — CSS recipes
+   Timing variables, keyframes, and pseudo-element rules.
+   Used by <ViewTransition> props (enter/exit/share classes).
+   ============================================================ */
+
+:root {
+  --vt-duration-exit: 150ms;
+  --vt-duration-enter: 210ms;
+  --vt-duration-move: 400ms;
+}
+
+@keyframes vt-fade {
+  from {
+    filter: blur(3px);
+    opacity: 0;
+  }
+  to {
+    filter: blur(0);
+    opacity: 1;
+  }
+}
+
+@keyframes vt-slide {
+  from {
+    translate: var(--vt-slide-offset);
+  }
+  to {
+    translate: 0;
+  }
+}
+
+@keyframes vt-slide-y {
+  from {
+    transform: translateY(var(--vt-slide-y-offset, 10px));
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes vt-via-blur {
+  30% {
+    filter: blur(3px);
+  }
+}
+
+/* Fade */
+::view-transition-old(.fade-out) {
+  animation: var(--vt-duration-exit) ease-in vt-fade reverse;
+}
+::view-transition-new(.fade-in) {
+  animation: var(--vt-duration-enter) ease-out var(--vt-duration-exit) both
+    vt-fade;
+}
+
+/* Slide vertical (Suspense reveal) */
+::view-transition-old(.slide-down) {
+  animation:
+    var(--vt-duration-exit) ease-out both vt-fade reverse,
+    var(--vt-duration-exit) ease-out both vt-slide-y reverse;
+}
+::view-transition-new(.slide-up) {
+  animation:
+    var(--vt-duration-enter) ease-in var(--vt-duration-exit) both vt-fade,
+    var(--vt-duration-move) ease-in both vt-slide-y;
+}
+
+/* Directional navigation — single-class approach */
+::view-transition-old(.nav-forward) {
+  --vt-slide-offset: -60px;
+  animation:
+    var(--vt-duration-exit) ease-in both vt-fade reverse,
+    var(--vt-duration-move) ease-in-out both vt-slide reverse;
+}
+::view-transition-new(.nav-forward) {
+  --vt-slide-offset: 60px;
+  animation:
+    var(--vt-duration-enter) ease-out var(--vt-duration-exit) both vt-fade,
+    var(--vt-duration-move) ease-in-out both vt-slide;
+}
+
+::view-transition-old(.nav-back) {
+  --vt-slide-offset: 60px;
+  animation:
+    var(--vt-duration-exit) ease-in both vt-fade reverse,
+    var(--vt-duration-move) ease-in-out both vt-slide reverse;
+}
+::view-transition-new(.nav-back) {
+  --vt-slide-offset: -60px;
+  animation:
+    var(--vt-duration-enter) ease-out var(--vt-duration-exit) both vt-fade,
+    var(--vt-duration-move) ease-in-out both vt-slide;
+}
+
+/* Shared element morph */
+::view-transition-group(.morph) {
+  animation-duration: var(--vt-duration-move);
+}
+::view-transition-image-pair(.morph) {
+  animation-name: vt-via-blur;
+}
+
+/* Persistent element isolation (sidebar, topbar) */
+::view-transition-group(dashboard-sidebar),
+::view-transition-group(dashboard-topbar) {
+  animation: none;
+  z-index: 100;
+}
+
+/* Reduced motion — View Transitions */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
+/* ============================================================
    Animation utilities — Tailwind-compatible custom classes
    ============================================================ */
 

@@ -14,7 +14,13 @@
  *  /harden   — sources show video title as primary identifier.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import {
+  startTransition,
+  useEffect,
+  useRef,
+  useState,
+  ViewTransition,
+} from 'react'
 import type {
   AugmentErrorResponse,
   AugmentSuccessResponse,
@@ -85,12 +91,14 @@ export default function SearchPage() {
 
       if (res.ok) {
         const data = (await res.json()) as AugmentSuccessResponse
-        setSuccessData({
-          answer: data.answer,
-          sources: data.sources,
-          sourceCount: data.sourceCount,
+        startTransition(() => {
+          setSuccessData({
+            answer: data.answer,
+            sources: data.sources,
+            sourceCount: data.sourceCount,
+          })
+          setSearchState(SEARCH_STATE.SUCCESS)
         })
-        setSearchState(SEARCH_STATE.SUCCESS)
       } else {
         const errData = (await res.json()) as AugmentErrorResponse
         const isNoContext = errData.code === AUGMENT_API_ERROR.NO_CONTEXT
@@ -98,21 +106,25 @@ export default function SearchPage() {
           ? FRIENDLY_NO_CONTEXT_MESSAGE
           : (errData.error ?? 'Error inesperado.')
 
-        setErrorData({
-          message:
-            normalizedMessage === LEGACY_NO_CONTEXT_MESSAGE
-              ? FRIENDLY_NO_CONTEXT_MESSAGE
-              : normalizedMessage,
-          code: errData.code,
+        startTransition(() => {
+          setErrorData({
+            message:
+              normalizedMessage === LEGACY_NO_CONTEXT_MESSAGE
+                ? FRIENDLY_NO_CONTEXT_MESSAGE
+                : normalizedMessage,
+            code: errData.code,
+          })
+          setSearchState(SEARCH_STATE.ERROR)
         })
-        setSearchState(SEARCH_STATE.ERROR)
       }
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') return
-      setErrorData({
-        message: 'No se pudo conectar al servidor. Inténtalo de nuevo.',
+      startTransition(() => {
+        setErrorData({
+          message: 'No se pudo conectar al servidor. Inténtalo de nuevo.',
+        })
+        setSearchState(SEARCH_STATE.ERROR)
       })
-      setSearchState(SEARCH_STATE.ERROR)
     }
   }
 
@@ -136,42 +148,60 @@ export default function SearchPage() {
       : formError
 
   return (
-    <div className="flex w-full max-w-2xl flex-col gap-8">
-      {/* ── Page header ── */}
-      <div className="flex flex-col gap-1.5 border-b border-outline-variant pb-6">
-        <span className="font-headline text-xs font-bold uppercase tracking-widest text-primary">
-          Segundo cerebro
-        </span>
-        <h1 className="font-headline text-3xl font-extrabold leading-tight text-on-surface md:text-4xl">
-          Buscar en mis videos
-        </h1>
-        <p className="font-body text-sm text-on-surface-variant">
-          Haz una pregunta en lenguaje natural — la IA busca en todos tus videos
-          a la vez.
-        </p>
+    <ViewTransition
+      enter={{
+        'nav-forward': 'slide-from-right',
+        'nav-back': 'slide-from-left',
+        default: 'none',
+      }}
+      exit={{
+        'nav-forward': 'slide-to-left',
+        'nav-back': 'slide-to-right',
+        default: 'none',
+      }}
+      default="none"
+    >
+      <div className="flex w-full max-w-2xl flex-col gap-8">
+        {/* ── Page header ── */}
+        <div className="flex flex-col gap-1.5 border-b border-outline-variant pb-6">
+          <span className="font-headline text-xs font-bold uppercase tracking-widest text-primary">
+            Segundo cerebro
+          </span>
+          <h1 className="font-headline text-3xl font-extrabold leading-tight text-on-surface md:text-4xl">
+            Buscar en mis videos
+          </h1>
+          <p className="font-body text-sm text-on-surface-variant">
+            Haz una pregunta en lenguaje natural — la IA busca en todos tus
+            videos a la vez.
+          </p>
+        </div>
+
+        {/* ── Library status — /onboard ── */}
+        <LibraryStatus />
+
+        {/* ── Search form — /distill (no card wrapper) ── */}
+        <SearchForm
+          query={query}
+          onQueryChange={setQuery}
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+          showExamples={showExamples}
+          error={normalizedError}
+          onSuggestionClick={handleSuggestionClick}
+        />
+
+        {/* ── Loading — /delight ── */}
+        {isLoading && (
+          <ViewTransition enter="fade-in" default="none">
+            <SearchLoading />
+          </ViewTransition>
+        )}
+
+        {/* ── Answer — /bolder ── */}
+        {searchState === SEARCH_STATE.SUCCESS && successData && (
+          <AnswerCard data={successData} />
+        )}
       </div>
-
-      {/* ── Library status — /onboard ── */}
-      <LibraryStatus />
-
-      {/* ── Search form — /distill (no card wrapper) ── */}
-      <SearchForm
-        query={query}
-        onQueryChange={setQuery}
-        onSubmit={handleSubmit}
-        isLoading={isLoading}
-        showExamples={showExamples}
-        error={normalizedError}
-        onSuggestionClick={handleSuggestionClick}
-      />
-
-      {/* ── Loading — /delight ── */}
-      {isLoading && <SearchLoading />}
-
-      {/* ── Answer — /bolder ── */}
-      {searchState === SEARCH_STATE.SUCCESS && successData && (
-        <AnswerCard data={successData} />
-      )}
-    </div>
+    </ViewTransition>
   )
 }

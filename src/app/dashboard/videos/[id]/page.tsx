@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
+import { ViewTransition } from 'react'
 import type { IntelligenceReport } from '@/lib/intelligence/types'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
@@ -84,20 +85,34 @@ export default async function VideoDetailPage({ params }: PageProps) {
     : null
 
   return (
-    <div className="flex flex-col gap-10">
-      {/* Header: thumbnail + meta + actions */}
-      <div className="rounded-2xl border border-outline-variant bg-background p-6 shadow-sm">
-        <VideoDetailHeader
-          video={typedVideo}
-          sectionCount={typedSections.length}
-        />
+    <ViewTransition
+      enter={{
+        'nav-forward': 'slide-from-right',
+        'nav-back': 'slide-from-left',
+        default: 'slide-up',
+      }}
+      exit={{
+        'nav-forward': 'slide-to-left',
+        'nav-back': 'slide-to-right',
+        default: 'none',
+      }}
+      default="none"
+    >
+      <div className="flex flex-col gap-10">
+        {/* Header: thumbnail + meta + actions */}
+        <div className="rounded-2xl border border-outline-variant bg-background p-6 shadow-sm">
+          <VideoDetailHeader
+            video={typedVideo}
+            sectionCount={typedSections.length}
+          />
+        </div>
+
+        {/* Informe de inteligencia — solo si está disponible */}
+        {reportData ? <IntelligenceReportView report={reportData} /> : null}
+
+        {/* Sections list */}
+        <VideoSectionsList sections={typedSections} />
       </div>
-
-      {/* Informe de inteligencia — solo si está disponible */}
-      {reportData ? <IntelligenceReportView report={reportData} /> : null}
-
-      {/* Sections list */}
-      <VideoSectionsList sections={typedSections} />
-    </div>
+    </ViewTransition>
   )
 }

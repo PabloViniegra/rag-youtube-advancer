@@ -103,7 +103,10 @@ export function DashboardTopbar({ displayName }: DashboardTopbarProps) {
   return (
     <>
       {/* ── Desktop topbar ── */}
-      <header className="hidden h-12 items-center justify-between border-b border-outline-variant bg-background px-6 md:flex">
+      <header
+        className="hidden h-12 items-center justify-between border-b border-outline-variant bg-background px-6 md:flex"
+        style={{ viewTransitionName: 'dashboard-topbar' }}
+      >
         <p className="font-body text-sm text-on-surface-variant">
           Hola,{' '}
           <span className="font-semibold text-on-surface">{displayName}</span>

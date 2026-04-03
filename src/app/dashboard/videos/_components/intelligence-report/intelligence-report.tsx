@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { startTransition, useState, ViewTransition } from 'react'
 import type { IntelligenceReport as IntelligenceReportData } from '@/lib/intelligence/types'
 import { cn } from '@/lib/utils'
 import { AnalysisSection } from './analysis-section'
@@ -61,7 +61,7 @@ export function IntelligenceReport({ report }: IntelligenceReportProps) {
               type="button"
               aria-selected={activeTab === tab.id}
               aria-controls={`panel-${tab.id}`}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => startTransition(() => setActiveTab(tab.id))}
               className={cn(
                 'flex-1 rounded-lg px-4 py-2.5 font-headline text-sm font-bold transition-all duration-150',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
@@ -81,15 +81,18 @@ export function IntelligenceReport({ report }: IntelligenceReportProps) {
         role="tabpanel"
         id={`panel-${activeTab}`}
         aria-labelledby={`tab-${activeTab}`}
-        className="animate-fade-in"
       >
-        {activeTab === 'summary' && <SummarySection summary={report.summary} />}
-        {activeTab === 'repurpose' && (
-          <RepurposeSection repurpose={report.repurpose} />
-        )}
-        {activeTab === 'analysis' && (
-          <AnalysisSection analysis={report.analysis} />
-        )}
+        <ViewTransition key={activeTab}>
+          {activeTab === 'summary' && (
+            <SummarySection summary={report.summary} />
+          )}
+          {activeTab === 'repurpose' && (
+            <RepurposeSection repurpose={report.repurpose} />
+          )}
+          {activeTab === 'analysis' && (
+            <AnalysisSection analysis={report.analysis} />
+          )}
+        </ViewTransition>
       </div>
     </section>
   )
