@@ -61,7 +61,7 @@ interface ReportOk {
 
 interface SeoReportOk {
   reportId: string
-  generatedAt: string
+  report: Record<string, unknown>
 }
 
 interface ApiErrorPayload {
@@ -124,7 +124,11 @@ function isReportOk(v: unknown): v is ReportOk {
 function isSeoReportOk(v: unknown): v is SeoReportOk {
   if (typeof v !== 'object' || v === null) return false
   const r = v as Record<string, unknown>
-  return typeof r.reportId === 'string' && typeof r.generatedAt === 'string'
+  return (
+    typeof r.reportId === 'string' &&
+    typeof r.report === 'object' &&
+    r.report !== null
+  )
 }
 
 /**
@@ -310,8 +314,8 @@ export async function ingestVideo(input: IngestInput): Promise<IngestResult> {
       })
 
       if (seo.status === 200 && isSeoReportOk(seo.data)) {
-        const data = seo.data as { seoReport?: unknown }
-        seoReport = (data.seoReport as IngestSuccess['seoReport']) ?? null
+        const data = seo.data as { report?: unknown }
+        seoReport = (data.report as IngestSuccess['seoReport']) ?? null
       }
     } catch {
       // Phase 6 failure is graceful — Intelligence Report remains available.
