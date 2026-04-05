@@ -1,8 +1,8 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { ViewTransition } from 'react'
 import type { Database } from '@/lib/supabase/types'
 import { cn } from '@/lib/utils'
+import { ThumbnailImage } from './thumbnail-image'
 
 type VideoRow = Database['public']['Tables']['videos']['Row']
 
@@ -21,9 +21,8 @@ function formatDate(iso: string): string {
 }
 
 export function VideoCard({ video, variant = 'default' }: VideoCardProps) {
-  const thumbnailUrl = `https://img.youtube.com/vi/${video.youtube_id}/mqdefault.jpg`
-  const youtubeUrl = `https://www.youtube.com/watch?v=${video.youtube_id}`
   const isFeatured = variant === 'featured'
+  const youtubeUrl = `https://www.youtube.com/watch?v=${video.youtube_id}`
 
   return (
     <article
@@ -45,10 +44,9 @@ export function VideoCard({ video, variant = 'default' }: VideoCardProps) {
           share="morph"
           default="none"
         >
-          <Image
-            src={thumbnailUrl}
+          <ThumbnailImage
+            youtubeId={video.youtube_id}
             alt={video.title ?? `Video ${video.youtube_id}`}
-            fill
             sizes={
               isFeatured
                 ? '(max-width: 640px) 100vw, 66vw'
