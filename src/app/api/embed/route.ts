@@ -183,21 +183,22 @@ export async function POST(
     )
   }
 
-  // Step 2 — authorization: free users may embed if under their video limit
+  // Step 2 — authorization: free users may embed if trial has not been used
   const { data: profileData } = await supabase
     .from('profiles')
-    .select('role, subscription_active')
+    .select('role, subscription_active, trial_used')
     .eq('id', user.id)
     .maybeSingle()
 
   const profile = profileData as Pick<
     ProfileRow,
-    'role' | 'subscription_active'
+    'role' | 'subscription_active' | 'trial_used'
   > | null
   const plan = profile ? resolvePlan(profile) : 'free'
+  const trialUsed = profile?.trial_used ?? false
   const videoCount = await getVideoCount(supabase, user.id)
 
-  if (!canIndexVideo(plan, videoCount)) {
+  if (!canIndexVideo(plan, videoCount, trialUsed)) {
     return errorResponse(
       'Video limit reached. Upgrade to Pro to index more videos.',
       EMBED_API_ERROR.FORBIDDEN,

@@ -48,8 +48,20 @@ export function videoLimitForPlan(plan: PlanKey): number {
   return PRO_VIDEO_LIMIT
 }
 
-/** Check whether a user can index another video given their current count. */
-export function canIndexVideo(plan: PlanKey, currentCount: number): boolean {
-  const limit = videoLimitForPlan(plan)
-  return currentCount < limit
+/**
+ * Check whether a user can index a video.
+ *
+ * Free users get a single trial regardless of current count — once `trialUsed`
+ * is set to `true` (after the first successful ingestion), the quota is gone
+ * even if they later delete the video.
+ *
+ * Pro and Admin users are unlimited.
+ */
+export function canIndexVideo(
+  plan: PlanKey,
+  currentCount: number,
+  trialUsed: boolean,
+): boolean {
+  if (plan === PLAN.FREE) return !trialUsed
+  return currentCount < videoLimitForPlan(plan)
 }

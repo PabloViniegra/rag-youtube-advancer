@@ -51,6 +51,7 @@ function buildRequest(body: unknown, isInvalidJson = false): Request {
 interface MockProfile {
   role: string
   subscription_active: boolean
+  trial_used?: boolean
 }
 
 function mockAuthAndProfile(
@@ -116,22 +117,20 @@ describe('POST /api/embed', () => {
 
   // ── Authorization ──────────────────────────────────────────────────────────
 
-  it('allows free users when under the video limit', async () => {
+  it('allows free users when trial has not been used', async () => {
     mockAuthAndProfile(
       { id: 'user-1' },
-      { role: 'user', subscription_active: false },
-      { videoCount: 0 },
+      { role: 'user', subscription_active: false, trial_used: false },
     )
     vi.mocked(embedChunks).mockResolvedValue([])
     const res = await POST(buildRequest({ chunks: ['hello'] }))
     expect(res.status).toBe(200)
   })
 
-  it('returns 403 when free user reached the video limit', async () => {
+  it('returns 403 when free user trial has been used', async () => {
     mockAuthAndProfile(
       { id: 'user-1' },
-      { role: 'user', subscription_active: false },
-      { videoCount: 1 },
+      { role: 'user', subscription_active: false, trial_used: true },
     )
     const res = await POST(buildRequest({ chunks: ['hello'] }))
     expect(res.status).toBe(403)
@@ -139,12 +138,11 @@ describe('POST /api/embed', () => {
     expect(body.code).toBe(EMBED_API_ERROR.FORBIDDEN)
   })
 
-  it('returns 403 when profile is not found and free limit is reached', async () => {
-    mockAuthAndProfile({ id: 'user-1' }, null, { videoCount: 1 })
+  it('allows free users when profile is not found (trial defaults to false)', async () => {
+    mockAuthAndProfile({ id: 'user-1' }, null)
+    vi.mocked(embedChunks).mockResolvedValue([])
     const res = await POST(buildRequest({ chunks: ['hello'] }))
-    expect(res.status).toBe(403)
-    const body = await res.json()
-    expect(body.code).toBe(EMBED_API_ERROR.FORBIDDEN)
+    expect(res.status).toBe(200)
   })
 
   it('allows access when user has active subscription', async () => {

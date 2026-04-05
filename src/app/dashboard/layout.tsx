@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import { Toaster } from 'sileo'
 import { DashboardSidebar } from '@/components/dashboard/sidebar'
 import { DashboardTopbar } from '@/components/dashboard/topbar'
 import { getCurrentUser } from '@/lib/auth/actions'
@@ -29,6 +30,17 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-svh bg-surface-container-low">
+      <Toaster
+        position="bottom-right"
+        theme="system"
+        options={{
+          roundness: 12,
+          styles: {
+            title: 'font-headline! font-bold!',
+            description: 'font-body! text-sm!',
+          },
+        }}
+      />
       <DashboardSidebar
         displayName={displayName}
         email={user.email ?? ''}

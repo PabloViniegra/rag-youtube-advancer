@@ -46,6 +46,7 @@ export interface Database {
           role: string
           stripe_customer_id: string | null
           subscription_active: boolean
+          trial_used: boolean
         }
         Insert: {
           id: string
@@ -53,6 +54,7 @@ export interface Database {
           role?: string
           stripe_customer_id?: string | null
           subscription_active?: boolean
+          trial_used?: boolean
         }
         Update: {
           id?: string
@@ -60,6 +62,7 @@ export interface Database {
           role?: string
           stripe_customer_id?: string | null
           subscription_active?: boolean
+          trial_used?: boolean
         }
         Relationships: []
       }

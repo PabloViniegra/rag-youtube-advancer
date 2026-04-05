@@ -60,6 +60,7 @@ function buildRequest(body: unknown, isInvalidJson = false): Request {
 interface MockProfile {
   role: string
   subscription_active: boolean
+  trial_used?: boolean
 }
 
 function mockAuthAndProfile(
@@ -80,6 +81,10 @@ function mockAuthAndProfile(
     .mockReturnValue({ maybeSingle: maybeSingleMock })
   const profileSelectMock = vi.fn().mockReturnValue({ eq: profileEqMock })
 
+  // update chain: .from('profiles').update({}).eq()  — fire-and-forget in route
+  const profileUpdateEqMock = vi.fn().mockResolvedValue({ error: null })
+  const profileUpdateMock = vi.fn().mockReturnValue({ eq: profileUpdateEqMock })
+
   const videosEqMock = vi.fn().mockResolvedValue({
     count: videoCount,
     error: null,
@@ -88,7 +93,7 @@ function mockAuthAndProfile(
 
   const fromMock = vi.fn((table: string) => {
     if (table === 'profiles') {
-      return { select: profileSelectMock }
+      return { select: profileSelectMock, update: profileUpdateMock }
     }
 
     if (table === 'videos') {
@@ -125,11 +130,10 @@ describe('POST /api/store', () => {
 
   // ── Authorization ──────────────────────────────────────────────────────────
 
-  it('allows free users when under the video limit', async () => {
+  it('allows free users when trial has not been used', async () => {
     mockAuthAndProfile(
       { id: 'user-1' },
-      { role: 'user', subscription_active: false },
-      { videoCount: 0 },
+      { role: 'user', subscription_active: false, trial_used: false },
     )
     vi.mocked(storeVideoSections).mockResolvedValue({
       videoId: 'vid-1',
@@ -139,11 +143,10 @@ describe('POST /api/store', () => {
     expect(res.status).toBe(200)
   })
 
-  it('returns 403 when free user reached the video limit', async () => {
+  it('returns 403 when free user trial has been used', async () => {
     mockAuthAndProfile(
       { id: 'user-1' },
-      { role: 'user', subscription_active: false },
-      { videoCount: 1 },
+      { role: 'user', subscription_active: false, trial_used: true },
     )
     const res = await POST(buildRequest(VALID_BODY))
     expect(res.status).toBe(403)
@@ -151,12 +154,14 @@ describe('POST /api/store', () => {
     expect(body.code).toBe(STORE_API_ERROR.FORBIDDEN)
   })
 
-  it('returns 403 when profile is not found and free limit is reached', async () => {
-    mockAuthAndProfile({ id: 'user-1' }, null, { videoCount: 1 })
+  it('allows free users when profile is not found (trial defaults to false)', async () => {
+    mockAuthAndProfile({ id: 'user-1' }, null)
+    vi.mocked(storeVideoSections).mockResolvedValue({
+      videoId: 'vid-1',
+      count: 1,
+    })
     const res = await POST(buildRequest(VALID_BODY))
-    expect(res.status).toBe(403)
-    const body = await res.json()
-    expect(body.code).toBe(STORE_API_ERROR.FORBIDDEN)
+    expect(res.status).toBe(200)
   })
 
   it('allows access when user has active subscription', async () => {

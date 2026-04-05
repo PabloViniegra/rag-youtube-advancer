@@ -4,8 +4,7 @@ import { redirect } from 'next/navigation'
 import { ViewTransition } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
-import { VideoCard } from './_components/video-card'
-import { VideoEmptyState } from './_components/video-empty-state'
+import { VideoGrid } from './_components/video-grid'
 
 type VideoRow = Database['public']['Tables']['videos']['Row']
 
@@ -78,23 +77,7 @@ export default async function VideosPage() {
         </div>
 
         {/* ── Content ── */}
-        {videoList.length === 0 ? (
-          <VideoEmptyState />
-        ) : (
-          <section aria-label="Lista de videos indexados">
-            {/* Asymmetric grid: first card is featured (wider), rest are standard */}
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {videoList.map((video, index) => (
-                <ViewTransition key={video.id} default="none">
-                  <VideoCard
-                    video={video}
-                    variant={index === 0 ? 'featured' : 'default'}
-                  />
-                </ViewTransition>
-              ))}
-            </div>
-          </section>
-        )}
+        <VideoGrid initialVideos={videoList} />
       </div>
     </ViewTransition>
   )

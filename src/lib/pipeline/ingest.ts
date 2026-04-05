@@ -160,20 +160,21 @@ export async function ingestVideo(input: IngestInput): Promise<IngestResult> {
 
   const { data: profileRaw } = await supabase
     .from('profiles')
-    .select('role, subscription_active')
+    .select('role, subscription_active, trial_used')
     .eq('id', user.id)
     .maybeSingle()
 
   const profile = profileRaw as unknown as Pick<
     Profile,
-    'role' | 'subscription_active'
+    'role' | 'subscription_active' | 'trial_used'
   > | null
 
   const plan = profile ? resolvePlan(profile) : 'free'
+  const trialUsed = profile?.trial_used ?? false
 
   const videoCount = await getVideoCount(supabase, user.id)
 
-  if (!canIndexVideo(plan, videoCount)) {
+  if (!canIndexVideo(plan, videoCount, trialUsed)) {
     return ingestError(
       INGEST_ERROR.VIDEO_LIMIT_REACHED,
       'Has alcanzado el limite de videos de tu plan.',
