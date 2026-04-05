@@ -2,6 +2,7 @@
 // const-first pattern, flat interfaces, no `any`
 
 import type { IntelligenceReport } from '@/lib/intelligence/types'
+import type { SeoReport } from '@/lib/seo/types'
 
 export const INGEST_ERROR = {
   INVALID_URL: 'invalid_url',
@@ -23,7 +24,7 @@ export interface IngestInput {
 }
 
 export interface IngestProgress {
-  phase: 1 | 2 | 3 | 4 | 5
+  phase: 1 | 2 | 3 | 4 | 5 | 6
   label: string
 }
 
@@ -33,6 +34,8 @@ export interface IngestSuccess {
   sectionCount: number
   /** Intelligence Report generated after indexing (null if generation failed). */
   report: IntelligenceReport | null
+  /** SEO Pack generated after Intelligence Report (null if generation failed). */
+  seoReport: SeoReport | null
 }
 
 export interface IngestError {
