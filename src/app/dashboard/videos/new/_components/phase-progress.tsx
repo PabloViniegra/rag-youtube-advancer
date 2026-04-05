@@ -31,6 +31,7 @@ const PHASE_LABELS = [
   'Embeddings',
   'Base de datos',
   'Informe IA',
+  'SEO Pack',
 ] as const satisfies readonly string[]
 
 /** Full-text labels used as screen-reader text and for test queries. */
@@ -40,6 +41,7 @@ const PHASE_LABELS_FULL = [
   'Generando embeddings...',
   'Guardando en base de datos...',
   'Generando informe de inteligencia...',
+  'Generando SEO Pack...',
 ] as const satisfies readonly string[]
 
 const LOADING_MESSAGES = [
