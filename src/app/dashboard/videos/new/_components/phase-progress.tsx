@@ -3,7 +3,7 @@
 /**
  * PhaseProgress
  *
- * Redesigned loading state: horizontal progress bar with 5 circular step
+ * Redesigned loading state: horizontal progress bar with 6 circular step
  * indicators and a rotating message below. Replaces the old vertical list.
  *
  * Props:
@@ -51,6 +51,8 @@ const LOADING_MESSAGES = [
   'Optimizando fragmentos para búsqueda…',
   'Casi listo, generando embeddings…',
 ] as const satisfies readonly string[]
+
+export const PHASE_COUNT = PHASE_LABELS.length
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 

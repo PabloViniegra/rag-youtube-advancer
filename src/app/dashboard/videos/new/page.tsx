@@ -18,6 +18,7 @@ import type { IngestResult } from '@/lib/pipeline/types'
 import { INGEST_ERROR } from '@/lib/pipeline/types'
 import { cn } from '@/lib/utils'
 import { IngestForm } from './_components/ingest-form'
+import { PHASE_COUNT } from './_components/phase-progress'
 import { PipelineHint } from './_components/pipeline-hint'
 import type { SuccessData } from './_components/success-card'
 import { SuccessCard } from './_components/success-card'
@@ -91,7 +92,7 @@ export default function NuevoVideoPage() {
     setErrorData(null)
 
     phaseTimerRef.current = setInterval(() => {
-      setPhaseIndex((prev) => Math.min(prev + 1, 4))
+      setPhaseIndex((prev) => Math.min(prev + 1, PHASE_COUNT - 1))
     }, 2500)
 
     let result: IngestResult
