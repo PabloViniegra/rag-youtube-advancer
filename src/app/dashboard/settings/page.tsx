@@ -1,8 +1,12 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { ViewTransition } from 'react'
+import { Suspense, ViewTransition } from 'react'
+import type { PlanKey } from '@/lib/plans'
+import { PLAN_LABEL, resolvePlan } from '@/lib/plans'
+import { syncSubscriptionFromStripe } from '@/lib/stripe/sync'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
+import { BillingSection } from './_components/billing-section'
 
 export const metadata: Metadata = {
   title: 'Ajustes — Dashboard',
@@ -12,25 +16,13 @@ export const metadata: Metadata = {
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 
-const PLAN_LABEL = {
-  admin: 'Admin',
-  pro: 'Pro',
-  free: 'Free',
-} as const
-
-type PlanKey = keyof typeof PLAN_LABEL
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function resolvePlan(profile: Profile): PlanKey {
-  if (profile.role === 'admin') return 'admin'
-  if (profile.subscription_active) return 'pro'
-  return 'free'
-}
-
 // ── Page ─────────────────────────────────────────────────────────────────────
 
-export default async function AjustesPage() {
+interface PageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
+
+export default async function AjustesPage({ searchParams }: PageProps) {
   const supabase = await createClient()
 
   const {
@@ -41,15 +33,46 @@ export default async function AjustesPage() {
     redirect('/login?redirectTo=/dashboard/settings')
   }
 
-  const { data: profileRaw } = await supabase
-    .from('profiles')
-    .select('id, email, role, stripe_customer_id, subscription_active')
-    .eq('id', user.id)
-    .maybeSingle()
+  const fetchProfile = () =>
+    supabase
+      .from('profiles')
+      .select('id, email, role, stripe_customer_id, subscription_active')
+      .eq('id', user.id)
+      .maybeSingle()
 
-  // supabase-js infers `data` as `never` in strict TS when select() columns
-  // don't exactly match the generated Row type — cast via unknown to Profile.
-  const profile = profileRaw as unknown as Profile | null
+  const { data: profileRaw } = await fetchProfile()
+  let profile = profileRaw as unknown as Profile | null
+
+  // ── Stripe sync on redirect ────────────────────────────────────────────────
+  // Two cases where the page must re-verify with Stripe instead of trusting
+  // only the DB (webhooks are async and may not have fired yet):
+  //
+  //   ?checkout=success  — user just paid; activate if Stripe confirms.
+  //   ?portal=return     — user returned from the portal; sync whatever changed
+  //                        (cancellation, reactivation, plan change).
+  const params = await searchParams
+  const checkout = typeof params.checkout === 'string' ? params.checkout : null
+  const portal = typeof params.portal === 'string' ? params.portal : null
+
+  const shouldSync =
+    (checkout === 'success' && profile && !profile.subscription_active) ||
+    portal === 'return'
+
+  if (shouldSync && profile) {
+    const result = await syncSubscriptionFromStripe({
+      userId: user.id,
+      email: profile.email ?? user.email,
+      existingCustomerId: profile.stripe_customer_id,
+      // On portal return, also deactivate if Stripe shows no active subscription.
+      deactivateIfNotFound: portal === 'return',
+    })
+
+    if (result.synced) {
+      // Re-fetch to pick up the updated subscription_active / role / stripe_customer_id.
+      const { data: freshRaw } = await fetchProfile()
+      profile = freshRaw as unknown as Profile | null
+    }
+  }
 
   const plan = profile ? resolvePlan(profile) : 'free'
   const email = profile?.email ?? user.email ?? '—'
@@ -75,15 +98,17 @@ export default async function AjustesPage() {
             Ajustes
           </h1>
           <p className="font-body text-sm text-on-surface-variant">
-            Gestiona tu cuenta y plan de suscripción.
+            Gestiona tu cuenta y plan de suscripcion.
           </p>
         </div>
 
         {/* ── Mi cuenta ── */}
         <AccountSection email={email} plan={plan} />
 
-        {/* ── Plan y facturación ── */}
-        <BillingSection plan={plan} />
+        {/* ── Plan y facturacion ── */}
+        <Suspense fallback={null}>
+          <BillingSection plan={plan} />
+        </Suspense>
       </div>
     </ViewTransition>
   )
@@ -113,7 +138,7 @@ function AccountSection({ email, plan }: AccountSectionProps) {
         {/* Email row */}
         <div className="flex items-center justify-between gap-4 rounded-xl bg-surface-container-low px-4 py-3">
           <span className="font-body text-xs font-medium text-on-surface-variant">
-            Correo electrónico
+            Correo electronico
           </span>
           <span className="font-body text-sm font-semibold text-on-surface truncate max-w-xs">
             {email}
@@ -132,67 +157,9 @@ function AccountSection({ email, plan }: AccountSectionProps) {
   )
 }
 
-interface BillingSectionProps {
-  plan: PlanKey
-}
-
-function BillingSection({ plan }: BillingSectionProps) {
-  return (
-    <section
-      aria-labelledby="billing-heading"
-      className="flex flex-col gap-4 rounded-2xl border border-outline-variant bg-background p-6 shadow-sm"
-    >
-      <h2
-        id="billing-heading"
-        className="font-headline text-base font-bold text-on-surface"
-      >
-        Plan y facturación
-      </h2>
-
-      {/* Current plan row */}
-      <div className="flex items-center justify-between gap-4 rounded-xl bg-surface-container-low px-4 py-3">
-        <span className="font-body text-xs font-medium text-on-surface-variant">
-          Plan actual
-        </span>
-        <RoleBadge plan={plan} />
-      </div>
-
-      {/* Coming soon stripe block */}
-      <div className="flex flex-col gap-4 rounded-xl border border-dashed border-outline-variant px-5 py-5">
-        <div className="flex items-center gap-2">
-          <ComingSoonChip />
-          <span className="font-body text-xs text-on-surface-variant">
-            Pagos con Stripe — próximamente disponible
-          </span>
-        </div>
-
-        <p className="font-body text-sm leading-relaxed text-on-surface-variant">
-          Pronto podrás gestionar tu suscripción, ver facturas y actualizar tu
-          método de pago directamente desde aquí.
-        </p>
-
-        {/* Disabled upgrade button */}
-        <button
-          type="button"
-          disabled
-          aria-disabled="true"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-body text-sm font-semibold text-on-primary opacity-40 cursor-not-allowed select-none"
-        >
-          <StripeIcon />
-          Actualizar a Pro — $5/mes
-        </button>
-      </div>
-    </section>
-  )
-}
-
 // ── Atoms ─────────────────────────────────────────────────────────────────────
 
-interface RoleBadgeProps {
-  plan: PlanKey
-}
-
-function RoleBadge({ plan }: RoleBadgeProps) {
+function RoleBadge({ plan }: { plan: PlanKey }) {
   const styles: Record<PlanKey, string> = {
     admin:
       'bg-primary-container text-on-primary-container border border-primary/20',
@@ -206,43 +173,5 @@ function RoleBadge({ plan }: RoleBadgeProps) {
     >
       {PLAN_LABEL[plan]}
     </span>
-  )
-}
-
-function ComingSoonChip() {
-  return (
-    <span className="inline-flex items-center rounded-full bg-secondary-container px-2.5 py-0.5 font-body text-xs font-semibold text-on-secondary-container">
-      Próximamente
-    </span>
-  )
-}
-
-// ── Icons ─────────────────────────────────────────────────────────────────────
-
-function StripeIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-    >
-      <rect
-        x="2"
-        y="5"
-        width="20"
-        height="14"
-        rx="2"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path
-        d="M2 10h20"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
   )
 }

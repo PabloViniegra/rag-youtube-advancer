@@ -23,6 +23,7 @@
  */
 import { NextResponse } from 'next/server'
 import type { EmbeddedChunk } from '@/lib/ai/types'
+import { canIndexVideo, resolvePlan } from '@/lib/plans'
 import { storeVideoSections } from '@/lib/storage/store'
 import type {
   StoreErrorResponse,
@@ -30,6 +31,7 @@ import type {
   StoreSuccessResponse,
 } from '@/lib/storage/types'
 import { STORE_API_ERROR } from '@/lib/storage/types'
+import { getVideoCount } from '@/lib/supabase/queries'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
 
@@ -107,20 +109,23 @@ export async function POST(
     )
   }
 
-  // Step 2 — authorization: subscription_active OR admin
+  // Step 2 — authorization: free users may store if under their video limit
   const { data: profileData } = await supabase
     .from('profiles')
-    .select('*')
+    .select('role, subscription_active')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
-  const profile = profileData as ProfileRow | null
-  const isAdmin = profile?.role === 'admin'
-  const hasSubscription = profile?.subscription_active === true
+  const profile = profileData as Pick<
+    ProfileRow,
+    'role' | 'subscription_active'
+  > | null
+  const plan = profile ? resolvePlan(profile) : 'free'
+  const videoCount = await getVideoCount(supabase, user.id)
 
-  if (!isAdmin && !hasSubscription) {
+  if (!canIndexVideo(plan, videoCount)) {
     return errorResponse(
-      'An active subscription is required to use this feature.',
+      'Video limit reached. Upgrade to Pro to index more videos.',
       STORE_API_ERROR.FORBIDDEN,
       403,
     )

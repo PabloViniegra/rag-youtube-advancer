@@ -27,3 +27,48 @@ export const aiGatewayApiKey = (() => {
     )
   return v
 })()
+
+// ── Stripe ────────────────────────────────────────────────────────────────────
+
+export const stripeSecretKey = (() => {
+  const v = process.env.NEXT_STRIPE_SECRET_KEY
+  if (!v)
+    throw new Error(
+      'Missing required environment variable: NEXT_STRIPE_SECRET_KEY',
+    )
+  return v
+})()
+
+export const stripePublicKey = (() => {
+  const v = process.env.NEXT_STRIPE_PUBLIC_KEY
+  if (!v)
+    throw new Error(
+      'Missing required environment variable: NEXT_STRIPE_PUBLIC_KEY',
+    )
+  return v
+})()
+
+export const stripeProProductId = (() => {
+  const v = process.env.NEXT_STRIPE_PRO_PRODUCT_ID
+  if (!v)
+    throw new Error(
+      'Missing required environment variable: NEXT_STRIPE_PRO_PRODUCT_ID',
+    )
+  return v
+})()
+
+/** Webhook signing secret — optional in dev, required in production. */
+export const stripeWebhookSecret = (() => {
+  return process.env.STRIPE_WEBHOOK_SECRET ?? ''
+})()
+
+// ── Supabase service role (server-only, bypasses RLS) ─────────────────────────
+
+export const supabaseServiceRoleKey = (() => {
+  const v = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!v)
+    throw new Error(
+      'Missing required environment variable: SUPABASE_SERVICE_ROLE_KEY',
+    )
+  return v
+})()

@@ -35,6 +35,8 @@ const ERROR_MESSAGES: Record<string, string> = {
   [INGEST_ERROR.UNAUTHORIZED]: 'Debes iniciar sesión para añadir videos.',
   [INGEST_ERROR.FORBIDDEN]:
     'Necesitas una suscripción activa para añadir videos.',
+  [INGEST_ERROR.VIDEO_LIMIT_REACHED]:
+    'Has alcanzado el limite de tu plan gratuito (1 video). Actualiza a Pro para seguir indexando.',
 }
 
 const GENERIC_INGEST_MESSAGES = [
@@ -155,7 +157,7 @@ export default function NuevoVideoPage() {
     >
       <div
         className={cn(
-          'flex w-full flex-col gap-8',
+          'mx-auto flex w-full flex-col gap-8',
           isSuccess ? 'max-w-4xl' : 'max-w-xl',
         )}
       >

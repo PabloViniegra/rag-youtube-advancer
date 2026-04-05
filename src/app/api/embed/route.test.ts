@@ -56,14 +56,38 @@ interface MockProfile {
 function mockAuthAndProfile(
   user: { id: string } | null,
   profile: MockProfile | null = null,
+  options: {
+    videoCount?: number
+  } = {},
 ) {
-  const singleMock = vi.fn().mockResolvedValue({
+  const { videoCount = 0 } = options
+
+  const maybeSingleMock = vi.fn().mockResolvedValue({
     data: profile,
     error: profile ? null : { message: 'not found' },
   })
-  const eqMock = vi.fn().mockReturnValue({ single: singleMock })
-  const selectMock = vi.fn().mockReturnValue({ eq: eqMock })
-  const fromMock = vi.fn().mockReturnValue({ select: selectMock })
+  const profileEqMock = vi
+    .fn()
+    .mockReturnValue({ maybeSingle: maybeSingleMock })
+  const profileSelectMock = vi.fn().mockReturnValue({ eq: profileEqMock })
+
+  const videosEqMock = vi.fn().mockResolvedValue({
+    count: videoCount,
+    error: null,
+  })
+  const videosSelectMock = vi.fn().mockReturnValue({ eq: videosEqMock })
+
+  const fromMock = vi.fn((table: string) => {
+    if (table === 'profiles') {
+      return { select: profileSelectMock }
+    }
+
+    if (table === 'videos') {
+      return { select: videosSelectMock }
+    }
+
+    return { select: vi.fn() }
+  })
 
   createClientMock.mockResolvedValue({
     auth: {
@@ -92,10 +116,22 @@ describe('POST /api/embed', () => {
 
   // ── Authorization ──────────────────────────────────────────────────────────
 
-  it('returns 403 when user has no subscription and is not admin', async () => {
+  it('allows free users when under the video limit', async () => {
     mockAuthAndProfile(
       { id: 'user-1' },
       { role: 'user', subscription_active: false },
+      { videoCount: 0 },
+    )
+    vi.mocked(embedChunks).mockResolvedValue([])
+    const res = await POST(buildRequest({ chunks: ['hello'] }))
+    expect(res.status).toBe(200)
+  })
+
+  it('returns 403 when free user reached the video limit', async () => {
+    mockAuthAndProfile(
+      { id: 'user-1' },
+      { role: 'user', subscription_active: false },
+      { videoCount: 1 },
     )
     const res = await POST(buildRequest({ chunks: ['hello'] }))
     expect(res.status).toBe(403)
@@ -103,8 +139,8 @@ describe('POST /api/embed', () => {
     expect(body.code).toBe(EMBED_API_ERROR.FORBIDDEN)
   })
 
-  it('returns 403 when profile is not found', async () => {
-    mockAuthAndProfile({ id: 'user-1' }, null)
+  it('returns 403 when profile is not found and free limit is reached', async () => {
+    mockAuthAndProfile({ id: 'user-1' }, null, { videoCount: 1 })
     const res = await POST(buildRequest({ chunks: ['hello'] }))
     expect(res.status).toBe(403)
     const body = await res.json()

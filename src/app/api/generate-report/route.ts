@@ -13,7 +13,6 @@
  * Error responses:
  *   400 — missing/invalid fields
  *   401 — unauthenticated
- *   403 — no active subscription or admin role
  *   500 — LLM or storage failure
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -23,7 +22,6 @@ import type { IntelligenceReport } from '@/lib/intelligence/types'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
 
-type ProfileRow = Database['public']['Tables']['profiles']['Row']
 type ReportRow = Database['public']['Tables']['intelligence_reports']['Row']
 type AppSupabaseClient = SupabaseClient<Database>
 
@@ -82,24 +80,8 @@ export async function POST(
     return errorResponse('Authentication required.', 'unauthorized', 401)
   }
 
-  // Authorization
-  const { data: profileData } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-
-  const profile = profileData as ProfileRow | null
-  const isAdmin = profile?.role === 'admin'
-  const hasSubscription = profile?.subscription_active === true
-
-  if (!isAdmin && !hasSubscription) {
-    return errorResponse(
-      'An active subscription is required.',
-      'forbidden',
-      403,
-    )
-  }
+  // Phase 5 runs after the video is already stored within limits —
+  // no additional subscription check needed here. Auth is sufficient.
 
   // Parse body
   let body: unknown

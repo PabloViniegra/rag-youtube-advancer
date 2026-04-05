@@ -16,6 +16,10 @@
 
 import { headers } from 'next/headers'
 
+import { canIndexVideo, resolvePlan } from '@/lib/plans'
+import { getVideoCount } from '@/lib/supabase/queries'
+import { createClient } from '@/lib/supabase/server'
+import type { Database } from '@/lib/supabase/types'
 import type {
   IngestError,
   IngestErrorCode,
@@ -24,6 +28,8 @@ import type {
   IngestSuccess,
 } from './types'
 import { INGEST_ERROR } from './types'
+
+type Profile = Database['public']['Tables']['profiles']['Row']
 
 // ─── internal response shapes ─────────────────────────────────────────────────
 
@@ -142,6 +148,39 @@ function resolveApiErrorMessage(data: unknown): string | null {
 export async function ingestVideo(input: IngestInput): Promise<IngestResult> {
   const { youtubeUrl, title } = input
 
+  // ── Pre-flight: video-limit gate ────────────────────────────────────────
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return ingestError(INGEST_ERROR.UNAUTHORIZED, 'No authenticated user.')
+  }
+
+  const { data: profileRaw } = await supabase
+    .from('profiles')
+    .select('role, subscription_active')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const profile = profileRaw as unknown as Pick<
+    Profile,
+    'role' | 'subscription_active'
+  > | null
+
+  const plan = profile ? resolvePlan(profile) : 'free'
+
+  const videoCount = await getVideoCount(supabase, user.id)
+
+  if (!canIndexVideo(plan, videoCount)) {
+    return ingestError(
+      INGEST_ERROR.VIDEO_LIMIT_REACHED,
+      'Has alcanzado el limite de videos de tu plan.',
+    )
+  }
+
+  // ── Prepare fetch context ───────────────────────────────────────────────
   const h = await headers()
   const host = h.get('host') ?? 'localhost:3000'
   const protocol = host.startsWith('localhost') ? 'http' : 'https'

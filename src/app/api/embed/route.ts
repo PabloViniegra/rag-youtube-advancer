@@ -30,6 +30,8 @@ import type {
   EmbedSuccessResponse,
 } from '@/lib/ai/types'
 import { EMBED_API_ERROR } from '@/lib/ai/types'
+import { canIndexVideo, resolvePlan } from '@/lib/plans'
+import { getVideoCount } from '@/lib/supabase/queries'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
 
@@ -181,24 +183,23 @@ export async function POST(
     )
   }
 
-  // Step 2 — authorization: subscription_active OR admin
-  // Note: explicit cast to ProfileRow | null because supabase-js type inference
-  // resolves data as 'never' in some strict TypeScript configs; our Database
-  // type guarantees the actual shape at runtime.
+  // Step 2 — authorization: free users may embed if under their video limit
   const { data: profileData } = await supabase
     .from('profiles')
-    .select('*')
+    .select('role, subscription_active')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
-  const profile = profileData as ProfileRow | null
+  const profile = profileData as Pick<
+    ProfileRow,
+    'role' | 'subscription_active'
+  > | null
+  const plan = profile ? resolvePlan(profile) : 'free'
+  const videoCount = await getVideoCount(supabase, user.id)
 
-  const isAdmin = profile?.role === 'admin'
-  const hasSubscription = profile?.subscription_active === true
-
-  if (!isAdmin && !hasSubscription) {
+  if (!canIndexVideo(plan, videoCount)) {
     return errorResponse(
-      'An active subscription is required to use this feature.',
+      'Video limit reached. Upgrade to Pro to index more videos.',
       EMBED_API_ERROR.FORBIDDEN,
       403,
     )

@@ -12,6 +12,7 @@ export const INGEST_ERROR = {
   REPORT_FAILED: 'report_failed',
   UNAUTHORIZED: 'unauthorized',
   FORBIDDEN: 'forbidden',
+  VIDEO_LIMIT_REACHED: 'video_limit_reached',
 } as const
 
 export type IngestErrorCode = (typeof INGEST_ERROR)[keyof typeof INGEST_ERROR]

@@ -29,6 +29,15 @@ export interface Database {
           report?: Json
           generated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'intelligence_reports_video_id_fkey'
+            columns: ['video_id']
+            isOneToOne: false
+            referencedRelation: 'videos'
+            referencedColumns: ['id']
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -52,6 +61,7 @@ export interface Database {
           stripe_customer_id?: string | null
           subscription_active?: boolean
         }
+        Relationships: []
       }
       videos: {
         Row: {
@@ -75,6 +85,15 @@ export interface Database {
           title?: string | null
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'videos_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
       }
       video_sections: {
         Row: {
@@ -95,6 +114,15 @@ export interface Database {
           content?: string | null
           embedding?: number[] | null
         }
+        Relationships: [
+          {
+            foreignKeyName: 'video_sections_video_id_fkey'
+            columns: ['video_id']
+            isOneToOne: false
+            referencedRelation: 'videos'
+            referencedColumns: ['id']
+          },
+        ]
       }
     }
     Views: Record<string, never>

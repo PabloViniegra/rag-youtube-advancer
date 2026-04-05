@@ -10,6 +10,14 @@ import { INGEST_ERROR } from './types'
 
 // ─── Hoisted mocks ────────────────────────────────────────────────────────────
 
+const { createClientMock } = vi.hoisted(() => ({
+  createClientMock: vi.fn(),
+}))
+
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: createClientMock,
+}))
+
 vi.mock('next/headers', () => ({
   headers: vi.fn(),
 }))
@@ -59,6 +67,43 @@ function mockHeaders(host = 'localhost:3000', cookie = 'sb-cookie=abc') {
   } as unknown as Awaited<ReturnType<typeof headers>>)
 }
 
+function mockIngestionGate(
+  user: { id: string } | null = { id: 'user-1' },
+  profile: { role: string; subscription_active: boolean } | null = {
+    role: 'user',
+    subscription_active: false,
+  },
+  videoCount = 0,
+) {
+  const maybeSingleMock = vi.fn().mockResolvedValue({
+    data: profile,
+    error: null,
+  })
+  const profileEqMock = vi
+    .fn()
+    .mockReturnValue({ maybeSingle: maybeSingleMock })
+  const profileSelectMock = vi.fn().mockReturnValue({ eq: profileEqMock })
+
+  const videosEqMock = vi.fn().mockResolvedValue({
+    count: videoCount,
+    error: null,
+  })
+  const videosSelectMock = vi.fn().mockReturnValue({ eq: videosEqMock })
+
+  const fromMock = vi.fn((table: string) => {
+    if (table === 'profiles') return { select: profileSelectMock }
+    if (table === 'videos') return { select: videosSelectMock }
+    return { select: vi.fn() }
+  })
+
+  createClientMock.mockResolvedValue({
+    auth: {
+      getUser: vi.fn().mockResolvedValue({ data: { user }, error: null }),
+    },
+    from: fromMock,
+  })
+}
+
 /**
  * Build a `fetch` spy that returns the given responses in order (one per call).
  */
@@ -80,7 +125,9 @@ function mockFetchSequence(
 
 describe('ingestVideo', () => {
   beforeEach(() => {
+    vi.clearAllMocks()
     mockHeaders()
+    mockIngestionGate()
   })
 
   afterEach(() => {
