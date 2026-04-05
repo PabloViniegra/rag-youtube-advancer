@@ -3,12 +3,13 @@
 /**
  * Pipeline orchestrator — Server Action
  *
- * Chains all 5 RAG ingestion phases by calling the internal Next.js API routes:
- *   1. POST /api/transcript       — extract full transcript from a YouTube URL
- *   2. POST /api/chunk            — split transcript text into overlapping segments
- *   3. POST /api/embed            — convert segments into 1536-dim vectors
- *   4. POST /api/store            — persist video + embedded sections to Supabase
- *   5. POST /api/generate-report  — generate Intelligence Report (3 parallel LLM calls)
+ * Chains all 6 RAG ingestion phases by calling the internal Next.js API routes:
+ *   1. POST /api/transcript           — extract full transcript from a YouTube URL
+ *   2. POST /api/chunk                — split transcript text into overlapping segments
+ *   3. POST /api/embed                — convert segments into 1536-dim vectors
+ *   4. POST /api/store                — persist video + embedded sections to Supabase
+ *   5. POST /api/generate-report      — generate Intelligence Report (3 parallel LLM calls)
+ *   6. POST /api/generate-seo-report  — generate SEO Pack (3 parallel LLM calls)
  *
  * Auth cookies are forwarded to every downstream fetch so Supabase middleware
  * can authenticate each sub-request.
@@ -54,6 +55,11 @@ interface StoreOk {
 }
 
 interface ReportOk {
+  reportId: string
+  generatedAt: string
+}
+
+interface SeoReportOk {
   reportId: string
   generatedAt: string
 }
@@ -110,6 +116,12 @@ function ingestError(code: IngestErrorCode, message: string): IngestError {
 }
 
 function isReportOk(v: unknown): v is ReportOk {
+  if (typeof v !== 'object' || v === null) return false
+  const r = v as Record<string, unknown>
+  return typeof r.reportId === 'string' && typeof r.generatedAt === 'string'
+}
+
+function isSeoReportOk(v: unknown): v is SeoReportOk {
   if (typeof v !== 'object' || v === null) return false
   const r = v as Record<string, unknown>
   return typeof r.reportId === 'string' && typeof r.generatedAt === 'string'
@@ -286,5 +298,25 @@ export async function ingestVideo(input: IngestInput): Promise<IngestResult> {
     // The report can be regenerated later.
   }
 
-  return { ok: true, videoId, sectionCount, report }
+  // ── Phase 6 — SEO Pack (graceful: only runs if Phase 5 succeeded) ───────
+  let seoReport: IngestSuccess['seoReport'] = null
+
+  if (report !== null) {
+    try {
+      const seo = await fetchJson('/api/generate-seo-report', {
+        videoId,
+        transcript: fullText,
+        title,
+      })
+
+      if (seo.status === 200 && isSeoReportOk(seo.data)) {
+        const data = seo.data as { seoReport?: unknown }
+        seoReport = (data.seoReport as IngestSuccess['seoReport']) ?? null
+      }
+    } catch {
+      // Phase 6 failure is graceful — Intelligence Report remains available.
+    }
+  }
+
+  return { ok: true, videoId, sectionCount, report, seoReport }
 }
