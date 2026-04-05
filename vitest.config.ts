@@ -25,6 +25,10 @@ const COVERAGE_INCLUDES = [
   'src/app/dashboard/videos/new/page.tsx',
   'src/app/dashboard/videos/[id]/page.tsx',
   'src/app/dashboard/search/page.tsx',
+  // SEO Pack
+  'src/lib/seo/chapter-markers.ts',
+  'src/lib/seo/generate.ts',
+  'src/lib/seo/prompts.ts',
 ] as const
 
 export default defineConfig({

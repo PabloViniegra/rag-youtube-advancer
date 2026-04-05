@@ -33,8 +33,8 @@ vi.mock('./_components/video-sections-list', () => ({
   VideoSectionsList: () => null,
 }))
 
-vi.mock('../_components/intelligence-report', () => ({
-  IntelligenceReportView: () => null,
+vi.mock('./_components/video-report-tabs', () => ({
+  VideoReportTabs: () => null,
 }))
 
 // ─── Imports (after mocks) ────────────────────────────────────────────────────
@@ -72,6 +72,7 @@ type SupabaseMockConfig = {
   videoError: unknown
   sectionsData: unknown
   reportData?: unknown
+  seoReportData?: unknown
 }
 
 function mockSupabase({
@@ -80,6 +81,7 @@ function mockSupabase({
   videoError,
   sectionsData,
   reportData = null,
+  seoReportData = null,
 }: SupabaseMockConfig) {
   const getUserResult = { data: { user } }
 
@@ -110,6 +112,15 @@ function mockSupabase({
   const reportEq = vi.fn().mockReturnValue({ maybeSingle: reportMaybeSingle })
   const reportSelect = vi.fn().mockReturnValue({ eq: reportEq })
 
+  // Build the query chain for seo_reports table
+  const seoReportMaybeSingle = vi
+    .fn()
+    .mockResolvedValue({ data: seoReportData, error: null })
+  const seoReportEq = vi
+    .fn()
+    .mockReturnValue({ maybeSingle: seoReportMaybeSingle })
+  const seoReportSelect = vi.fn().mockReturnValue({ eq: seoReportEq })
+
   const fromMock = vi.fn().mockImplementation((table: string) => {
     if (table === 'videos') {
       return {
@@ -125,6 +136,9 @@ function mockSupabase({
     }
     if (table === 'intelligence_reports') {
       return { select: reportSelect }
+    }
+    if (table === 'seo_reports') {
+      return { select: seoReportSelect }
     }
     return {}
   })
@@ -209,6 +223,29 @@ describe('VideoDetailPage', () => {
       videoData: VIDEO_ROW,
       videoError: null,
       sectionsData: null,
+    })
+
+    const result = await VideoDetailPage({
+      params: Promise.resolve({ id: 'vid-1' }),
+    })
+    expect(result).not.toBeNull()
+  })
+
+  it('renders successfully when both intelligence and SEO reports are present', async () => {
+    mockSupabase({
+      user: { id: 'user-1' },
+      videoData: VIDEO_ROW,
+      videoError: null,
+      sectionsData: SECTION_ROWS,
+      reportData: { report: { summary: { timestamps: [] } } },
+      seoReportData: {
+        report: {
+          seoPackage: {},
+          showNotes: {},
+          thumbnailBrief: {},
+          generatedAt: '2024-01-01T00:00:00.000Z',
+        },
+      },
     })
 
     const result = await VideoDetailPage({

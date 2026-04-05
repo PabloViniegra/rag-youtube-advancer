@@ -39,6 +39,35 @@ export interface Database {
           },
         ]
       }
+      seo_reports: {
+        Row: {
+          id: string
+          video_id: string
+          report: Json
+          generated_at: string
+        }
+        Insert: {
+          id?: string
+          video_id: string
+          report: Json
+          generated_at?: string
+        }
+        Update: {
+          id?: string
+          video_id?: string
+          report?: Json
+          generated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'seo_reports_video_id_fkey'
+            columns: ['video_id']
+            isOneToOne: false
+            referencedRelation: 'videos'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       profiles: {
         Row: {
           id: string

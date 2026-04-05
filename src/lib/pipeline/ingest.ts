@@ -56,7 +56,6 @@ interface StoreOk {
 
 interface ReportOk {
   reportId: string
-  generatedAt: string
 }
 
 interface SeoReportOk {
@@ -118,7 +117,7 @@ function ingestError(code: IngestErrorCode, message: string): IngestError {
 function isReportOk(v: unknown): v is ReportOk {
   if (typeof v !== 'object' || v === null) return false
   const r = v as Record<string, unknown>
-  return typeof r.reportId === 'string' && typeof r.generatedAt === 'string'
+  return typeof r.reportId === 'string'
 }
 
 function isSeoReportOk(v: unknown): v is SeoReportOk {

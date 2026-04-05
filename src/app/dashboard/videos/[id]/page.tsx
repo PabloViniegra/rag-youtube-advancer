@@ -1,16 +1,21 @@
 import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
 import { ViewTransition } from 'react'
-import type { IntelligenceReport } from '@/lib/intelligence/types'
+import type {
+  IntelligenceReport,
+  IntelligenceTimestamp,
+} from '@/lib/intelligence/types'
+import type { SeoReport } from '@/lib/seo/types'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
-import { IntelligenceReportView } from '../_components/intelligence-report'
 import { VideoDetailHeader } from './_components/video-detail-header'
+import { VideoReportTabs } from './_components/video-report-tabs'
 import { VideoSectionsList } from './_components/video-sections-list'
 
 type VideoRow = Database['public']['Tables']['videos']['Row']
 type SectionRow = Database['public']['Tables']['video_sections']['Row']
 type ReportRow = Database['public']['Tables']['intelligence_reports']['Row']
+type SeoReportRow = Database['public']['Tables']['seo_reports']['Row']
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -61,8 +66,8 @@ export default async function VideoDetailPage({ params }: PageProps) {
 
   const typedVideo = video as VideoRow
 
-  // Fetch sections + intelligence report in parallel to avoid waterfall
-  const [sectionsResult, reportResult] = await Promise.all([
+  // Fetch sections + intelligence report + SEO report in parallel — no waterfall
+  const [sectionsResult, reportResult, seoReportResult] = await Promise.all([
     supabase
       .from('video_sections')
       .select('id, content')
@@ -70,6 +75,11 @@ export default async function VideoDetailPage({ params }: PageProps) {
       .order('id'),
     supabase
       .from('intelligence_reports')
+      .select('report')
+      .eq('video_id', id)
+      .maybeSingle(),
+    supabase
+      .from('seo_reports')
       .select('report')
       .eq('video_id', id)
       .maybeSingle(),
@@ -83,6 +93,14 @@ export default async function VideoDetailPage({ params }: PageProps) {
   const reportData = reportResult.data
     ? ((reportResult.data as ReportRow).report as unknown as IntelligenceReport)
     : null
+
+  const seoReportData = seoReportResult.data
+    ? ((seoReportResult.data as SeoReportRow).report as unknown as SeoReport)
+    : null
+
+  // Chapter markers need the timestamps from the Intelligence Report
+  const irTimestamps: IntelligenceTimestamp[] =
+    reportData?.summary?.timestamps ?? []
 
   return (
     <ViewTransition
@@ -107,8 +125,12 @@ export default async function VideoDetailPage({ params }: PageProps) {
           />
         </div>
 
-        {/* Informe de inteligencia — solo si está disponible */}
-        {reportData ? <IntelligenceReportView report={reportData} /> : null}
+        {/* Intelligence + SEO reports — tab UI when both present, plain when only one */}
+        <VideoReportTabs
+          reportData={reportData}
+          seoReportData={seoReportData}
+          irTimestamps={irTimestamps}
+        />
 
         {/* Sections list */}
         <VideoSectionsList sections={typedSections} />
