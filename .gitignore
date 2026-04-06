@@ -52,3 +52,5 @@ CLAUDE.md
 /.playwright-mcp/
 /.serena/
 /docs/
+Vectorial_Silence.md
+generate_icon.py

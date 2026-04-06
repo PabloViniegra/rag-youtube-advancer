@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="neon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF007A" />
+      <stop offset="100%" stop-color="#7000FF" />
+    </linearGradient>
+    <linearGradient id="cyan" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF" />
+      <stop offset="100%" stop-color="#0057FF" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="120" fill="#0B0C10" />
+  <circle cx="256" cy="256" r="160" fill="none" stroke="url(#cyan)" stroke-width="24" opacity="0.8"/>
+  <path d="M206 166 L386 256 L206 346 Z" fill="url(#neon)" opacity="0.9" />
+  <circle cx="206" cy="166" r="24" fill="#00F0FF" />
+  <circle cx="386" cy="256" r="24" fill="#FF007A" />
+  <circle cx="206" cy="346" r="24" fill="#7000FF" />
+  <text x="256" y="470" font-family="monospace" font-size="12" fill="#444" letter-spacing="4" text-anchor="middle">VX-09: RAG_RETRIEVAL_NODE</text>
+</svg>
