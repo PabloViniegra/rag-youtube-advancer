@@ -22,28 +22,18 @@ vi.mock('react', async () => {
   }
 })
 
+// Mock next/navigation router
+const mockPush = vi.fn()
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: mockPush }),
+}))
+
 // Mock the ingestVideo Server Action
 const mockIngestVideo = vi.fn()
 
 vi.mock('@/lib/pipeline/ingest', () => ({
   ingestVideo: (...args: unknown[]) => mockIngestVideo(...args),
-}))
-
-// next/link renders as a plain <a> in tests
-vi.mock('next/link', () => ({
-  default: ({
-    href,
-    children,
-    className,
-  }: {
-    href: string
-    children: React.ReactNode
-    className?: string
-  }) => (
-    <a href={href} className={className}>
-      {children}
-    </a>
-  ),
 }))
 
 // ─── Import (after mocks) ─────────────────────────────────────────────────────
@@ -65,6 +55,7 @@ describe('NuevoVideoPage', () => {
   afterEach(() => {
     cleanup()
     vi.restoreAllMocks()
+    mockPush.mockReset()
   })
 
   // ── Idle state ──────────────────────────────────────────────────────────────
@@ -112,9 +103,9 @@ describe('NuevoVideoPage', () => {
     ).not.toBeInTheDocument()
   })
 
-  // ── Success state ────────────────────────────────────────────────────────────
+  // ── Success state — redirect ─────────────────────────────────────────────────
 
-  it('renders SuccessCard on successful ingestion', async () => {
+  it('redirects to video detail page on successful ingestion', async () => {
     const user = userEvent.setup()
     resolveWith({
       ok: true,
@@ -130,39 +121,8 @@ describe('NuevoVideoPage', () => {
     await user.click(screen.getByRole('button', { name: /analizar video/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('¡Video indexado!')).toBeInTheDocument()
+      expect(mockPush).toHaveBeenCalledWith('/dashboard/videos/vid-abc')
     })
-
-    expect(screen.getByText('12')).toBeInTheDocument()
-    expect(screen.getByText(/fragmentos en memoria/i)).toBeInTheDocument()
-  })
-
-  it('resets form when "Añadir otro video" is clicked', async () => {
-    const user = userEvent.setup()
-    resolveWith({
-      ok: true,
-      videoId: 'vid-abc',
-      sectionCount: 5,
-      report: null,
-      seoReport: null,
-    })
-
-    render(<NuevoVideoPage />)
-
-    await user.type(screen.getByLabelText(/URL de YouTube/i), VALID_URL)
-    await user.click(screen.getByRole('button', { name: /analizar video/i }))
-
-    await waitFor(() => {
-      expect(screen.getByText('¡Video indexado!')).toBeInTheDocument()
-    })
-
-    await user.click(screen.getByRole('button', { name: /añadir otro video/i }))
-
-    // Form is back, URL is cleared
-    expect(screen.getByLabelText(/URL de YouTube/i)).toHaveValue('')
-    expect(
-      screen.getByRole('button', { name: /analizar video/i }),
-    ).toBeDisabled()
   })
 
   // ── Error state — known error codes ─────────────────────────────────────────

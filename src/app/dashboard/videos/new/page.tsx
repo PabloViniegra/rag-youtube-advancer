@@ -4,24 +4,22 @@
  * /dashboard/videos/new
  *
  * Ingestion page — Client Component.
- * Calls the `ingestVideo` Server Action and shows phase progress while waiting.
+ * Calls the `ingestVideo` Server Action, shows phase progress while waiting,
+ * then redirects directly to the new video's detail page on success.
  *
  * Layout:
  *   1. Hero section — overline + H1 + subtitle + PipelineHint
  *   2. Form card (IngestForm) — URL field, title field, submit / loading / error
- *   3. SuccessCard — shown after successful ingestion
  */
 
 import { useEffect, useRef, useState, ViewTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { ingestVideo } from '@/lib/pipeline/ingest'
 import type { IngestResult } from '@/lib/pipeline/types'
 import { INGEST_ERROR } from '@/lib/pipeline/types'
-import { cn } from '@/lib/utils'
 import { IngestForm } from './_components/ingest-form'
 import { PHASE_COUNT } from './_components/phase-progress'
 import { PipelineHint } from './_components/pipeline-hint'
-import type { SuccessData } from './_components/success-card'
-import { SuccessCard } from './_components/success-card'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -54,7 +52,6 @@ const GENERIC_INGEST_MESSAGES = [
 const FORM_STATE = {
   IDLE: 'idle',
   LOADING: 'loading',
-  SUCCESS: 'success',
   ERROR: 'error',
 } as const
 
@@ -67,11 +64,12 @@ interface ErrorData {
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function NuevoVideoPage() {
+  const router = useRouter()
+
   const [url, setUrl] = useState('')
   const [title, setTitle] = useState('')
   const [formState, setFormState] = useState<FormState>(FORM_STATE.IDLE)
   const [phaseIndex, setPhaseIndex] = useState(0)
-  const [successData, setSuccessData] = useState<SuccessData | null>(null)
   const [errorData, setErrorData] = useState<ErrorData | null>(null)
 
   const phaseTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -88,7 +86,6 @@ export default function NuevoVideoPage() {
     e.preventDefault()
     setFormState(FORM_STATE.LOADING)
     setPhaseIndex(0)
-    setSuccessData(null)
     setErrorData(null)
 
     phaseTimerRef.current = setInterval(() => {
@@ -115,12 +112,7 @@ export default function NuevoVideoPage() {
     }
 
     if (result.ok) {
-      setSuccessData({
-        videoId: result.videoId,
-        sectionCount: result.sectionCount,
-        report: result.report,
-      })
-      setFormState(FORM_STATE.SUCCESS)
+      router.push(`/dashboard/videos/${result.videoId}`)
     } else {
       const normalizedMessage = result.message.trim()
       const isGenericMessage = GENERIC_INGEST_MESSAGES.some(
@@ -140,8 +132,6 @@ export default function NuevoVideoPage() {
     }
   }
 
-  const isSuccess = formState === FORM_STATE.SUCCESS && successData
-
   return (
     <ViewTransition
       enter={{
@@ -156,52 +146,34 @@ export default function NuevoVideoPage() {
       }}
       default="none"
     >
-      <div
-        className={cn(
-          'mx-auto flex w-full flex-col gap-8',
-          isSuccess ? 'max-w-4xl' : 'max-w-xl',
-        )}
-      >
+      <div className="mx-auto flex w-full max-w-xl flex-col gap-8">
         {/* ── Hero ───────────────────────────────────────────────────────── */}
-        {!isSuccess && (
-          <header className="flex flex-col gap-4 animate-fade-up">
-            <p className="font-headline text-xs font-bold uppercase tracking-widest text-primary">
-              Segunda Mente
-            </p>
-            <h1 className="font-headline text-3xl font-extrabold leading-tight text-on-surface">
-              Añadir video
-            </h1>
-            <p className="font-body text-sm text-on-surface-variant">
-              Pega la URL de un video de YouTube para indexarlo. Lo analizamos
-              en cinco pasos automáticos:
-            </p>
-            <PipelineHint />
-          </header>
-        )}
+        <header className="flex flex-col gap-4 animate-fade-up">
+          <p className="font-headline text-xs font-bold uppercase tracking-widest text-primary">
+            Segunda Mente
+          </p>
+          <h1 className="font-headline text-3xl font-extrabold leading-tight text-on-surface">
+            Añadir video
+          </h1>
+          <p className="font-body text-sm text-on-surface-variant">
+            Pega la URL de un video de YouTube para indexarlo. Lo analizamos en
+            cinco pasos automáticos:
+          </p>
+          <PipelineHint />
+        </header>
 
-        {/* ── Success / Form ─────────────────────────────────────────────── */}
-        {isSuccess ? (
-          <SuccessCard
-            data={successData}
-            onReset={() => {
-              setUrl('')
-              setTitle('')
-              setFormState(FORM_STATE.IDLE)
-            }}
-          />
-        ) : (
-          <IngestForm
-            url={url}
-            title={title}
-            isLoading={formState === FORM_STATE.LOADING}
-            isError={formState === FORM_STATE.ERROR}
-            errorMessage={errorData?.message ?? null}
-            phaseIndex={phaseIndex}
-            onUrlChange={setUrl}
-            onTitleChange={setTitle}
-            onSubmit={handleSubmit}
-          />
-        )}
+        {/* ── Form ───────────────────────────────────────────────────────── */}
+        <IngestForm
+          url={url}
+          title={title}
+          isLoading={formState === FORM_STATE.LOADING}
+          isError={formState === FORM_STATE.ERROR}
+          errorMessage={errorData?.message ?? null}
+          phaseIndex={phaseIndex}
+          onUrlChange={setUrl}
+          onTitleChange={setTitle}
+          onSubmit={handleSubmit}
+        />
       </div>
     </ViewTransition>
   )
