@@ -11,13 +11,17 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // ─── Hoisted mocks ────────────────────────────────────────────────────────────
 
-const { getCurrentUserMock, createClientMock, revalidatePathMock } = vi.hoisted(
-  () => ({
-    getCurrentUserMock: vi.fn(),
-    createClientMock: vi.fn(),
-    revalidatePathMock: vi.fn(),
-  }),
-)
+const {
+  getCurrentUserMock,
+  createClientMock,
+  revalidatePathMock,
+  updateTagMock,
+} = vi.hoisted(() => ({
+  getCurrentUserMock: vi.fn(),
+  createClientMock: vi.fn(),
+  revalidatePathMock: vi.fn(),
+  updateTagMock: vi.fn(),
+}))
 
 vi.mock('@/lib/auth/actions', () => ({
   getCurrentUser: getCurrentUserMock,
@@ -29,6 +33,7 @@ vi.mock('@/lib/supabase/server', () => ({
 
 vi.mock('next/cache', () => ({
   revalidatePath: revalidatePathMock,
+  updateTag: updateTagMock,
 }))
 
 // ─── Imports (after mocks) ────────────────────────────────────────────────────
@@ -109,5 +114,6 @@ describe('deleteVideo', () => {
     expect(result).toEqual({})
     expect(result.error).toBeUndefined()
     expect(revalidatePathMock).toHaveBeenCalledWith('/dashboard/videos')
+    expect(updateTagMock).toHaveBeenCalledWith('dashboard-user-1')
   })
 })

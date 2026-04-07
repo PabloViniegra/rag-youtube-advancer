@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 /**
- * Tests for SearchPage — Client Component
+ * Tests for SearchOrchestrator — Client Component
  *
- * Uses React Testing Library + jsdom. `fetch` is mocked globally so we
- * can control /api/augment responses without a real server.
+ * SearchPage was migrated to an async Server Component. The client-side
+ * behavior lives in SearchOrchestrator, which is what we validate here.
  */
 import {
   cleanup,
@@ -43,15 +43,9 @@ vi.mock('next/link', () => ({
   ),
 }))
 
-// LibraryStatus has its own fetch lifecycle and is tested separately; mock it
-// here so SearchPage tests focus on the query/answer state machine.
-vi.mock('./_components/library-status', () => ({
-  LibraryStatus: () => null,
-}))
-
 // ─── Import (after mocks) ─────────────────────────────────────────────────────
 
-import SearchPage from './page'
+import { SearchOrchestrator } from './_components/search-orchestrator'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -66,25 +60,22 @@ function mockFetch(status: number, body: unknown) {
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
-describe('SearchPage', () => {
+describe('SearchOrchestrator', () => {
   afterEach(() => {
     cleanup()
     vi.restoreAllMocks()
   })
 
   it('renders the initial idle state', () => {
-    render(<SearchPage />)
+    render(<SearchOrchestrator />)
 
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-      'Buscar en mis videos',
-    )
     expect(screen.getByLabelText(/tu pregunta/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /buscar/i })).toBeDisabled()
   })
 
   it('enables the submit button when query is typed', async () => {
     const user = userEvent.setup()
-    render(<SearchPage />)
+    render(<SearchOrchestrator />)
 
     const textarea = screen.getByLabelText(/tu pregunta/i)
     await user.type(textarea, '¿Qué es React?')
@@ -98,7 +89,7 @@ describe('SearchPage', () => {
     // Never-resolving fetch to keep loading state
     vi.spyOn(globalThis, 'fetch').mockReturnValueOnce(new Promise(() => {}))
 
-    render(<SearchPage />)
+    render(<SearchOrchestrator />)
 
     await user.type(screen.getByLabelText(/tu pregunta/i), '¿Qué es React?')
     await user.click(screen.getByRole('button', { name: /buscar/i }))
@@ -123,7 +114,7 @@ describe('SearchPage', () => {
       sourceCount: 1,
     })
 
-    render(<SearchPage />)
+    render(<SearchOrchestrator />)
 
     await user.type(screen.getByLabelText(/tu pregunta/i), '¿Qué es React?')
     await user.click(screen.getByRole('button', { name: /buscar/i }))
@@ -145,7 +136,7 @@ describe('SearchPage', () => {
 
     mockFetch(500, { error: 'Error interno del servidor' })
 
-    render(<SearchPage />)
+    render(<SearchOrchestrator />)
 
     await user.type(screen.getByLabelText(/tu pregunta/i), '¿Qué es React?')
     await user.click(screen.getByRole('button', { name: /buscar/i }))
@@ -166,7 +157,7 @@ describe('SearchPage', () => {
         'No encontré contexto suficiente para esa pregunta. Prueba con otras palabras o menciona una idea concreta del video.',
     })
 
-    render(<SearchPage />)
+    render(<SearchOrchestrator />)
 
     await user.type(screen.getByLabelText(/tu pregunta/i), 'Dame un título')
     await user.click(screen.getByRole('button', { name: /buscar/i }))
@@ -186,7 +177,7 @@ describe('SearchPage', () => {
       error: 'No relevant video sections found for the given query.',
     })
 
-    render(<SearchPage />)
+    render(<SearchOrchestrator />)
 
     await user.type(screen.getByLabelText(/tu pregunta/i), 'Dame un título')
     await user.click(screen.getByRole('button', { name: /buscar/i }))
@@ -208,7 +199,7 @@ describe('SearchPage', () => {
         'No encontré contexto suficiente para esa pregunta. Prueba con otras palabras o menciona una idea concreta del video.',
     })
 
-    render(<SearchPage />)
+    render(<SearchOrchestrator />)
 
     await user.type(screen.getByLabelText(/tu pregunta/i), 'Dame un título')
     await user.click(screen.getByRole('button', { name: /buscar/i }))
@@ -243,7 +234,7 @@ describe('SearchPage', () => {
         'No encontré contexto suficiente para esa pregunta. Prueba con otras palabras o menciona una idea concreta del video.',
     })
 
-    render(<SearchPage />)
+    render(<SearchOrchestrator />)
 
     await user.type(screen.getByLabelText(/tu pregunta/i), 'Dame un título')
     await user.click(screen.getByRole('button', { name: /buscar/i }))
@@ -266,7 +257,7 @@ describe('SearchPage', () => {
       new Error('network error'),
     )
 
-    render(<SearchPage />)
+    render(<SearchOrchestrator />)
 
     await user.type(screen.getByLabelText(/tu pregunta/i), '¿Qué es React?')
     await user.click(screen.getByRole('button', { name: /buscar/i }))
@@ -282,7 +273,7 @@ describe('SearchPage', () => {
     const user = userEvent.setup()
     const fetchSpy = vi.spyOn(globalThis, 'fetch')
 
-    render(<SearchPage />)
+    render(<SearchOrchestrator />)
 
     const textarea = screen.getByLabelText(/tu pregunta/i)
     await user.type(textarea, '   ')
@@ -313,7 +304,7 @@ describe('SearchPage', () => {
       sourceCount: 2,
     })
 
-    render(<SearchPage />)
+    render(<SearchOrchestrator />)
 
     await user.type(screen.getByLabelText(/tu pregunta/i), 'test')
     await user.click(screen.getByRole('button', { name: /buscar/i }))
@@ -332,7 +323,7 @@ describe('SearchPage', () => {
     abortError.name = 'AbortError'
     vi.spyOn(globalThis, 'fetch').mockRejectedValueOnce(abortError)
 
-    const { unmount } = render(<SearchPage />)
+    const { unmount } = render(<SearchOrchestrator />)
 
     await user.type(screen.getByLabelText(/tu pregunta/i), 'test query')
     fireEvent.submit(

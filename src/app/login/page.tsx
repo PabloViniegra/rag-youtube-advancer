@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { LoginForm } from '@/components/auth/login-form'
 
 export const metadata: Metadata = {
@@ -11,9 +12,20 @@ interface LoginPageProps {
   searchParams: Promise<{ redirectTo?: string }>
 }
 
-export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { redirectTo } = await searchParams
+// ── Dynamic: reads searchParams at request time ───────────────────────────────
 
+async function LoginFormSection({
+  searchParams,
+}: {
+  searchParams: Promise<{ redirectTo?: string }>
+}) {
+  const { redirectTo } = await searchParams
+  return <LoginForm redirectTo={redirectTo} />
+}
+
+// ── Page shell (static) ───────────────────────────────────────────────────────
+
+export default function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <main className="flex min-h-svh">
       {/* ── LEFT PANEL — Editorial Crimson brand panel ── */}
@@ -27,7 +39,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
           <div className="flex size-10 items-center justify-center rounded-xl bg-on-primary/10 ring-1 ring-on-primary/20 backdrop-blur-sm">
-            {/* Brain / play icon */}
             <svg
               width="20"
               height="20"
@@ -89,7 +100,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
         {/* Social proof */}
         <div className="relative z-10 flex items-center gap-3">
-          {/* Stacked avatars */}
           <div className="flex -space-x-2" aria-hidden="true">
             {['A', 'M', 'C'].map((initial) => (
               <div
@@ -107,10 +117,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </div>
       </div>
 
-      {/* ── RIGHT PANEL — Cream form panel ── */}
+      {/* ── RIGHT PANEL ── */}
       <div className="flex w-full flex-col items-center justify-center bg-background px-6 py-12 md:w-1/2 md:px-12 lg:px-20">
         <div className="w-full max-w-sm">
-          {/* Mobile-only brand strip — left panel is hidden on small screens */}
+          {/* Mobile-only brand strip */}
           <div className="mb-8 flex items-center gap-3 md:hidden">
             <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
               <svg
@@ -164,7 +174,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             Volver al inicio
           </Link>
 
-          {/* Heading — h1 because on mobile the left panel (which has the other h1) is hidden */}
+          {/* Heading */}
           <div className="mb-8 flex flex-col gap-2">
             <h1 className="font-headline text-2xl font-extrabold text-on-surface">
               Accede a tu cuenta
@@ -174,10 +184,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </p>
           </div>
 
-          {/* OAuth buttons */}
-          <LoginForm redirectTo={redirectTo} />
+          {/* OAuth buttons — dynamic: reads redirectTo from searchParams */}
+          <Suspense fallback={<LoginFormSkeleton />}>
+            <LoginFormSection searchParams={searchParams} />
+          </Suspense>
 
-          {/* Divider — content is meaningful: explains passwordless auth */}
+          {/* Divider */}
           <div className="my-6 flex items-center gap-3">
             <div
               className="h-px flex-1 bg-outline-variant"
@@ -213,5 +225,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </div>
       </div>
     </main>
+  )
+}
+
+function LoginFormSkeleton() {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="h-11 w-full animate-pulse rounded-xl bg-surface-container-low" />
+      <div className="h-11 w-full animate-pulse rounded-xl bg-surface-container-low" />
+    </div>
   )
 }

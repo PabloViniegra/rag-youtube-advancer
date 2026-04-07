@@ -1,151 +1,40 @@
-'use client'
+import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
+import { ViewTransition } from 'react'
+import { createClient } from '@/lib/supabase/server'
+import { LibraryStatus } from './_components/library-status'
+import { SearchOrchestrator } from './_components/search-orchestrator'
 
 /**
  * /dashboard/search
  *
- * Search / Q&A UI — Client orchestrator.
- * Calls POST /api/augment and renders the AI answer + sources.
- *
- * Improvements applied:
- *  /distill  — form lives on the page surface, no card wrapper.
- *  /bolder   — answer block has editorial crimson left border + text-xl.
- *  /onboard  — LibraryStatus shows video count; idle chips surface examples.
- *  /delight  — Ctrl+Enter shortcut; rotating loading messages; copy button.
- *  /harden   — sources show video title as primary identifier.
+ * Server Component shell:
+ *  - Authenticates the user
+ *  - Fetches video count for LibraryStatus (no client waterfall)
+ *  - Renders static header + LibraryStatus + SearchOrchestrator (client)
  */
 
-import {
-  startTransition,
-  useEffect,
-  useRef,
-  useState,
-  ViewTransition,
-} from 'react'
-import type {
-  AugmentErrorResponse,
-  AugmentSuccessResponse,
-} from '@/lib/augmentation/types'
-import { AUGMENT_API_ERROR, AUGMENT_DEFAULTS } from '@/lib/augmentation/types'
-import type { AnswerData } from './_components/answer-card'
-import { AnswerCard } from './_components/answer-card'
-import { LibraryStatus } from './_components/library-status'
-import type { SearchFormError } from './_components/search-form'
-import { SearchForm } from './_components/search-form'
-import { SearchLoading } from './_components/search-loading'
+export const metadata: Metadata = {
+  title: 'Buscar — Dashboard',
+}
 
-// ── State machine ─────────────────────────────────────────────────────────────
+export default async function SearchPage() {
+  const supabase = await createClient()
 
-const SEARCH_STATE = {
-  IDLE: 'idle',
-  LOADING: 'loading',
-  SUCCESS: 'success',
-  ERROR: 'error',
-} as const
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-type SearchState = (typeof SEARCH_STATE)[keyof typeof SEARCH_STATE]
-
-const LEGACY_NO_CONTEXT_MESSAGE =
-  'No relevant video sections found for the given query.'
-const FRIENDLY_NO_CONTEXT_MESSAGE =
-  'No encontré contexto suficiente para esa pregunta. Prueba con otras palabras o menciona una idea concreta del video.'
-
-// ── Page ──────────────────────────────────────────────────────────────────────
-
-export default function SearchPage() {
-  const [query, setQuery] = useState('')
-  const [searchState, setSearchState] = useState<SearchState>(SEARCH_STATE.IDLE)
-  const [successData, setSuccessData] = useState<AnswerData | null>(null)
-  const [errorData, setErrorData] = useState<SearchFormError | null>(null)
-
-  const abortRef = useRef<AbortController | null>(null)
-
-  useEffect(() => {
-    return () => {
-      abortRef.current?.abort()
-    }
-  }, [])
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    if (!query.trim()) return
-
-    abortRef.current?.abort()
-    const controller = new AbortController()
-    abortRef.current = controller
-
-    setSearchState(SEARCH_STATE.LOADING)
-    setSuccessData(null)
-    setErrorData(null)
-
-    try {
-      const res = await fetch('/api/augment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: query.trim(),
-          matchThreshold: AUGMENT_DEFAULTS.matchThreshold,
-          matchCount: AUGMENT_DEFAULTS.matchCount,
-        }),
-        signal: controller.signal,
-      })
-
-      if (res.ok) {
-        const data = (await res.json()) as AugmentSuccessResponse
-        startTransition(() => {
-          setSuccessData({
-            answer: data.answer,
-            sources: data.sources,
-            sourceCount: data.sourceCount,
-          })
-          setSearchState(SEARCH_STATE.SUCCESS)
-        })
-      } else {
-        const errData = (await res.json()) as AugmentErrorResponse
-        const isNoContext = errData.code === AUGMENT_API_ERROR.NO_CONTEXT
-        const normalizedMessage = isNoContext
-          ? FRIENDLY_NO_CONTEXT_MESSAGE
-          : (errData.error ?? 'Error inesperado.')
-
-        startTransition(() => {
-          setErrorData({
-            message:
-              normalizedMessage === LEGACY_NO_CONTEXT_MESSAGE
-                ? FRIENDLY_NO_CONTEXT_MESSAGE
-                : normalizedMessage,
-            code: errData.code,
-          })
-          setSearchState(SEARCH_STATE.ERROR)
-        })
-      }
-    } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') return
-      startTransition(() => {
-        setErrorData({
-          message: 'No se pudo conectar al servidor. Inténtalo de nuevo.',
-        })
-        setSearchState(SEARCH_STATE.ERROR)
-      })
-    }
+  if (!user) {
+    redirect('/login?redirectTo=/dashboard/search')
   }
 
-  function handleSuggestionClick(suggestion: string) {
-    setQuery(suggestion)
-    setErrorData(null)
-    setSearchState(SEARCH_STATE.IDLE)
-  }
+  const { count } = await supabase
+    .from('videos')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
 
-  const isLoading = searchState === SEARCH_STATE.LOADING
-  const showExamples = !successData && !isLoading && !query.trim()
-  const formError = searchState === SEARCH_STATE.ERROR ? errorData : null
-
-  // Normalize the FORBIDDEN error to a user-friendly message
-  const normalizedError: SearchFormError | null =
-    formError?.code === AUGMENT_API_ERROR.FORBIDDEN
-      ? {
-          ...formError,
-          message: 'Necesitas una suscripción activa para usar esta función.',
-        }
-      : formError
+  const videoCount = count ?? 0
 
   return (
     <ViewTransition
@@ -162,7 +51,7 @@ export default function SearchPage() {
       default="none"
     >
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
-        {/* ── Page header ── */}
+        {/* ── Page header (static, SSR'd) ── */}
         <div className="flex flex-col gap-1.5 border-b border-outline-variant pb-6">
           <span className="font-headline text-xs font-bold uppercase tracking-widest text-primary">
             Segundo cerebro
@@ -176,31 +65,11 @@ export default function SearchPage() {
           </p>
         </div>
 
-        {/* ── Library status — /onboard ── */}
-        <LibraryStatus />
+        {/* ── Library status (SSR'd, no client waterfall) ── */}
+        <LibraryStatus videoCount={videoCount} />
 
-        {/* ── Search form — /distill (no card wrapper) ── */}
-        <SearchForm
-          query={query}
-          onQueryChange={setQuery}
-          onSubmit={handleSubmit}
-          isLoading={isLoading}
-          showExamples={showExamples}
-          error={normalizedError}
-          onSuggestionClick={handleSuggestionClick}
-        />
-
-        {/* ── Loading — /delight ── */}
-        {isLoading && (
-          <ViewTransition enter="fade-in" default="none">
-            <SearchLoading />
-          </ViewTransition>
-        )}
-
-        {/* ── Answer — /bolder ── */}
-        {searchState === SEARCH_STATE.SUCCESS && successData && (
-          <AnswerCard data={successData} />
-        )}
+        {/* ── Interactive search (client) ── */}
+        <SearchOrchestrator />
       </div>
     </ViewTransition>
   )

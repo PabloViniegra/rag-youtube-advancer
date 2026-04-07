@@ -1,33 +1,75 @@
-/**
- * Tests for ingestVideo — Pipeline orchestrator (Server Action)
- *
- * `fetch` is mocked globally so we can control the response of each phase
- * without hitting real API routes. `next/headers` is mocked to return a
- * predictable host + cookie header.
- */
+import { cleanup, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { TRANSCRIPT_ERROR } from '@/lib/youtube/types'
+import { ingestVideo } from './ingest'
 import { INGEST_ERROR } from './types'
 
-// ─── Hoisted mocks ────────────────────────────────────────────────────────────
-
-const { createClientMock } = vi.hoisted(() => ({
+const {
+  updateTagMock,
+  createClientMock,
+  getVideoCountMock,
+  fetchYoutubeTranscriptMock,
+  chunkTextMock,
+  embedChunksMock,
+  storeVideoSectionsMock,
+  generateIntelligenceReportMock,
+  generateSeoReportMock,
+} = vi.hoisted(() => ({
+  updateTagMock: vi.fn(),
   createClientMock: vi.fn(),
+  getVideoCountMock: vi.fn(),
+  fetchYoutubeTranscriptMock: vi.fn(),
+  chunkTextMock: vi.fn(),
+  embedChunksMock: vi.fn(),
+  storeVideoSectionsMock: vi.fn(),
+  generateIntelligenceReportMock: vi.fn(),
+  generateSeoReportMock: vi.fn(),
+}))
+
+vi.mock('next/cache', () => ({
+  updateTag: updateTagMock,
 }))
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: createClientMock,
 }))
 
-vi.mock('next/headers', () => ({
-  headers: vi.fn(),
+vi.mock('@/lib/supabase/queries', () => ({
+  getVideoCount: getVideoCountMock,
 }))
 
-// ─── Imports (after mocks) ────────────────────────────────────────────────────
+vi.mock('@/lib/ai/chunk', () => ({
+  chunkText: chunkTextMock,
+}))
 
-import { headers } from 'next/headers'
-import { ingestVideo } from './ingest'
+vi.mock('@/lib/ai/embed', () => ({
+  embedChunks: embedChunksMock,
+}))
 
-// ─── Fixtures ─────────────────────────────────────────────────────────────────
+vi.mock('@/lib/storage/store', () => ({
+  storeVideoSections: storeVideoSectionsMock,
+}))
+
+vi.mock('@/lib/intelligence/generate', () => ({
+  generateIntelligenceReport: generateIntelligenceReportMock,
+}))
+
+vi.mock('@/lib/seo/generate', () => ({
+  generateSeoReport: generateSeoReportMock,
+}))
+
+vi.mock('@/lib/youtube/transcript', async () => {
+  const actual = await vi.importActual<
+    typeof import('@/lib/youtube/transcript')
+  >('@/lib/youtube/transcript')
+
+  return {
+    ...actual,
+    fetchYoutubeTranscript: fetchYoutubeTranscriptMock,
+  }
+})
+
+import { TranscriptFetchError } from '@/lib/youtube/transcript'
 
 const VALID_INPUT = {
   youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
@@ -39,61 +81,143 @@ const TRANSCRIPT_OK = {
   fullText: 'This is the transcript text.',
 }
 
-const CHUNK_OK = {
-  chunks: ['chunk one', 'chunk two'],
-}
+const EMBED_OK = [{ content: 'chunk one', index: 0, embedding: [0.1, 0.2] }]
 
-const EMBED_OK = {
-  data: [
-    { content: 'chunk one', index: 0, embedding: [0.1, 0.2] },
-    { content: 'chunk two', index: 1, embedding: [0.3, 0.4] },
-  ],
-}
-
-const STORE_OK = {
-  videoId: 'vid-uuid-123',
-  count: 2,
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function mockHeaders(host = 'localhost:3000', cookie = 'sb-cookie=abc') {
-  vi.mocked(headers).mockResolvedValue({
-    get: (key: string) => {
-      if (key === 'host') return host
-      if (key === 'cookie') return cookie
-      return null
+const REPORT_OK = {
+  summary: {
+    tldr: {
+      context: 'c',
+      mainArgument: 'm',
+      conclusion: 'x',
     },
-  } as unknown as Awaited<ReturnType<typeof headers>>)
-}
-
-function mockIngestionGate(
-  user: { id: string } | null = { id: 'user-1' },
-  profile: { role: string; subscription_active: boolean } | null = {
-    role: 'user',
-    subscription_active: false,
+    timestamps: [{ time: '00:10', label: 'Intro' }],
+    keyTakeaways: ['1', '2', '3', '4', '5'],
   },
-  videoCount = 0,
-) {
-  const maybeSingleMock = vi.fn().mockResolvedValue({
-    data: profile,
-    error: null,
-  })
-  const profileEqMock = vi
-    .fn()
-    .mockReturnValue({ maybeSingle: maybeSingleMock })
-  const profileSelectMock = vi.fn().mockReturnValue({ eq: profileEqMock })
+  repurpose: {
+    twitterThread: [
+      { position: 1, content: 'a' },
+      { position: 2, content: 'b' },
+      { position: 3, content: 'c' },
+      { position: 4, content: 'd' },
+      { position: 5, content: 'e' },
+      { position: 6, content: 'f' },
+      { position: 7, content: 'g' },
+    ],
+    shortScript: {
+      hook: 'h',
+      body: 'b',
+      cta: 'c',
+      suggestedClip: 's',
+    },
+    linkedinPost: 'post',
+    newsletterDraft: {
+      subject: 'sub',
+      body: 'body',
+    },
+  },
+  analysis: {
+    sentiment: {
+      tone: 'educativo',
+      confidence: 0.9,
+      explanation: 'good',
+    },
+    entities: [{ name: 'React', type: 'concepto', context: 'ctx' }],
+    suggestedQuestions: ['q1', 'q2', 'q3'],
+  },
+  generatedAt: '2025-01-01T00:00:00.000Z',
+} as const
 
-  const videosEqMock = vi.fn().mockResolvedValue({
-    count: videoCount,
+const SEO_OK = {
+  seoPackage: {
+    titleVariants: [
+      { variant: 'A', title: 'A', rationale: 'a' },
+      { variant: 'B', title: 'B', rationale: 'b' },
+      { variant: 'C', title: 'C', rationale: 'c' },
+    ],
+    description: 'desc',
+    tags: [
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '10',
+      '11',
+      '12',
+      '13',
+      '14',
+      '15',
+    ],
+  },
+  showNotes: {
+    episodeTitle: 'ep',
+    description: 'd',
+    resources: ['r'],
+    suggestedLinks: ['l'],
+  },
+  thumbnailBrief: {
+    mainElement: 'm',
+    textOverlay: 't',
+    emotionalTone: 'e',
+    composition: 'c',
+    colorSuggestions: ['red', 'blue', 'green'],
+  },
+  generatedAt: '2025-01-01T00:00:00.000Z',
+} as const
+
+function setupSupabase(user: { id: string } | null = { id: 'user-1' }) {
+  const profileMaybeSingleMock = vi.fn().mockResolvedValue({
+    data: { role: 'user', subscription_active: false, trial_used: false },
     error: null,
   })
-  const videosSelectMock = vi.fn().mockReturnValue({ eq: videosEqMock })
+
+  const profileSelectEqMock = vi
+    .fn()
+    .mockReturnValue({ maybeSingle: profileMaybeSingleMock })
+  const profileSelectMock = vi.fn().mockReturnValue({ eq: profileSelectEqMock })
+
+  const profileUpdateEqMock = vi.fn().mockResolvedValue({ error: null })
+  const profileUpdateMock = vi.fn().mockReturnValue({ eq: profileUpdateEqMock })
+
+  const reportSingleMock = vi.fn().mockResolvedValue({
+    data: { id: 'report-1' },
+    error: null,
+  })
+  const reportSelectMock = vi.fn().mockReturnValue({ single: reportSingleMock })
+  const reportUpsertMock = vi.fn().mockReturnValue({ select: reportSelectMock })
+
+  const seoSingleMock = vi.fn().mockResolvedValue({
+    data: { id: 'seo-1' },
+    error: null,
+  })
+  const seoSelectMock = vi.fn().mockReturnValue({ single: seoSingleMock })
+  const seoUpsertMock = vi.fn().mockReturnValue({ select: seoSelectMock })
 
   const fromMock = vi.fn((table: string) => {
-    if (table === 'profiles') return { select: profileSelectMock }
-    if (table === 'videos') return { select: videosSelectMock }
-    return { select: vi.fn() }
+    if (table === 'profiles') {
+      return {
+        select: profileSelectMock,
+        update: profileUpdateMock,
+      }
+    }
+
+    if (table === 'intelligence_reports') {
+      return { upsert: reportUpsertMock }
+    }
+
+    if (table === 'seo_reports') {
+      return { upsert: seoUpsertMock }
+    }
+
+    return {
+      select: vi.fn(),
+      update: vi.fn(),
+      upsert: vi.fn(),
+    }
   })
 
   createClientMock.mockResolvedValue({
@@ -104,120 +228,62 @@ function mockIngestionGate(
   })
 }
 
-/**
- * Build a `fetch` spy that returns the given responses in order (one per call).
- */
-function mockFetchSequence(
-  responses: Array<{ status: number; body: unknown }>,
-) {
-  let call = 0
-  vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
-    const r = responses[call++]
-    const body = JSON.stringify(r?.body ?? null)
-    return new Response(body, {
-      status: r?.status ?? 200,
-      headers: { 'Content-Type': 'application/json' },
-    })
-  })
-}
-
-// ─── Tests ────────────────────────────────────────────────────────────────────
-
 describe('ingestVideo', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockHeaders()
-    mockIngestionGate()
+    setupSupabase()
+
+    getVideoCountMock.mockResolvedValue(0)
+    fetchYoutubeTranscriptMock.mockResolvedValue(TRANSCRIPT_OK)
+    chunkTextMock.mockReturnValue(['chunk one'])
+    embedChunksMock.mockResolvedValue(EMBED_OK)
+    storeVideoSectionsMock.mockResolvedValue({
+      videoId: 'vid-uuid-123',
+      count: 1,
+    })
+    generateIntelligenceReportMock.mockResolvedValue(REPORT_OK)
+    generateSeoReportMock.mockResolvedValue(SEO_OK)
   })
 
   afterEach(() => {
+    cleanup()
     vi.restoreAllMocks()
   })
 
-  // ── Happy path ──────────────────────────────────────────────────────────────
-
-  it('returns success when all 4 phases succeed', async () => {
-    mockFetchSequence([
-      { status: 200, body: TRANSCRIPT_OK },
-      { status: 200, body: CHUNK_OK },
-      { status: 200, body: EMBED_OK },
-      { status: 200, body: STORE_OK },
-    ])
-
+  it('returns success when all phases succeed', async () => {
     const result = await ingestVideo(VALID_INPUT)
 
     expect(result.ok).toBe(true)
     if (!result.ok) return
+
     expect(result.videoId).toBe('vid-uuid-123')
-    expect(result.sectionCount).toBe(2)
+    expect(result.sectionCount).toBe(1)
+    expect(updateTagMock).toHaveBeenCalledWith('dashboard-user-1')
   })
 
-  it('calls all 4 API routes in order', async () => {
-    const fetchSpy = vi
-      .spyOn(globalThis, 'fetch')
-      .mockImplementation(async (input) => {
-        const url = input.toString()
-        if (url.includes('/api/transcript'))
-          return new Response(JSON.stringify(TRANSCRIPT_OK), { status: 200 })
-        if (url.includes('/api/chunk'))
-          return new Response(JSON.stringify(CHUNK_OK), { status: 200 })
-        if (url.includes('/api/embed'))
-          return new Response(JSON.stringify(EMBED_OK), { status: 200 })
-        if (url.includes('/api/store'))
-          return new Response(JSON.stringify(STORE_OK), { status: 200 })
-        return new Response('not found', { status: 404 })
-      })
-
+  it('calls pipeline phases with expected payloads', async () => {
     await ingestVideo(VALID_INPUT)
 
-    const urls = fetchSpy.mock.calls.map((c) => c[0]?.toString() ?? '')
-    expect(urls.some((u) => u.includes('/api/transcript'))).toBe(true)
-    expect(urls.some((u) => u.includes('/api/chunk'))).toBe(true)
-    expect(urls.some((u) => u.includes('/api/embed'))).toBe(true)
-    expect(urls.some((u) => u.includes('/api/store'))).toBe(true)
+    expect(fetchYoutubeTranscriptMock).toHaveBeenCalledWith(
+      VALID_INPUT.youtubeUrl,
+    )
+    expect(chunkTextMock).toHaveBeenCalledWith(
+      TRANSCRIPT_OK.fullText,
+      expect.any(Object),
+    )
+    expect(embedChunksMock).toHaveBeenCalledWith(['chunk one'])
+    expect(storeVideoSectionsMock).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({
+        youtubeId: TRANSCRIPT_OK.videoId,
+        title: VALID_INPUT.title,
+        userId: 'user-1',
+      }),
+    )
   })
 
-  it('uses https protocol when host is not localhost', async () => {
-    mockHeaders('myapp.vercel.app', '')
-    const fetchSpy = vi
-      .spyOn(globalThis, 'fetch')
-      .mockImplementation(async (input) => {
-        const url = input.toString()
-        if (url.startsWith('https://myapp.vercel.app')) {
-          if (url.includes('/api/transcript'))
-            return new Response(JSON.stringify(TRANSCRIPT_OK), { status: 200 })
-          if (url.includes('/api/chunk'))
-            return new Response(JSON.stringify(CHUNK_OK), { status: 200 })
-          if (url.includes('/api/embed'))
-            return new Response(JSON.stringify(EMBED_OK), { status: 200 })
-          if (url.includes('/api/store'))
-            return new Response(JSON.stringify(STORE_OK), { status: 200 })
-        }
-        return new Response('bad', { status: 500 })
-      })
-
-    const result = await ingestVideo(VALID_INPUT)
-    expect(result.ok).toBe(true)
-
-    const firstUrl = fetchSpy.mock.calls[0]?.[0]?.toString() ?? ''
-    expect(firstUrl.startsWith('https://')).toBe(true)
-  })
-
-  // ── Phase 1 — Transcript errors ─────────────────────────────────────────────
-
-  it('returns TRANSCRIPT_FAILED on transcript 500', async () => {
-    mockFetchSequence([{ status: 500, body: { error: 'server exploded' } }])
-
-    const result = await ingestVideo(VALID_INPUT)
-
-    expect(result.ok).toBe(false)
-    if (result.ok) return
-    expect(result.code).toBe(INGEST_ERROR.TRANSCRIPT_FAILED)
-    expect(result.message).toBe('server exploded')
-  })
-
-  it('returns UNAUTHORIZED on transcript 401', async () => {
-    mockFetchSequence([{ status: 401, body: { error: 'not auth' } }])
+  it('returns UNAUTHORIZED when no authenticated user exists', async () => {
+    setupSupabase(null)
 
     const result = await ingestVideo(VALID_INPUT)
 
@@ -226,18 +292,60 @@ describe('ingestVideo', () => {
     expect(result.code).toBe(INGEST_ERROR.UNAUTHORIZED)
   })
 
-  it('returns FORBIDDEN on transcript 403', async () => {
-    mockFetchSequence([{ status: 403, body: {} }])
+  it('returns VIDEO_LIMIT_REACHED when free trial is already used', async () => {
+    const profileMaybeSingleMock = vi.fn().mockResolvedValue({
+      data: { role: 'user', subscription_active: false, trial_used: true },
+      error: null,
+    })
+
+    const profileSelectEqMock = vi
+      .fn()
+      .mockReturnValue({ maybeSingle: profileMaybeSingleMock })
+    const profileSelectMock = vi
+      .fn()
+      .mockReturnValue({ eq: profileSelectEqMock })
+
+    createClientMock.mockResolvedValue({
+      auth: {
+        getUser: vi
+          .fn()
+          .mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null }),
+      },
+      from: vi.fn((table: string) => {
+        if (table === 'profiles') {
+          return {
+            select: profileSelectMock,
+            update: vi.fn().mockReturnValue({ eq: vi.fn() }),
+          }
+        }
+        return { select: vi.fn(), upsert: vi.fn(), update: vi.fn() }
+      }),
+    })
+
+    getVideoCountMock.mockResolvedValue(1)
 
     const result = await ingestVideo(VALID_INPUT)
 
     expect(result.ok).toBe(false)
     if (result.ok) return
-    expect(result.code).toBe(INGEST_ERROR.FORBIDDEN)
+    expect(result.code).toBe(INGEST_ERROR.VIDEO_LIMIT_REACHED)
   })
 
-  it('returns TRANSCRIPT_FAILED with generic message when body has no error field', async () => {
-    mockFetchSequence([{ status: 500, body: null }])
+  it('maps INVALID_URL transcript error correctly', async () => {
+    fetchYoutubeTranscriptMock.mockRejectedValueOnce(
+      new TranscriptFetchError(TRANSCRIPT_ERROR.INVALID_URL, 'URL inválida'),
+    )
+
+    const result = await ingestVideo(VALID_INPUT)
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.code).toBe(INGEST_ERROR.INVALID_URL)
+    expect(result.message).toBe('URL inválida')
+  })
+
+  it('returns TRANSCRIPT_FAILED on non-transcript exceptions', async () => {
+    fetchYoutubeTranscriptMock.mockRejectedValueOnce(new Error('boom'))
 
     const result = await ingestVideo(VALID_INPUT)
 
@@ -247,127 +355,29 @@ describe('ingestVideo', () => {
     expect(result.message).toBe('Transcript extraction failed.')
   })
 
-  it('returns TRANSCRIPT_FAILED when transcript response has invalid shape', async () => {
-    mockFetchSequence([
-      { status: 200, body: { videoId: 'ok', missing_fullText: true } },
-    ])
-
-    const result = await ingestVideo(VALID_INPUT)
-
-    expect(result.ok).toBe(false)
-    if (result.ok) return
-    expect(result.code).toBe(INGEST_ERROR.TRANSCRIPT_FAILED)
-    expect(result.message).toBe('Invalid transcript response.')
-  })
-
-  it('uses message field from error body as fallback', async () => {
-    mockFetchSequence([{ status: 502, body: { message: 'gateway timeout' } }])
-
-    const result = await ingestVideo(VALID_INPUT)
-
-    expect(result.ok).toBe(false)
-    if (result.ok) return
-    expect(result.message).toBe('gateway timeout')
-  })
-
-  // ── Phase 2 — Chunk errors ───────────────────────────────────────────────────
-
-  it('returns CHUNK_FAILED on chunk 500', async () => {
-    mockFetchSequence([
-      { status: 200, body: TRANSCRIPT_OK },
-      { status: 500, body: { error: 'chunk error' } },
-    ])
+  it('returns CHUNK_FAILED when no chunks are generated', async () => {
+    chunkTextMock.mockReturnValueOnce([])
 
     const result = await ingestVideo(VALID_INPUT)
 
     expect(result.ok).toBe(false)
     if (result.ok) return
     expect(result.code).toBe(INGEST_ERROR.CHUNK_FAILED)
-    expect(result.message).toBe('chunk error')
   })
 
-  it('returns CHUNK_FAILED when chunk response has invalid shape', async () => {
-    mockFetchSequence([
-      { status: 200, body: TRANSCRIPT_OK },
-      { status: 200, body: { notChunks: true } },
-    ])
-
-    const result = await ingestVideo(VALID_INPUT)
-
-    expect(result.ok).toBe(false)
-    if (result.ok) return
-    expect(result.code).toBe(INGEST_ERROR.CHUNK_FAILED)
-    expect(result.message).toBe('Invalid chunk response.')
-  })
-
-  it('returns UNAUTHORIZED on chunk 401', async () => {
-    mockFetchSequence([
-      { status: 200, body: TRANSCRIPT_OK },
-      { status: 401, body: {} },
-    ])
-
-    const result = await ingestVideo(VALID_INPUT)
-
-    expect(result.ok).toBe(false)
-    if (result.ok) return
-    expect(result.code).toBe(INGEST_ERROR.UNAUTHORIZED)
-  })
-
-  // ── Phase 3 — Embed errors ───────────────────────────────────────────────────
-
-  it('returns EMBED_FAILED on embed 500', async () => {
-    mockFetchSequence([
-      { status: 200, body: TRANSCRIPT_OK },
-      { status: 200, body: CHUNK_OK },
-      { status: 500, body: { error: 'embed error' } },
-    ])
+  it('returns EMBED_FAILED when embed phase throws', async () => {
+    embedChunksMock.mockRejectedValueOnce(new Error('embed down'))
 
     const result = await ingestVideo(VALID_INPUT)
 
     expect(result.ok).toBe(false)
     if (result.ok) return
     expect(result.code).toBe(INGEST_ERROR.EMBED_FAILED)
-    expect(result.message).toBe('embed error')
+    expect(result.message).toBe('embed down')
   })
 
-  it('returns EMBED_FAILED when embed response has invalid shape', async () => {
-    mockFetchSequence([
-      { status: 200, body: TRANSCRIPT_OK },
-      { status: 200, body: CHUNK_OK },
-      { status: 200, body: { data: [{ bad: 'shape' }] } },
-    ])
-
-    const result = await ingestVideo(VALID_INPUT)
-
-    expect(result.ok).toBe(false)
-    if (result.ok) return
-    expect(result.code).toBe(INGEST_ERROR.EMBED_FAILED)
-    expect(result.message).toBe('Invalid embed response.')
-  })
-
-  it('returns FORBIDDEN on embed 403', async () => {
-    mockFetchSequence([
-      { status: 200, body: TRANSCRIPT_OK },
-      { status: 200, body: CHUNK_OK },
-      { status: 403, body: {} },
-    ])
-
-    const result = await ingestVideo(VALID_INPUT)
-
-    expect(result.ok).toBe(false)
-    if (result.ok) return
-    expect(result.code).toBe(INGEST_ERROR.FORBIDDEN)
-  })
-
-  // ── Phase 4 — Store errors ───────────────────────────────────────────────────
-
-  it('returns STORE_FAILED on store 500', async () => {
-    mockFetchSequence([
-      { status: 200, body: TRANSCRIPT_OK },
-      { status: 200, body: CHUNK_OK },
-      { status: 200, body: EMBED_OK },
-      { status: 500, body: { error: 'db write failed' } },
-    ])
+  it('returns STORE_FAILED when store phase throws', async () => {
+    storeVideoSectionsMock.mockRejectedValueOnce(new Error('db write failed'))
 
     const result = await ingestVideo(VALID_INPUT)
 
@@ -377,50 +387,26 @@ describe('ingestVideo', () => {
     expect(result.message).toBe('db write failed')
   })
 
-  it('returns STORE_FAILED when store response has invalid shape', async () => {
-    mockFetchSequence([
-      { status: 200, body: TRANSCRIPT_OK },
-      { status: 200, body: CHUNK_OK },
-      { status: 200, body: EMBED_OK },
-      { status: 200, body: { videoId: 'ok' } }, // missing count
-    ])
+  it('keeps success when intelligence report generation fails (graceful)', async () => {
+    generateIntelligenceReportMock.mockRejectedValueOnce(new Error('llm down'))
 
     const result = await ingestVideo(VALID_INPUT)
 
-    expect(result.ok).toBe(false)
-    if (result.ok) return
-    expect(result.code).toBe(INGEST_ERROR.STORE_FAILED)
-    expect(result.message).toBe('Invalid store response.')
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.report).toBeNull()
+    expect(result.seoReport).toBeNull()
+    expect(generateSeoReportMock).not.toHaveBeenCalled()
   })
 
-  it('returns UNAUTHORIZED on store 401', async () => {
-    mockFetchSequence([
-      { status: 200, body: TRANSCRIPT_OK },
-      { status: 200, body: CHUNK_OK },
-      { status: 200, body: EMBED_OK },
-      { status: 401, body: {} },
-    ])
+  it('keeps success when SEO generation fails (graceful)', async () => {
+    generateSeoReportMock.mockRejectedValueOnce(new Error('seo down'))
 
     const result = await ingestVideo(VALID_INPUT)
 
-    expect(result.ok).toBe(false)
-    if (result.ok) return
-    expect(result.code).toBe(INGEST_ERROR.UNAUTHORIZED)
-  })
-
-  it('returns generic STORE_FAILED message when store body has no error field', async () => {
-    mockFetchSequence([
-      { status: 200, body: TRANSCRIPT_OK },
-      { status: 200, body: CHUNK_OK },
-      { status: 200, body: EMBED_OK },
-      { status: 500, body: {} },
-    ])
-
-    const result = await ingestVideo(VALID_INPUT)
-
-    expect(result.ok).toBe(false)
-    if (result.ok) return
-    expect(result.code).toBe(INGEST_ERROR.STORE_FAILED)
-    expect(result.message).toBe('Storing video sections failed.')
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.report).not.toBeNull()
+    expect(result.seoReport).toBeNull()
   })
 })

@@ -3,24 +3,36 @@
 /**
  * Pipeline orchestrator — Server Action
  *
- * Chains all 6 RAG ingestion phases by calling the internal Next.js API routes:
- *   1. POST /api/transcript           — extract full transcript from a YouTube URL
- *   2. POST /api/chunk                — split transcript text into overlapping segments
- *   3. POST /api/embed                — convert segments into 1536-dim vectors
- *   4. POST /api/store                — persist video + embedded sections to Supabase
- *   5. POST /api/generate-report      — generate Intelligence Report (3 parallel LLM calls)
- *   6. POST /api/generate-seo-report  — generate SEO Pack (3 parallel LLM calls)
- *
- * Auth cookies are forwarded to every downstream fetch so Supabase middleware
- * can authenticate each sub-request.
+ * Chains all 6 RAG ingestion phases by calling library functions directly
+ * (no internal HTTP round-trips):
+ *   1. fetchYoutubeTranscript — extract full transcript
+ *   2. chunkText              — split into overlapping segments
+ *   3. embedChunks            — convert segments into 1536-dim vectors
+ *   4. storeVideoSections     — persist video + sections to Supabase
+ *   5. generateIntelligenceReport — 3 parallel LLM calls → Intelligence Report
+ *   6. generateSeoReport          — 3 parallel LLM calls → SEO Pack
  */
 
-import { headers } from 'next/headers'
+import { updateTag } from 'next/cache'
 
+import { chunkText } from '@/lib/ai/chunk'
+import { embedChunks } from '@/lib/ai/embed'
+import { CHUNK_CONFIG } from '@/lib/ai/types'
+import type { EmbeddedChunk } from '@/lib/ai/types'
+import { generateIntelligenceReport } from '@/lib/intelligence/generate'
+import type { IntelligenceReport } from '@/lib/intelligence/types'
 import { canIndexVideo, resolvePlan } from '@/lib/plans'
+import { generateSeoReport } from '@/lib/seo/generate'
+import type { SeoReport } from '@/lib/seo/types'
+import { storeVideoSections } from '@/lib/storage/store'
 import { getVideoCount } from '@/lib/supabase/queries'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
+import {
+  fetchYoutubeTranscript,
+  TranscriptFetchError,
+} from '@/lib/youtube/transcript'
+import { TRANSCRIPT_ERROR } from '@/lib/youtube/types'
 import type {
   IngestError,
   IngestErrorCode,
@@ -30,83 +42,11 @@ import type {
 } from './types'
 import { INGEST_ERROR } from './types'
 
+// ─── DB row types for upserts ─────────────────────────────────────────────────
+
 type Profile = Database['public']['Tables']['profiles']['Row']
-
-// ─── internal response shapes ─────────────────────────────────────────────────
-
-interface TranscriptOk {
-  videoId: string
-  fullText: string
-}
-interface ChunkOk {
-  chunks: string[]
-}
-interface EmbedItem {
-  content: string
-  index: number
-  embedding: number[]
-}
-interface EmbedOk {
-  data: EmbedItem[]
-}
-interface StoreOk {
-  videoId: string
-  count: number
-}
-
-interface ReportOk {
-  reportId: string
-}
-
-interface SeoReportOk {
-  reportId: string
-  report: Record<string, unknown>
-}
-
-interface ApiErrorPayload {
-  error?: string
-  message?: string
-}
-
-// ─── type guards ──────────────────────────────────────────────────────────────
-
-function isTranscriptOk(v: unknown): v is TranscriptOk {
-  if (typeof v !== 'object' || v === null) return false
-  const r = v as Record<string, unknown>
-  return typeof r.videoId === 'string' && typeof r.fullText === 'string'
-}
-
-function isChunkOk(v: unknown): v is ChunkOk {
-  if (typeof v !== 'object' || v === null) return false
-  const r = v as Record<string, unknown>
-  return (
-    Array.isArray(r.chunks) &&
-    (r.chunks as unknown[]).every((c) => typeof c === 'string')
-  )
-}
-
-function isEmbedItem(v: unknown): v is EmbedItem {
-  if (typeof v !== 'object' || v === null) return false
-  const r = v as Record<string, unknown>
-  return (
-    typeof r.content === 'string' &&
-    typeof r.index === 'number' &&
-    Array.isArray(r.embedding) &&
-    (r.embedding as unknown[]).every((n) => typeof n === 'number')
-  )
-}
-
-function isEmbedOk(v: unknown): v is EmbedOk {
-  if (typeof v !== 'object' || v === null) return false
-  const r = v as Record<string, unknown>
-  return Array.isArray(r.data) && (r.data as unknown[]).every(isEmbedItem)
-}
-
-function isStoreOk(v: unknown): v is StoreOk {
-  if (typeof v !== 'object' || v === null) return false
-  const r = v as Record<string, unknown>
-  return typeof r.videoId === 'string' && typeof r.count === 'number'
-}
+type ReportRow = Database['public']['Tables']['intelligence_reports']['Row']
+type SeoReportRow = Database['public']['Tables']['seo_reports']['Row']
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -114,56 +54,12 @@ function ingestError(code: IngestErrorCode, message: string): IngestError {
   return { ok: false, code, message }
 }
 
-function isReportOk(v: unknown): v is ReportOk {
-  if (typeof v !== 'object' || v === null) return false
-  const r = v as Record<string, unknown>
-  return typeof r.reportId === 'string'
-}
-
-function isSeoReportOk(v: unknown): v is SeoReportOk {
-  if (typeof v !== 'object' || v === null) return false
-  const r = v as Record<string, unknown>
-  return (
-    typeof r.reportId === 'string' &&
-    typeof r.report === 'object' &&
-    r.report !== null
-  )
-}
-
-/**
- * Maps an HTTP status to an auth error code, or returns `fallback` for
- * any other non-200 status.
- */
-function resolveErrorCode(
-  status: number,
-  fallback: IngestErrorCode,
-): IngestErrorCode {
-  if (status === 401) return INGEST_ERROR.UNAUTHORIZED
-  if (status === 403) return INGEST_ERROR.FORBIDDEN
-  return fallback
-}
-
-function resolveApiErrorMessage(data: unknown): string | null {
-  if (typeof data !== 'object' || data === null) return null
-  const payload = data as ApiErrorPayload
-
-  if (typeof payload.error === 'string' && payload.error.trim() !== '') {
-    return payload.error
-  }
-
-  if (typeof payload.message === 'string' && payload.message.trim() !== '') {
-    return payload.message
-  }
-
-  return null
-}
-
 // ─── Server Action ────────────────────────────────────────────────────────────
 
 export async function ingestVideo(input: IngestInput): Promise<IngestResult> {
   const { youtubeUrl, title } = input
 
-  // ── Pre-flight: video-limit gate ────────────────────────────────────────
+  // ── Pre-flight: auth + plan gate ────────────────────────────────────────────
   const supabase = await createClient()
   const {
     data: { user },
@@ -186,7 +82,6 @@ export async function ingestVideo(input: IngestInput): Promise<IngestResult> {
 
   const plan = profile ? resolvePlan(profile) : 'free'
   const trialUsed = profile?.trial_used ?? false
-
   const videoCount = await getVideoCount(supabase, user.id)
 
   if (!canIndexVideo(plan, videoCount, trialUsed)) {
@@ -196,125 +91,133 @@ export async function ingestVideo(input: IngestInput): Promise<IngestResult> {
     )
   }
 
-  // ── Prepare fetch context ───────────────────────────────────────────────
-  const h = await headers()
-  const host = h.get('host') ?? 'localhost:3000'
-  const protocol = host.startsWith('localhost') ? 'http' : 'https'
-  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? `${protocol}://${host}`
-  const cookieHeader = h.get('cookie') ?? ''
+  // ── Phase 1 — Transcript ───────────────────────────────────────────────────
+  let youtubeId: string
+  let fullText: string
 
-  const fetchJson = async (
-    path: string,
-    payload: Record<string, unknown>,
-  ): Promise<{ status: number; data: unknown }> => {
-    const res = await fetch(`${origin}${path}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Cookie: cookieHeader },
-      body: JSON.stringify(payload),
-    })
-    let data: unknown = null
-    try {
-      data = await res.json()
-    } catch {
-      /* leave null */
+  try {
+    const result = await fetchYoutubeTranscript(youtubeUrl)
+    youtubeId = result.videoId
+    fullText = result.fullText
+  } catch (error) {
+    if (error instanceof TranscriptFetchError) {
+      const code =
+        error.code === TRANSCRIPT_ERROR.INVALID_URL
+          ? INGEST_ERROR.INVALID_URL
+          : INGEST_ERROR.TRANSCRIPT_FAILED
+      return ingestError(code, error.message)
     }
-    return { status: res.status, data }
-  }
-
-  // ── Phase 1 — Transcript ──────────────────────────────────────────────────
-  const t = await fetchJson('/api/transcript', { url: youtubeUrl })
-  if (t.status !== 200) {
-    const apiMessage = resolveApiErrorMessage(t.data)
-    return ingestError(
-      resolveErrorCode(t.status, INGEST_ERROR.TRANSCRIPT_FAILED),
-      apiMessage ?? 'Transcript extraction failed.',
-    )
-  }
-  if (!isTranscriptOk(t.data)) {
     return ingestError(
       INGEST_ERROR.TRANSCRIPT_FAILED,
-      'Invalid transcript response.',
+      'Transcript extraction failed.',
     )
   }
-  const { videoId: youtubeId, fullText } = t.data
 
-  // ── Phase 2 — Chunk ───────────────────────────────────────────────────────
-  const c = await fetchJson('/api/chunk', { text: fullText })
-  if (c.status !== 200) {
-    const apiMessage = resolveApiErrorMessage(c.data)
+  // ── Phase 2 — Chunk ────────────────────────────────────────────────────────
+  const chunks = chunkText(fullText, CHUNK_CONFIG)
+
+  if (chunks.length === 0) {
     return ingestError(
-      resolveErrorCode(c.status, INGEST_ERROR.CHUNK_FAILED),
-      apiMessage ?? 'Text chunking failed.',
+      INGEST_ERROR.CHUNK_FAILED,
+      'No chunks generated from transcript.',
     )
   }
-  if (!isChunkOk(c.data)) {
-    return ingestError(INGEST_ERROR.CHUNK_FAILED, 'Invalid chunk response.')
-  }
-  const { chunks } = c.data
 
-  // ── Phase 3 — Embed ───────────────────────────────────────────────────────
-  const e = await fetchJson('/api/embed', { chunks })
-  if (e.status !== 200) {
-    const apiMessage = resolveApiErrorMessage(e.data)
-    return ingestError(
-      resolveErrorCode(e.status, INGEST_ERROR.EMBED_FAILED),
-      apiMessage ?? 'Embedding generation failed.',
-    )
-  }
-  if (!isEmbedOk(e.data)) {
-    return ingestError(INGEST_ERROR.EMBED_FAILED, 'Invalid embed response.')
-  }
-  const sections = e.data.data
+  // ── Phase 3 — Embed ────────────────────────────────────────────────────────
+  let sections: EmbeddedChunk[]
 
-  // ── Phase 4 — Store ───────────────────────────────────────────────────────
-  const s = await fetchJson('/api/store', { youtubeId, title, sections })
-  if (s.status !== 200) {
-    const apiMessage = resolveApiErrorMessage(s.data)
-    return ingestError(
-      resolveErrorCode(s.status, INGEST_ERROR.STORE_FAILED),
-      apiMessage ?? 'Storing video sections failed.',
-    )
-  }
-  if (!isStoreOk(s.data)) {
-    return ingestError(INGEST_ERROR.STORE_FAILED, 'Invalid store response.')
+  try {
+    sections = await embedChunks(chunks)
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Embedding generation failed.'
+    return ingestError(INGEST_ERROR.EMBED_FAILED, message)
   }
 
-  const videoId = s.data.videoId
-  const sectionCount = s.data.count
+  // ── Phase 4 — Store ────────────────────────────────────────────────────────
+  let videoId: string
+  let sectionCount: number
 
-  // ── Phase 5 — Intelligence Report (graceful: failure doesn't block) ─────
+  try {
+    const result = await storeVideoSections(supabase, {
+      youtubeId,
+      title,
+      userId: user.id,
+      sections,
+    })
+    videoId = result.videoId
+    sectionCount = result.count
+
+    // Mark trial as used — fire-and-forget, non-blocking
+    void supabase
+      .from('profiles')
+      .update({ trial_used: true })
+      .eq('id', user.id)
+
+    // Invalidate dashboard cache so next load reflects the new video
+    updateTag(`dashboard-${user.id}`)
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Storing video sections failed.'
+    return ingestError(INGEST_ERROR.STORE_FAILED, message)
+  }
+
+  // ── Phase 5 — Intelligence Report (graceful: failure doesn't block) ────────
   let report: IngestSuccess['report'] = null
 
   try {
-    const r = await fetchJson('/api/generate-report', {
-      videoId,
+    const intelligenceReport = await generateIntelligenceReport({
       transcript: fullText,
       title,
     })
 
-    if (r.status === 200 && isReportOk(r.data)) {
-      const data = r.data as { report?: unknown }
-      report = (data.report as IngestSuccess['report']) ?? null
+    const { data: inserted } = await (
+      supabase.from('intelligence_reports') as ReturnType<typeof supabase.from>
+    )
+      .upsert(
+        {
+          video_id: videoId,
+          report: intelligenceReport,
+          generated_at: intelligenceReport.generatedAt,
+        } as unknown as ReportRow,
+        { onConflict: 'video_id' },
+      )
+      .select('id')
+      .single()
+
+    if (inserted) {
+      report = intelligenceReport as IntelligenceReport
     }
   } catch {
     // Phase 5 failure is graceful — the video is already indexed.
-    // The report can be regenerated later.
   }
 
-  // ── Phase 6 — SEO Pack (graceful: only runs if Phase 5 succeeded) ───────
+  // ── Phase 6 — SEO Pack (graceful: only runs if Phase 5 succeeded) ──────────
   let seoReport: IngestSuccess['seoReport'] = null
 
   if (report !== null) {
     try {
-      const seo = await fetchJson('/api/generate-seo-report', {
-        videoId,
+      const seoReportData = await generateSeoReport({
         transcript: fullText,
         title,
       })
 
-      if (seo.status === 200 && isSeoReportOk(seo.data)) {
-        const data = seo.data as { report?: unknown }
-        seoReport = (data.report as IngestSuccess['seoReport']) ?? null
+      const { data: inserted } = await (
+        supabase.from('seo_reports') as ReturnType<typeof supabase.from>
+      )
+        .upsert(
+          {
+            video_id: videoId,
+            report: seoReportData,
+            generated_at: seoReportData.generatedAt,
+          } as unknown as SeoReportRow,
+          { onConflict: 'video_id' },
+        )
+        .select('id')
+        .single()
+
+      if (inserted) {
+        seoReport = seoReportData as SeoReport
       }
     } catch {
       // Phase 6 failure is graceful — Intelligence Report remains available.

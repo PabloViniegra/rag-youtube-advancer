@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Outfit, Plus_Jakarta_Sans } from 'next/font/google'
+import { Suspense } from 'react'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import './globals.css'
 
@@ -42,7 +43,9 @@ export default function RootLayout({
     >
       <body className="min-h-screen overflow-x-hidden bg-background font-body text-on-surface antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
+          {/* Suspense boundary allows dynamic routes (dashboard, auth) to
+              stream in their content while the static shell is prerendered. */}
+          <Suspense>{children}</Suspense>
         </ThemeProvider>
       </body>
     </html>

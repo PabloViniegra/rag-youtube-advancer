@@ -1,0 +1,170 @@
+'use client'
+
+/**
+ * SearchOrchestrator
+ *
+ * Client component that owns the search state machine:
+ *   idle → loading → success | error
+ *
+ * Receives no server data — the static shell and library status are
+ * rendered by the Server Component parent (search/page.tsx).
+ */
+
+import {
+  startTransition,
+  useEffect,
+  useRef,
+  useState,
+  ViewTransition,
+} from 'react'
+import type {
+  AugmentErrorResponse,
+  AugmentSuccessResponse,
+} from '@/lib/augmentation/types'
+import { AUGMENT_API_ERROR, AUGMENT_DEFAULTS } from '@/lib/augmentation/types'
+import type { AnswerData } from './answer-card'
+import { AnswerCard } from './answer-card'
+import type { SearchFormError } from './search-form'
+import { SearchForm } from './search-form'
+import { SearchLoading } from './search-loading'
+
+// ── State machine ──────────────────────────────────────────────────────────────
+
+const SEARCH_STATE = {
+  IDLE: 'idle',
+  LOADING: 'loading',
+  SUCCESS: 'success',
+  ERROR: 'error',
+} as const
+
+type SearchState = (typeof SEARCH_STATE)[keyof typeof SEARCH_STATE]
+
+const LEGACY_NO_CONTEXT_MESSAGE =
+  'No relevant video sections found for the given query.'
+const FRIENDLY_NO_CONTEXT_MESSAGE =
+  'No encontré contexto suficiente para esa pregunta. Prueba con otras palabras o menciona una idea concreta del video.'
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
+export function SearchOrchestrator() {
+  const [query, setQuery] = useState('')
+  const [searchState, setSearchState] = useState<SearchState>(SEARCH_STATE.IDLE)
+  const [successData, setSuccessData] = useState<AnswerData | null>(null)
+  const [errorData, setErrorData] = useState<SearchFormError | null>(null)
+
+  const abortRef = useRef<AbortController | null>(null)
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort()
+    }
+  }, [])
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    if (!query.trim()) return
+
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+
+    setSearchState(SEARCH_STATE.LOADING)
+    setSuccessData(null)
+    setErrorData(null)
+
+    try {
+      const res = await fetch('/api/augment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: query.trim(),
+          matchThreshold: AUGMENT_DEFAULTS.matchThreshold,
+          matchCount: AUGMENT_DEFAULTS.matchCount,
+        }),
+        signal: controller.signal,
+      })
+
+      if (res.ok) {
+        const data = (await res.json()) as AugmentSuccessResponse
+        startTransition(() => {
+          setSuccessData({
+            answer: data.answer,
+            sources: data.sources,
+            sourceCount: data.sourceCount,
+          })
+          setSearchState(SEARCH_STATE.SUCCESS)
+        })
+      } else {
+        const errData = (await res.json()) as AugmentErrorResponse
+        const isNoContext = errData.code === AUGMENT_API_ERROR.NO_CONTEXT
+        const normalizedMessage = isNoContext
+          ? FRIENDLY_NO_CONTEXT_MESSAGE
+          : (errData.error ?? 'Error inesperado.')
+
+        startTransition(() => {
+          setErrorData({
+            message:
+              normalizedMessage === LEGACY_NO_CONTEXT_MESSAGE
+                ? FRIENDLY_NO_CONTEXT_MESSAGE
+                : normalizedMessage,
+            code: errData.code,
+          })
+          setSearchState(SEARCH_STATE.ERROR)
+        })
+      }
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return
+      startTransition(() => {
+        setErrorData({
+          message: 'No se pudo conectar al servidor. Inténtalo de nuevo.',
+        })
+        setSearchState(SEARCH_STATE.ERROR)
+      })
+    }
+  }
+
+  function handleSuggestionClick(suggestion: string) {
+    setQuery(suggestion)
+    setErrorData(null)
+    setSearchState(SEARCH_STATE.IDLE)
+  }
+
+  const isLoading = searchState === SEARCH_STATE.LOADING
+  const showExamples = !successData && !isLoading && !query.trim()
+  const formError = searchState === SEARCH_STATE.ERROR ? errorData : null
+
+  const normalizedError: SearchFormError | null =
+    formError?.code === AUGMENT_API_ERROR.FORBIDDEN
+      ? {
+          ...formError,
+          message: 'Necesitas una suscripción activa para usar esta función.',
+        }
+      : formError
+
+  return (
+    <>
+      {/* ── Search form ── */}
+      <SearchForm
+        query={query}
+        onQueryChange={setQuery}
+        onSubmit={handleSubmit}
+        isLoading={isLoading}
+        showExamples={showExamples}
+        error={normalizedError}
+        onSuggestionClick={handleSuggestionClick}
+      />
+
+      {/* ── Loading ── */}
+      {isLoading && (
+        <ViewTransition enter="fade-in" default="none">
+          <SearchLoading />
+        </ViewTransition>
+      )}
+
+      {/* ── Answer ── */}
+      {searchState === SEARCH_STATE.SUCCESS && successData && (
+        <AnswerCard data={successData} />
+      )}
+    </>
+  )
+}

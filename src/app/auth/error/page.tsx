@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
 
@@ -13,20 +14,32 @@ const ERROR_MESSAGES: Record<string, string> = {
   default: 'An unexpected authentication error occurred.',
 }
 
-export default async function AuthErrorPage({
-  searchParams,
-}: AuthErrorPageProps) {
+// ── Dynamic content (reads searchParams at request time) ──────────────────────
+
+async function ErrorMessage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams
   const reason = typeof params?.reason === 'string' ? params.reason : 'default'
   const message = ERROR_MESSAGES[reason] ?? ERROR_MESSAGES.default
+  return <p className="text-sm text-on-surface-variant">{message}</p>
+}
 
+// ── Page shell (static) ───────────────────────────────────────────────────────
+
+export default function AuthErrorPage({ searchParams }: AuthErrorPageProps) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md space-y-6 text-center">
         <h1 className="text-2xl font-semibold tracking-tight text-on-surface font-headline">
           Authentication error
         </h1>
-        <p className="text-sm text-on-surface-variant">{message}</p>
+
+        {/* Dynamic error message — streamed in */}
+        <Suspense
+          fallback={<p className="text-sm text-on-surface-variant">Loading…</p>}
+        >
+          <ErrorMessage searchParams={searchParams} />
+        </Suspense>
+
         <Link
           href="/login"
           className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-colors hover:bg-primary-dim focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"

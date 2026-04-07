@@ -1,47 +1,21 @@
-'use client'
+import Link from 'next/link'
 
 /**
  * LibraryStatus — /onboard
  *
- * Shows video library context above the search form:
- *  - loading  → skeleton pulse
+ * Shows video library context above the search form.
+ * Pure Server Component — receives videoCount as prop from search/page.tsx.
+ *
  *  - 0 videos → empty state with CTA to add first video
  *  - N videos → compact count + manage link
  */
 
-import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import type { LibraryStatsResponse } from '@/app/api/library-stats/route'
+interface LibraryStatusProps {
+  videoCount: number
+}
 
-type StatusState = 'loading' | 'empty' | 'ready'
-
-export function LibraryStatus() {
-  const [videoCount, setVideoCount] = useState(0)
-  const [status, setStatus] = useState<StatusState>('loading')
-
-  useEffect(() => {
-    fetch('/api/library-stats')
-      .then((r) => r.json() as Promise<LibraryStatsResponse>)
-      .then((data) => {
-        setVideoCount(data.videoCount)
-        setStatus(data.videoCount === 0 ? 'empty' : 'ready')
-      })
-      .catch(() => {
-        // Best-effort — on error, don't block search
-        setStatus('ready')
-      })
-  }, [])
-
-  if (status === 'loading') {
-    return (
-      <div
-        aria-hidden="true"
-        className="h-8 w-52 animate-pulse rounded-lg bg-surface-container"
-      />
-    )
-  }
-
-  if (status === 'empty') {
+export function LibraryStatus({ videoCount }: LibraryStatusProps) {
+  if (videoCount === 0) {
     return (
       <div className="flex flex-col gap-3 rounded-xl border border-outline-variant bg-surface-container-low px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-0.5">

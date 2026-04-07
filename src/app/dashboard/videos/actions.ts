@@ -4,7 +4,7 @@
  * Server Actions for video management.
  */
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, updateTag } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth/actions'
 import { createClient } from '@/lib/supabase/server'
 
@@ -44,6 +44,7 @@ export async function deleteVideo(videoId: string): Promise<DeleteVideoResult> {
   if (deleteError) return { error: 'No se pudo eliminar el video.' }
 
   revalidatePath('/dashboard/videos')
+  updateTag(`dashboard-${user.id}`)
 
   return {}
 }
