@@ -9,7 +9,13 @@
  * Extracted from new/page.tsx so the static hero section is SSR'd.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import {
+  useEffect,
+  useRef,
+  useState,
+  startTransition,
+  addTransitionType,
+} from 'react'
 import { useRouter } from 'next/navigation'
 import { ingestVideo } from '@/lib/pipeline/ingest'
 import type { IngestResult } from '@/lib/pipeline/types'
@@ -80,9 +86,13 @@ export function NewVideoOrchestrator() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    setFormState(FORM_STATE.LOADING)
-    setPhaseIndex(0)
-    setErrorData(null)
+
+    // Wrap in startTransition so ViewTransitions activate on the swap
+    startTransition(() => {
+      setFormState(FORM_STATE.LOADING)
+      setPhaseIndex(0)
+      setErrorData(null)
+    })
 
     phaseTimerRef.current = setInterval(() => {
       setPhaseIndex((prev) => Math.min(prev + 1, PHASE_COUNT - 1))
@@ -108,7 +118,11 @@ export function NewVideoOrchestrator() {
     }
 
     if (result.ok) {
-      router.push(`/dashboard/videos/${result.videoId}`)
+      // addTransitionType marks the navigation direction for page-level VTs
+      startTransition(() => {
+        addTransitionType('nav-forward')
+        router.push(`/dashboard/videos/${result.videoId}`)
+      })
     } else {
       const normalizedMessage = result.message.trim()
       const isGenericMessage = GENERIC_INGEST_MESSAGES.some(
@@ -123,8 +137,10 @@ export function NewVideoOrchestrator() {
             ? (ERROR_MESSAGES[result.code] ?? normalizedMessage)
             : normalizedMessage
 
-      setErrorData({ message })
-      setFormState(FORM_STATE.ERROR)
+      startTransition(() => {
+        setErrorData({ message })
+        setFormState(FORM_STATE.ERROR)
+      })
     }
   }
 

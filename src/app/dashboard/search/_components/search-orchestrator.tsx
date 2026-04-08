@@ -76,9 +76,12 @@ export function SearchOrchestrator({ children }: SearchOrchestratorProps) {
     const controller = new AbortController()
     abortRef.current = controller
 
-    setSearchState(SEARCH_STATE.LOADING)
-    setSuccessData(null)
-    setErrorData(null)
+    // Wrap in startTransition so ViewTransitions activate on the state change
+    startTransition(() => {
+      setSearchState(SEARCH_STATE.LOADING)
+      setSuccessData(null)
+      setErrorData(null)
+    })
 
     try {
       const res = await fetch('/api/augment', {
@@ -163,18 +166,24 @@ export function SearchOrchestrator({ children }: SearchOrchestratorProps) {
       />
 
       {/* ── AI quick-prompts (server-rendered, shown in idle state) ── */}
-      {showIdle && children}
+      {showIdle && (
+        <ViewTransition enter="fade-in" exit="fade-out" default="none">
+          {children}
+        </ViewTransition>
+      )}
 
       {/* ── Loading ── */}
       {isLoading && (
-        <ViewTransition enter="fade-in" default="none">
+        <ViewTransition enter="fade-in" exit="fade-out" default="none">
           <SearchLoading />
         </ViewTransition>
       )}
 
       {/* ── Answer ── */}
       {searchState === SEARCH_STATE.SUCCESS && successData && (
-        <AnswerCard data={successData} />
+        <ViewTransition enter="slide-up" default="none">
+          <AnswerCard data={successData} />
+        </ViewTransition>
       )}
     </SearchQueryContext>
   )

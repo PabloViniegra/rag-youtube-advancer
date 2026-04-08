@@ -124,7 +124,12 @@ function BothReportsTabs({
         id={`report-panel-${activeTab}`}
         aria-labelledby={`report-tab-${activeTab}`}
       >
-        <ViewTransition key={activeTab}>
+        <ViewTransition
+          key={activeTab}
+          enter="fade-in"
+          exit="fade-out"
+          default="none"
+        >
           {activeTab === 'intelligence' && (
             <IntelligenceReportView report={reportData} />
           )}

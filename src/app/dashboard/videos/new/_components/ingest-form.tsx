@@ -7,6 +7,7 @@
  * Sub-components (fields, icons) are in ./ingest-form-fields.tsx.
  */
 
+import { ViewTransition } from 'react'
 import {
   ErrorBanner,
   SubmitButton,
@@ -59,13 +60,26 @@ export function IngestForm({
           disabled={isLoading}
         />
 
-        {isError && errorMessage && <ErrorBanner message={errorMessage} />}
-
-        {isLoading ? (
-          <PhaseProgress phaseIndex={phaseIndex} />
-        ) : (
-          <SubmitButton disabled={!url.trim()} />
+        {/* Error banner — slides up when an error appears */}
+        {isError && errorMessage && (
+          <ViewTransition enter="slide-up" exit="slide-down" default="none">
+            <ErrorBanner message={errorMessage} />
+          </ViewTransition>
         )}
+
+        {/* Submit ↔ progress swap — slides when loading state toggles */}
+        <ViewTransition
+          key={isLoading ? 'loading' : 'idle'}
+          enter="slide-up"
+          exit="slide-down"
+          default="none"
+        >
+          {isLoading ? (
+            <PhaseProgress phaseIndex={phaseIndex} />
+          ) : (
+            <SubmitButton disabled={!url.trim()} />
+          )}
+        </ViewTransition>
       </form>
     </section>
   )

@@ -4,10 +4,11 @@ import { useTransition } from 'react'
 import { sileo } from 'sileo'
 import { deleteVideo } from '../actions'
 
+// isOpen is no longer a prop — the parent controls mounting/unmounting,
+// which lets the outer ViewTransition animate enter/exit correctly.
 interface DeleteVideoModalProps {
   videoId: string
   videoTitle: string | null
-  isOpen: boolean
   onClose: () => void
   onDeleteOptimistic: () => void
 }
@@ -21,13 +22,10 @@ const IMPACT_ITEMS = [
 export function DeleteVideoModal({
   videoId,
   videoTitle,
-  isOpen,
   onClose,
   onDeleteOptimistic,
 }: DeleteVideoModalProps) {
   const [isPending, startTransition] = useTransition()
-
-  if (!isOpen) return null
 
   function handleConfirm() {
     startTransition(async () => {

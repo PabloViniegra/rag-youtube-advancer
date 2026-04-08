@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, startTransition, ViewTransition } from 'react'
 import { DeleteVideoModal } from './delete-video-modal'
 
 interface VideoCardActionsProps {
@@ -18,8 +18,23 @@ export function VideoCardActions({
   const [modalOpen, setModalOpen] = useState(false)
 
   function handleDeleteClick() {
-    setMenuOpen(false)
-    setModalOpen(true)
+    // Wrap in startTransition: closes menu (exit VT) and opens modal (enter VT)
+    startTransition(() => {
+      setMenuOpen(false)
+      setModalOpen(true)
+    })
+  }
+
+  function handleMenuToggle() {
+    startTransition(() => setMenuOpen((prev) => !prev))
+  }
+
+  function handleMenuClose() {
+    startTransition(() => setMenuOpen(false))
+  }
+
+  function handleModalClose() {
+    startTransition(() => setModalOpen(false))
   }
 
   return (
@@ -31,7 +46,7 @@ export function VideoCardActions({
           aria-label="Más opciones"
           aria-expanded={menuOpen}
           aria-haspopup="menu"
-          onClick={() => setMenuOpen((prev) => !prev)}
+          onClick={handleMenuToggle}
           className="flex size-8 items-center justify-center rounded-full bg-surface/80 text-on-surface-variant backdrop-blur-sm transition-colors hover:bg-surface hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
         >
           <DotsIcon />
@@ -42,34 +57,41 @@ export function VideoCardActions({
             {/* Click-outside overlay */}
             <div
               className="fixed inset-0 z-10"
-              onClick={() => setMenuOpen(false)}
+              onClick={handleMenuClose}
               aria-hidden="true"
             />
-            <div
-              role="menu"
-              className="absolute right-0 top-9 z-20 min-w-[160px] rounded-xl border border-outline-variant bg-surface py-1 shadow-lg"
-            >
-              <button
-                type="button"
-                role="menuitem"
-                onClick={handleDeleteClick}
-                className="flex w-full items-center gap-2.5 px-4 py-2.5 font-body text-sm text-error transition-colors hover:bg-error-container focus-visible:bg-error-container focus-visible:outline-none"
+            {/* Dropdown panel — animates enter/exit */}
+            <ViewTransition enter="fade-in" exit="fade-out" default="none">
+              <div
+                role="menu"
+                className="absolute right-0 top-9 z-20 min-w-[160px] rounded-xl border border-outline-variant bg-surface py-1 shadow-lg"
               >
-                <TrashIcon />
-                Eliminar video
-              </button>
-            </div>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={handleDeleteClick}
+                  className="flex w-full items-center gap-2.5 px-4 py-2.5 font-body text-sm text-error transition-colors hover:bg-error-container focus-visible:bg-error-container focus-visible:outline-none"
+                >
+                  <TrashIcon />
+                  Eliminar video
+                </button>
+              </div>
+            </ViewTransition>
           </>
         )}
       </div>
 
-      <DeleteVideoModal
-        videoId={videoId}
-        videoTitle={videoTitle}
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onDeleteOptimistic={onDeleteOptimistic}
-      />
+      {/* Modal — mounted/unmounted by the parent so ViewTransition can animate */}
+      {modalOpen && (
+        <ViewTransition enter="fade-in" exit="fade-out" default="none">
+          <DeleteVideoModal
+            videoId={videoId}
+            videoTitle={videoTitle}
+            onClose={handleModalClose}
+            onDeleteOptimistic={onDeleteOptimistic}
+          />
+        </ViewTransition>
+      )}
     </>
   )
 }
