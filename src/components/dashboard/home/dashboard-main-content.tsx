@@ -1,4 +1,5 @@
 import { getDashboardData } from '@/lib/queries/dashboard'
+import { getLatestDigest } from '@/lib/queries/get-latest-digest'
 
 import { BrainStatus } from './brain-status'
 import { ContextualTip } from './contextual-tip'
@@ -6,6 +7,7 @@ import { DashboardHero } from './dashboard-hero'
 import { OnboardingSteps } from './onboarding-steps'
 import { QuickActions } from './quick-actions'
 import { RecentVideos } from './recent-videos'
+import { WeeklyDigest } from './weekly-digest'
 
 interface DashboardMainContentProps {
   userId: string
@@ -24,8 +26,8 @@ export async function DashboardMainContent({
   userId,
   displayName,
 }: DashboardMainContentProps) {
-  const { videoCount, sectionCount, recentVideos } =
-    await getDashboardData(userId)
+  const [{ videoCount, sectionCount, recentVideos }, digest] =
+    await Promise.all([getDashboardData(userId), getLatestDigest(userId)])
 
   const hasVideos = videoCount > 0
 
@@ -44,6 +46,8 @@ export async function DashboardMainContent({
 
       {/* Returns null when videoCount === 0 */}
       <ContextualTip videoCount={videoCount} />
+
+      <WeeklyDigest digest={digest} />
 
       {hasVideos ? <RecentVideos videos={recentVideos} /> : <OnboardingSteps />}
     </div>

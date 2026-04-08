@@ -6,8 +6,10 @@
  * Client component that owns the search state machine:
  *   idle → loading → success | error
  *
- * Receives no server data — the static shell and library status are
- * rendered by the Server Component parent (search/page.tsx).
+ * Accepts `children` (rendered into the idle slot) so the Server Component
+ * parent can inject <QuickPrompts> without crossing the client boundary with
+ * non-serialisable props.  The SearchQueryContext provided here lets those
+ * server-rendered children call setQuery without prop-drilling functions.
  */
 
 import {
@@ -24,6 +26,7 @@ import type {
 import { AUGMENT_API_ERROR, AUGMENT_DEFAULTS } from '@/lib/augmentation/types'
 import type { AnswerData } from './answer-card'
 import { AnswerCard } from './answer-card'
+import { SearchQueryContext } from './search-query-context'
 import type { SearchFormError } from './search-form'
 import { SearchForm } from './search-form'
 import { SearchLoading } from './search-loading'
@@ -46,7 +49,12 @@ const FRIENDLY_NO_CONTEXT_MESSAGE =
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function SearchOrchestrator() {
+interface SearchOrchestratorProps {
+  /** Server-rendered quick-prompts slot (injected from page.tsx) */
+  children?: React.ReactNode
+}
+
+export function SearchOrchestrator({ children }: SearchOrchestratorProps) {
   const [query, setQuery] = useState('')
   const [searchState, setSearchState] = useState<SearchState>(SEARCH_STATE.IDLE)
   const [successData, setSuccessData] = useState<AnswerData | null>(null)
@@ -130,7 +138,7 @@ export function SearchOrchestrator() {
   }
 
   const isLoading = searchState === SEARCH_STATE.LOADING
-  const showExamples = !successData && !isLoading && !query.trim()
+  const showIdle = !successData && !isLoading && !query.trim()
   const formError = searchState === SEARCH_STATE.ERROR ? errorData : null
 
   const normalizedError: SearchFormError | null =
@@ -142,17 +150,20 @@ export function SearchOrchestrator() {
       : formError
 
   return (
-    <>
+    <SearchQueryContext value={{ setQuery: handleSuggestionClick }}>
       {/* ── Search form ── */}
       <SearchForm
         query={query}
         onQueryChange={setQuery}
         onSubmit={handleSubmit}
         isLoading={isLoading}
-        showExamples={showExamples}
+        showExamples={false}
         error={normalizedError}
         onSuggestionClick={handleSuggestionClick}
       />
+
+      {/* ── AI quick-prompts (server-rendered, shown in idle state) ── */}
+      {showIdle && children}
 
       {/* ── Loading ── */}
       {isLoading && (
@@ -165,6 +176,6 @@ export function SearchOrchestrator() {
       {searchState === SEARCH_STATE.SUCCESS && successData && (
         <AnswerCard data={successData} />
       )}
-    </>
+    </SearchQueryContext>
   )
 }

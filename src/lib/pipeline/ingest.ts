@@ -156,6 +156,9 @@ export async function ingestVideo(input: IngestInput): Promise<IngestResult> {
 
     // Invalidate dashboard cache so next load reflects the new video
     updateTag(`dashboard-${user.id}`)
+
+    // Invalidate quick-prompts cache so new AI chips are generated on next visit
+    updateTag('quick-prompts')
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'Storing video sections failed.'

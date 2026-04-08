@@ -90,8 +90,10 @@ function SearchInput({
 
 function ExampleQuestions({
   onExampleClick,
+  questions = EXAMPLE_QUESTIONS,
 }: {
   onExampleClick: (s: string) => void
+  questions?: readonly string[]
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -102,7 +104,7 @@ function ExampleQuestions({
         Ideas para empezar:
       </p>
       <div className="flex flex-wrap gap-2">
-        {EXAMPLE_QUESTIONS.map((q) => (
+        {questions.map((q) => (
           <button
             key={q}
             type="button"

@@ -1,8 +1,11 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
 import { ViewTransition } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { LibraryStatus } from './_components/library-status'
+import { QuickPrompts } from './_components/quick-prompts'
+import { QuickPromptsSkeleton } from './_components/quick-prompts-skeleton'
 import { SearchOrchestrator } from './_components/search-orchestrator'
 
 /**
@@ -11,7 +14,9 @@ import { SearchOrchestrator } from './_components/search-orchestrator'
  * Server Component shell:
  *  - Authenticates the user
  *  - Fetches video count for LibraryStatus (no client waterfall)
+ *  - Fetches last 8 video titles for AI quick-prompts
  *  - Renders static header + LibraryStatus + SearchOrchestrator (client)
+ *    with QuickPrompts streamed in via Suspense as children
  */
 
 export const metadata: Metadata = {
@@ -29,12 +34,23 @@ export default async function SearchPage() {
     redirect('/login?redirectTo=/dashboard/search')
   }
 
-  const { count } = await supabase
-    .from('videos')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', user.id)
+  const [countResult, titlesResult] = await Promise.all([
+    supabase
+      .from('videos')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id),
+    supabase
+      .from('videos')
+      .select('title')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(8),
+  ])
 
-  const videoCount = count ?? 0
+  const videoCount = countResult.count ?? 0
+  const titles = (titlesResult.data ?? [])
+    .map((v) => v.title)
+    .filter((t): t is string => typeof t === 'string' && t.length > 0)
 
   return (
     <ViewTransition
@@ -68,8 +84,12 @@ export default async function SearchPage() {
         {/* ── Library status (SSR'd, no client waterfall) ── */}
         <LibraryStatus videoCount={videoCount} />
 
-        {/* ── Interactive search (client) ── */}
-        <SearchOrchestrator />
+        {/* ── Interactive search (client) with AI prompts streamed in ── */}
+        <SearchOrchestrator>
+          <Suspense fallback={<QuickPromptsSkeleton />}>
+            <QuickPrompts titles={titles} />
+          </Suspense>
+        </SearchOrchestrator>
       </div>
     </ViewTransition>
   )

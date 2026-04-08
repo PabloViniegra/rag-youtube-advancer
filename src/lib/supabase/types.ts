@@ -127,6 +127,47 @@ export interface Database {
           },
         ]
       }
+      weekly_digests: {
+        Row: {
+          id: string
+          user_id: string
+          week_start: string
+          topics: string[]
+          connections: string[]
+          suggested_questions: string[]
+          dismissed_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          week_start: string
+          topics?: string[]
+          connections?: string[]
+          suggested_questions?: string[]
+          dismissed_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          week_start?: string
+          topics?: string[]
+          connections?: string[]
+          suggested_questions?: string[]
+          dismissed_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'weekly_digests_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       video_sections: {
         Row: {
           id: string
