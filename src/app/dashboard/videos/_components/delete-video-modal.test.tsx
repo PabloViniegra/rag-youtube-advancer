@@ -47,7 +47,6 @@ describe('DeleteVideoModal', () => {
   const defaultProps = {
     videoId: 'video-1',
     videoTitle: 'Mi video de prueba',
-    isOpen: true,
     onClose: vi.fn(),
     onDeleteOptimistic: vi.fn(),
   }
@@ -58,11 +57,6 @@ describe('DeleteVideoModal', () => {
 
   afterEach(() => {
     cleanup()
-  })
-
-  it('renders nothing when isOpen is false', () => {
-    render(<DeleteVideoModal {...defaultProps} isOpen={false} />)
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('renders the dialog with video title and impact list', () => {

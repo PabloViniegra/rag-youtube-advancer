@@ -19,6 +19,7 @@ vi.mock('react', async () => {
   return {
     ...actual,
     ViewTransition: ({ children }: { children?: React.ReactNode }) => children,
+    addTransitionType: vi.fn(),
   }
 })
 

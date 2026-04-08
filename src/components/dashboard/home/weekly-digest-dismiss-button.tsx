@@ -2,6 +2,7 @@
 
 import { useTransition } from 'react'
 import { dismissDigest } from '@/app/dashboard/home/actions/digest'
+import { CloseIcon } from '@/components/dashboard/icons'
 
 interface WeeklyDigestDismissButtonProps {
   digestId: string
@@ -24,9 +25,9 @@ export function WeeklyDigestDismissButton({
       onClick={handleDismiss}
       disabled={isPending}
       aria-label="Cerrar resumen semanal"
-      className="rounded p-1 text-on-surface-variant opacity-60 transition-opacity hover:opacity-100 disabled:cursor-not-allowed"
+      className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-on-surface-variant/60 transition-colors hover:bg-tertiary-container hover:text-on-tertiary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-40"
     >
-      ✕
+      <CloseIcon />
     </button>
   )
 }
