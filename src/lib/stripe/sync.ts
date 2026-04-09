@@ -19,6 +19,7 @@
 
 import { stripe } from '@/lib/stripe/client'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { logger } from '@/lib/logger'
 
 export type SyncResult = { synced: true; active: boolean } | { synced: false }
 
@@ -96,7 +97,7 @@ export async function syncSubscriptionFromStripe(params: {
       .eq('id', userId)
 
     if (error) {
-      console.error('[stripe-sync] Failed to activate profile:', error.message)
+      logger.error('stripe-sync', 'Failed to activate profile:', error.message)
       return { synced: false }
     }
     return { synced: true, active: true }
@@ -118,7 +119,7 @@ async function deactivateProfile(userId: string): Promise<boolean> {
     .eq('id', userId)
 
   if (error) {
-    console.error('[stripe-sync] Failed to deactivate profile:', error.message)
+    logger.error('stripe-sync', 'Failed to deactivate profile:', error.message)
     return false
   }
   return true

@@ -3,6 +3,7 @@ import { unstable_cache } from 'next/cache'
 import { aiGateway } from '@/lib/ai/gateway'
 import { buildUserPrompt, SYSTEM_PROMPT_QUICK_PROMPTS } from './prompts'
 import { FALLBACK_QUESTIONS, QUICK_PROMPTS_CONFIG } from './types'
+import { logger } from '@/lib/logger'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -49,7 +50,7 @@ async function _generateQuickPrompts(titles: string[]): Promise<string[]> {
     const fallbacks = FALLBACK_QUESTIONS.filter((q) => !parsed.includes(q))
     return [...parsed, ...fallbacks].slice(0, promptCount)
   } catch (error) {
-    console.error('[quick-prompts] Failed to generate prompts:', error)
+    logger.error('quick-prompts', 'Failed to generate prompts:', error)
     return [...FALLBACK_QUESTIONS]
   }
 }

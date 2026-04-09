@@ -21,6 +21,7 @@ import { generateIntelligenceReport } from '@/lib/intelligence/generate'
 import type { IntelligenceReport } from '@/lib/intelligence/types'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
+import { logger } from '@/lib/logger'
 
 type ReportRow = Database['public']['Tables']['intelligence_reports']['Row']
 type AppSupabaseClient = SupabaseClient<Database>
@@ -160,7 +161,7 @@ export async function POST(
 
     return NextResponse.json({ reportId: row.id, report }, { status: 200 })
   } catch (error) {
-    console.error('[generate-report] Unexpected error:', error)
+    logger.error('generate-report', 'Unexpected error:', error)
     const message =
       error instanceof Error
         ? error.message

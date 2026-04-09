@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.85",
+    "@sentry/nextjs": "^10.48.0",
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.101.1",
     "ai": "^6.0.143",

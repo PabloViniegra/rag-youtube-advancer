@@ -4,6 +4,7 @@ import { stripeWebhookSecret } from '@/lib/env'
 import { stripe } from '@/lib/stripe/client'
 import { STRIPE_WEBHOOK_EVENT } from '@/lib/stripe/types'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { logger } from '@/lib/logger'
 
 // ── Webhook handler ──────────────────────────────────────────────────────────
 
@@ -30,14 +31,15 @@ export async function POST(request: Request) {
     } else {
       // Dev fallback: parse raw body without signature verification.
       // This should NEVER happen in production.
-      console.warn(
-        '[stripe-webhook] No STRIPE_WEBHOOK_SECRET — skipping signature verification',
+      logger.warn(
+        'stripe-webhook',
+        'No STRIPE_WEBHOOK_SECRET — skipping signature verification',
       )
       event = JSON.parse(body) as Stripe.Event
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
-    console.error('[stripe-webhook] Signature verification failed:', message)
+    logger.error('stripe-webhook', 'Signature verification failed:', message)
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 
@@ -74,7 +76,7 @@ export async function POST(request: Request) {
         break
     }
   } catch (error) {
-    console.error(`[stripe-webhook] Error handling ${event.type}:`, error)
+    logger.error('stripe-webhook', `Error handling ${event.type}:`, error)
     return NextResponse.json(
       { error: 'Webhook handler failed' },
       { status: 500 },
@@ -114,8 +116,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     .eq('id', userId)
 
   if (error) {
-    console.error(
-      '[stripe-webhook] Failed to update profile on checkout:',
+    logger.error(
+      'stripe-webhook',
+      'Failed to update profile on checkout:',
       error,
     )
   }
@@ -143,8 +146,9 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     .eq('stripe_customer_id', customerId)
 
   if (error) {
-    console.error(
-      '[stripe-webhook] Failed to update subscription status:',
+    logger.error(
+      'stripe-webhook',
+      'Failed to update subscription status:',
       error,
     )
   }
@@ -164,7 +168,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     .eq('stripe_customer_id', customerId)
 
   if (error) {
-    console.error('[stripe-webhook] Failed to deactivate subscription:', error)
+    logger.error('stripe-webhook', 'Failed to deactivate subscription:', error)
   }
 }
 
@@ -188,7 +192,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
 
   if (!customerId) return
 
-  console.warn(`[stripe-webhook] Payment failed for customer ${customerId}`)
+  logger.warn('stripe-webhook', `Payment failed for customer ${customerId}`)
 
   // Optionally deactivate on payment failure — Stripe will retry, so we only
   // log here. Deactivation happens via subscription.deleted when Stripe
@@ -204,6 +208,6 @@ async function activateByCustomerId(customerId: string) {
     .eq('stripe_customer_id', customerId)
 
   if (error) {
-    console.error('[stripe-webhook] Failed to activate by customer ID:', error)
+    logger.error('stripe-webhook', 'Failed to activate by customer ID:', error)
   }
 }

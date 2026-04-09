@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import { withSentryConfig } from '@sentry/nextjs'
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
@@ -24,4 +25,10 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+const sentryConfig = {
+  silent: true,
+  widenClientFileUpload: true,
+  hideSourceMaps: true,
+}
+
+export default withSentryConfig(nextConfig, sentryConfig)

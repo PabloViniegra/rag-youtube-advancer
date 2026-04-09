@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { generateWeeklyDigest } from '@/lib/weekly-digest'
+import { logger } from '@/lib/logger'
 
 function getWeekStart(now: Date): string {
   const d = new Date(now)
@@ -59,8 +60,9 @@ export async function GET(req: NextRequest) {
       )
       processed++
     } catch (error) {
-      console.error(
-        `[cron/weekly-digest] Failed to generate digest for user ${userId}:`,
+      logger.error(
+        'cron/weekly-digest',
+        `Failed to generate digest for user ${userId}:`,
         error,
       )
       errors++

@@ -32,6 +32,7 @@ import type {
 import { RETRIEVE_API_ERROR, RETRIEVE_DEFAULTS } from '@/lib/retrieval/types'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
+import { logger } from '@/lib/logger'
 
 type ProfileRow = Database['public']['Tables']['profiles']['Row']
 
@@ -142,8 +143,9 @@ export async function POST(
 
     return NextResponse.json(result, { status: 200 })
   } catch (error) {
-    console.error(
-      '[retrieve] Unexpected error while retrieving video sections:',
+    logger.error(
+      'retrieve',
+      'Unexpected error while retrieving video sections:',
       error,
     )
     return errorResponse(

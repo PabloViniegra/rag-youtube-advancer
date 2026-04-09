@@ -34,6 +34,7 @@ import { STORE_API_ERROR } from '@/lib/storage/types'
 import { getVideoCount } from '@/lib/supabase/queries'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
+import { logger } from '@/lib/logger'
 
 type ProfileRow = Database['public']['Tables']['profiles']['Row']
 
@@ -167,24 +168,17 @@ export async function POST(
     )
       .then(({ error }) => {
         if (error) {
-          console.warn(
-            '[store] Failed to mark trial_used for user',
-            user.id,
+          logger.warn(
+            'store',
+            `Failed to mark trial_used for user ${user.id}`,
             error,
           )
         }
       })
       .catch((err: unknown) => {
-        console.warn(
-          '[store] Unexpected error marking trial_used for user',
-          user.id,
-          err,
-        )
-      })
-      .catch((err: unknown) => {
-        console.warn(
-          '[store] Unexpected error marking trial_used for user',
-          user.id,
+        logger.warn(
+          'store',
+          `Unexpected error marking trial_used for user ${user.id}`,
           err,
         )
       })
