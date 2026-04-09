@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { ViewTransition } from 'react'
 
@@ -66,13 +67,13 @@ export function RecentVideos({ videos }: RecentVideosProps) {
               >
                 {/* YouTube thumbnail */}
                 <div className="relative h-8 w-14 flex-shrink-0 overflow-hidden rounded bg-surface-container-high">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={`https://i.ytimg.com/vi/${video.youtube_id}/default.jpg`}
                     alt=""
                     aria-hidden="true"
                     loading="lazy"
-                    className="h-full w-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                 </div>
 

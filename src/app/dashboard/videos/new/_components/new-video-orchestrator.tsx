@@ -9,14 +9,14 @@
  * Extracted from new/page.tsx so the static hero section is SSR'd.
  */
 
+import { useRouter } from 'next/navigation'
 import {
+  addTransitionType,
+  startTransition,
   useEffect,
   useRef,
   useState,
-  startTransition,
-  addTransitionType,
 } from 'react'
-import { useRouter } from 'next/navigation'
 import { ingestVideo } from '@/lib/pipeline/ingest'
 import type { IngestResult } from '@/lib/pipeline/types'
 import { INGEST_ERROR } from '@/lib/pipeline/types'

@@ -1,9 +1,9 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
-import { AdminNotice, FeedbackBanner, PlanBadge } from './billing-atoms'
-import type { PlanKey } from './billing-atoms'
 import { PlanActions } from './billing-actions'
+import type { PlanKey } from './billing-atoms'
+import { AdminNotice, FeedbackBanner, PlanBadge } from './billing-atoms'
 
 // ── Checkout feedback ─────────────────────────────────────────────────────────
 

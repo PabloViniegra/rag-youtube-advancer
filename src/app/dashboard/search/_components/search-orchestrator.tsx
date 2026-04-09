@@ -26,10 +26,10 @@ import type {
 import { AUGMENT_API_ERROR, AUGMENT_DEFAULTS } from '@/lib/augmentation/types'
 import type { AnswerData } from './answer-card'
 import { AnswerCard } from './answer-card'
-import { SearchQueryContext } from './search-query-context'
 import type { SearchFormError } from './search-form'
 import { SearchForm } from './search-form'
 import { SearchLoading } from './search-loading'
+import { SearchQueryContext } from './search-query-context'
 
 // ── State machine ──────────────────────────────────────────────────────────────
 

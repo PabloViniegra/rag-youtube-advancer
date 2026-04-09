@@ -1,6 +1,6 @@
 export { generateWeeklyDigest } from './generate'
 export {
-  WEEKLY_DIGEST_CONFIG,
   type DigestPayload,
+  WEEKLY_DIGEST_CONFIG,
   type WeeklyDigestRow,
 } from './types'

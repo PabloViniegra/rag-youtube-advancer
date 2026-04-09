@@ -31,7 +31,7 @@ vi.mock('next/link', () => ({
 }))
 
 vi.mock('@/app/dashboard/videos/_components/intelligence-report', () => ({
-  IntelligenceReportView: ({ report }: { report: unknown }) => (
+  IntelligenceReportView: ({ report: _report }: { report: unknown }) => (
     <div data-testid="intelligence-report">Intelligence Report</div>
   ),
 }))

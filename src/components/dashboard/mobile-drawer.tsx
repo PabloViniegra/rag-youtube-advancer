@@ -65,7 +65,7 @@ export function MobileDrawer({
       }
       if (e.key !== 'Tab') return
 
-      const els = Array.from(drawer!.querySelectorAll<HTMLElement>(FOCUSABLE))
+      const els = Array.from(drawer.querySelectorAll<HTMLElement>(FOCUSABLE))
       if (els.length === 0) return
 
       const first = els[0]

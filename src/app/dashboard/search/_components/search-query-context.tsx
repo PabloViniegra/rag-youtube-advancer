@@ -8,7 +8,7 @@
  * the server→client prop boundary with a non-serializable function.
  */
 
-import { createContext, use, useState } from 'react'
+import { createContext, use } from 'react'
 
 interface SearchQueryContextValue {
   setQuery: (q: string) => void

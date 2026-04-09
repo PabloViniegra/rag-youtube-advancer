@@ -1,4 +1,4 @@
-import { cleanup, waitFor } from '@testing-library/react'
+import { cleanup } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { TRANSCRIPT_ERROR } from '@/lib/youtube/types'
 import { ingestVideo } from './ingest'

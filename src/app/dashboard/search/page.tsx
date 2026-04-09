@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { Suspense } from 'react'
-import { ViewTransition } from 'react'
+import { Suspense, ViewTransition } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { LibraryStatus } from './_components/library-status'
 import { QuickPrompts } from './_components/quick-prompts'

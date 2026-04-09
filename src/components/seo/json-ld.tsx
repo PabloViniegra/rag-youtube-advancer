@@ -10,8 +10,7 @@
  */
 
 interface JsonLdProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  schema: Record<string, any>
+  schema: Record<string, unknown>
 }
 
 /**
@@ -20,10 +19,6 @@ interface JsonLdProps {
  */
 export function JsonLd({ schema }: JsonLdProps) {
   return (
-    // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured
-    // data uses JSON.stringify output — machine-generated, never user input.
-    // This is the Next.js-recommended pattern for embedding schema.org scripts.
-    // See: https://nextjs.org/docs/app/building-your-application/optimizing/metadata#json-ld
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}

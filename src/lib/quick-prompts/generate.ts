@@ -1,8 +1,8 @@
 import { generateText } from 'ai'
 import { unstable_cache } from 'next/cache'
 import { aiGateway } from '@/lib/ai/gateway'
-import { FALLBACK_QUESTIONS, QUICK_PROMPTS_CONFIG } from './types'
 import { buildUserPrompt, SYSTEM_PROMPT_QUICK_PROMPTS } from './prompts'
+import { FALLBACK_QUESTIONS, QUICK_PROMPTS_CONFIG } from './types'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

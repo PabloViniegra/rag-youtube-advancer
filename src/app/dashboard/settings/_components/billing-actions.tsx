@@ -7,8 +7,8 @@
 
 import { useTransition } from 'react'
 import { redirectToCheckout, redirectToPortal } from '@/lib/stripe/actions'
-import { StripeIcon } from './billing-atoms'
 import type { PlanKey } from './billing-atoms'
+import { StripeIcon } from './billing-atoms'
 
 // ── Components ────────────────────────────────────────────────────────────────
 

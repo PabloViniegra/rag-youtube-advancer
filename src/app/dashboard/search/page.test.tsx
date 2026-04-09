@@ -13,7 +13,7 @@ import {
   waitFor,
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -327,7 +327,9 @@ describe('SearchOrchestrator', () => {
 
     await user.type(screen.getByLabelText(/tu pregunta/i), 'test query')
     fireEvent.submit(
-      screen.getByRole('button', { name: /buscar/i }).closest('form')!,
+      screen
+        .getByRole('button', { name: /buscar/i })
+        .closest('form') as HTMLFormElement,
     )
 
     // Unmount before the promise resolves

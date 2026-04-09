@@ -58,7 +58,7 @@ const SECTION_ROWS = [
 
 // ─── Supabase mock helpers ─────────────────────────────────────────────────────
 
-function buildChain(responses: Record<string, unknown>) {
+function _buildChain(responses: Record<string, unknown>) {
   const chain: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(responses)) {
     chain[key] = vi.fn().mockReturnValue(value)
@@ -95,8 +95,8 @@ function mockSupabase({
   const videosEqId = vi
     .fn()
     .mockReturnValue({ eq: videosEqUserId, maybeSingle: videosMaybeSingle })
-  const videosSelectAll = vi.fn().mockReturnValue({ eq: videosEqId })
-  const videosSelectTitle = vi
+  const _videosSelectAll = vi.fn().mockReturnValue({ eq: videosEqId })
+  const _videosSelectTitle = vi
     .fn()
     .mockReturnValue({ eq: videosEqId, maybeSingle: videosMaybeSingle })
 

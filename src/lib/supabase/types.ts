@@ -1,4 +1,3 @@
-// biome-ignore lint/suspicious/noExplicitAny: Supabase JSONB columns use recursive Json
 type Json =
   | string
   | number

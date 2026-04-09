@@ -46,8 +46,7 @@ import NuevoVideoPage from './page'
 const VALID_URL = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
 
 function resolveWith(result: IngestResult) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ;(mockIngestVideo as any).mockResolvedValueOnce(result)
+  mockIngestVideo.mockResolvedValueOnce(result)
 }
 
 // ─── Tests ────────────────────────────────────────────────────────────────────

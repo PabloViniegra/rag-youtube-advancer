@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import type { WeeklyDigestRow } from '@/lib/weekly-digest/types'
 import { ArrowRightIcon } from '@/components/dashboard/icons'
+import type { WeeklyDigestRow } from '@/lib/weekly-digest/types'
 import { WeeklyDigestDismissButton } from './weekly-digest-dismiss-button'
 
 interface WeeklyDigestProps {
