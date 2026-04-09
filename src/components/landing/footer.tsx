@@ -1,10 +1,8 @@
 import Link from 'next/link'
 
 const FOOTER_LINKS = [
-  { label: 'Términos de Uso', href: '#' },
-  { label: 'Privacidad', href: '#' },
-  { label: 'Twitter / X', href: '#' },
-  { label: 'YouTube', href: '#' },
+  { label: 'Términos de Uso', href: '/terms' },
+  { label: 'Privacidad', href: '/privacy' },
 ]
 
 export function Footer() {

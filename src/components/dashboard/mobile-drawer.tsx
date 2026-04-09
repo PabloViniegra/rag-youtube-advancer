@@ -53,11 +53,6 @@ export function MobileDrawer({
     const drawer = drawerRef.current
     if (!drawer) return
 
-    const focusables = Array.from(
-      drawer.querySelectorAll<HTMLElement>(FOCUSABLE),
-    )
-    focusables[0]?.focus()
-
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
         onClose()
@@ -65,7 +60,10 @@ export function MobileDrawer({
       }
       if (e.key !== 'Tab') return
 
-      const els = Array.from(drawer.querySelectorAll<HTMLElement>(FOCUSABLE))
+      const drawerEl = drawerRef.current
+      if (!drawerEl) return
+
+      const els = Array.from(drawerEl.querySelectorAll<HTMLElement>(FOCUSABLE))
       if (els.length === 0) return
 
       const first = els[0]

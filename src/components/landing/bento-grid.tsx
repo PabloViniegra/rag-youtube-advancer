@@ -32,6 +32,7 @@ export function BentoGrid() {
               <Image
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6i84HsJgoPXi9WbUivShOuOZfeBCIP7qFv-14jI4EVUbHcEWNITuu50XXa63LyhkZ7wUrYGUVRoOmHoG2pqEywW2n9wyjI-RgyrbUKgXBvknztbnDoPEP2UxhVlVDso5omq7sYax9nzb2t1Rg_swjIcq4TJ4nBFeGVqBIp-AfClMCTsbanWPzIFlPWxrI7i7o9zpCB4bzDRVGt4CwYveEvnhlHEpUOzYrSew1kYl1jBFN-52DQT26V-KiZSalGNL0Yhvum4rYVuFK"
                 alt="Dashboard de retención de audiencia mostrando análisis predictivo de puntos de abandono"
+                priority
                 fill
                 className="object-cover opacity-60"
                 sizes="(max-width: 768px) 100vw, 66vw"

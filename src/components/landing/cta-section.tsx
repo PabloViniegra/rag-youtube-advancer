@@ -33,7 +33,7 @@ export function CtaSection({ isAuthenticated }: CtaSectionProps) {
 
         {/* Price anchor — visible, specific, removes anxiety */}
         <p className="text-2xl font-headline font-bold text-on-primary/90 mb-8">
-          $5/mes.{' '}
+          $5.99/mes.{' '}
           <span className="font-body font-normal text-xl text-on-primary/70">
             Sin sorpresas. Cancela cuando quieras.
           </span>
