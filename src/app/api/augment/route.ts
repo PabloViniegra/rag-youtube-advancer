@@ -194,7 +194,11 @@ export async function POST(
     })
 
     return NextResponse.json(result, { status: 200 })
-  } catch {
+  } catch (error) {
+    console.error(
+      '[augment] Unexpected error while generating the answer:',
+      error,
+    )
     return errorResponse(
       'An unexpected error occurred while generating the answer.',
       AUGMENT_API_ERROR.INTERNAL_ERROR,

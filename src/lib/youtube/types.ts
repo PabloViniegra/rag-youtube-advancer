@@ -35,6 +35,8 @@ export interface TranscriptResult {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const TRANSCRIPT_ERROR = {
+  /** The user is not authenticated. */
+  UNAUTHORIZED: 'unauthorized',
   /** The supplied URL is not a valid YouTube URL or contains no video ID. */
   INVALID_URL: 'invalid_url',
   /** The video does not exist or is private/unavailable. */

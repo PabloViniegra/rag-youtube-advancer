@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect } from 'react'
+
 /**
  * Global error boundary — catches errors in root layout.
  * Must include its own <html> and <body> tags.
@@ -10,7 +12,11 @@ interface GlobalErrorProps {
   reset: () => void
 }
 
-export default function GlobalError({ reset }: GlobalErrorProps) {
+export default function GlobalError({ error, reset }: GlobalErrorProps) {
+  useEffect(() => {
+    // Log to error tracking (e.g. Sentry) here if needed
+    console.error('[global-error]', error)
+  }, [error])
   return (
     <html lang="es">
       <body className="flex min-h-screen items-center justify-center bg-background p-8 text-center">

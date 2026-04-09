@@ -25,6 +25,22 @@ import type { Database } from '@/lib/supabase/types'
 type ReportRow = Database['public']['Tables']['intelligence_reports']['Row']
 type AppSupabaseClient = SupabaseClient<Database>
 
+// ─── Error codes ──────────────────────────────────────────────────────────────
+
+const GENERATE_REPORT_ERROR = {
+  /** The user is not authenticated. */
+  UNAUTHORIZED: 'unauthorized',
+  /** The request body is missing required fields or is not valid JSON. */
+  INVALID_BODY: 'invalid_body',
+  /** The intelligence report could not be persisted to the database. */
+  STORE_FAILED: 'store_failed',
+  /** The LLM generation call failed. */
+  GENERATION_FAILED: 'generation_failed',
+} as const
+
+type GenerateReportErrorCode =
+  (typeof GENERATE_REPORT_ERROR)[keyof typeof GENERATE_REPORT_ERROR]
+
 // ─── Request/Response types ───────────────────────────────────────────────────
 
 interface GenerateReportRequest {
@@ -40,14 +56,14 @@ interface GenerateReportSuccess {
 
 interface GenerateReportError {
   error: string
-  code: string
+  code: GenerateReportErrorCode
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function errorResponse(
   message: string,
-  code: string,
+  code: GenerateReportErrorCode,
   status: number,
 ): NextResponse<GenerateReportError> {
   return NextResponse.json({ error: message, code }, { status })
@@ -77,7 +93,11 @@ export async function POST(
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return errorResponse('Authentication required.', 'unauthorized', 401)
+    return errorResponse(
+      'Authentication required.',
+      GENERATE_REPORT_ERROR.UNAUTHORIZED,
+      401,
+    )
   }
 
   // Phase 5 runs after the video is already stored within limits —
@@ -90,7 +110,7 @@ export async function POST(
   } catch {
     return errorResponse(
       'Request body must be valid JSON.',
-      'invalid_body',
+      GENERATE_REPORT_ERROR.INVALID_BODY,
       400,
     )
   }
@@ -98,7 +118,7 @@ export async function POST(
   if (!isValidRequest(body)) {
     return errorResponse(
       'Invalid request body. Expected: { videoId: string; transcript: string; title?: string }.',
-      'invalid_body',
+      GENERATE_REPORT_ERROR.INVALID_BODY,
       400,
     )
   }
@@ -131,7 +151,7 @@ export async function POST(
     if (insertError || !inserted) {
       return errorResponse(
         insertError?.message ?? 'Failed to store intelligence report.',
-        'store_failed',
+        GENERATE_REPORT_ERROR.STORE_FAILED,
         500,
       )
     }
@@ -140,10 +160,11 @@ export async function POST(
 
     return NextResponse.json({ reportId: row.id, report }, { status: 200 })
   } catch (error) {
+    console.error('[generate-report] Unexpected error:', error)
     const message =
       error instanceof Error
         ? error.message
         : 'Intelligence report generation failed.'
-    return errorResponse(message, 'generation_failed', 500)
+    return errorResponse(message, GENERATE_REPORT_ERROR.GENERATION_FAILED, 500)
   }
 }

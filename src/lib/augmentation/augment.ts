@@ -62,12 +62,21 @@ export async function augmentAnswer(
   const contextBlock = buildContextBlock(matches)
   const userMessage = buildUserMessage(query, contextBlock)
 
-  const { text } = await generateText({
-    model: aiGateway(AUGMENTATION_CONFIG.model),
-    system: SYSTEM_INSTRUCTIONS,
-    prompt: userMessage,
-    maxOutputTokens: AUGMENTATION_CONFIG.maxOutputTokens,
-  })
+  let text: string
+  try {
+    const result = await generateText({
+      model: aiGateway(AUGMENTATION_CONFIG.model),
+      system: SYSTEM_INSTRUCTIONS,
+      prompt: userMessage,
+      maxOutputTokens: AUGMENTATION_CONFIG.maxOutputTokens,
+    })
+    text = result.text
+  } catch (error) {
+    throw new Error(
+      `LLM augmentation failed: ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error },
+    )
+  }
 
   return {
     answer: text,

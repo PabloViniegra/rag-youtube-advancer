@@ -89,7 +89,7 @@ export async function POST(
   if (!user) {
     return errorResponse(
       'Authentication required.',
-      CHUNK_API_ERROR.INTERNAL_ERROR,
+      CHUNK_API_ERROR.UNAUTHORIZED,
       401,
     )
   }

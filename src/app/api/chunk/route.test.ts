@@ -59,7 +59,7 @@ describe('POST /api/chunk', () => {
     const res = await POST(buildRequest({ text: 'hello world' }))
     expect(res.status).toBe(401)
     const body = await res.json()
-    expect(body.code).toBe(CHUNK_API_ERROR.INTERNAL_ERROR)
+    expect(body.code).toBe(CHUNK_API_ERROR.UNAUTHORIZED)
   })
 
   // ── Body validation ───────────────────────────────────────────────────────

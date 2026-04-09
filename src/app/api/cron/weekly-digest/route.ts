@@ -58,7 +58,11 @@ export async function GET(req: NextRequest) {
         { onConflict: 'user_id,week_start' },
       )
       processed++
-    } catch {
+    } catch (error) {
+      console.error(
+        `[cron/weekly-digest] Failed to generate digest for user ${userId}:`,
+        error,
+      )
       errors++
     }
   }

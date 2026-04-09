@@ -141,7 +141,11 @@ export async function POST(
     })
 
     return NextResponse.json(result, { status: 200 })
-  } catch {
+  } catch (error) {
+    console.error(
+      '[retrieve] Unexpected error while retrieving video sections:',
+      error,
+    )
     return errorResponse(
       'An unexpected error occurred while retrieving video sections.',
       RETRIEVE_API_ERROR.INTERNAL_ERROR,

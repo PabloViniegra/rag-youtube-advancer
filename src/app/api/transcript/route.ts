@@ -80,7 +80,7 @@ export async function POST(
   if (!user) {
     return errorResponse(
       'Authentication required.',
-      TRANSCRIPT_ERROR.FETCH_FAILED,
+      TRANSCRIPT_ERROR.UNAUTHORIZED,
       401,
     )
   }

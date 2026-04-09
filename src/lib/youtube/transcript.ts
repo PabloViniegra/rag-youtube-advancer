@@ -37,6 +37,10 @@ export class TranscriptFetchError extends Error {
     super(message)
     this.name = 'TranscriptFetchError'
     this.code = code
+    // Ensure the stack trace points to the throw site, not the Error base class.
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, TranscriptFetchError)
+    }
   }
 }
 

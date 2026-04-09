@@ -33,6 +33,8 @@ export const CHUNK_CONFIG = {
 // ─────────────────────────────────────────────
 
 export const CHUNK_API_ERROR = {
+  /** The user is not authenticated. */
+  UNAUTHORIZED: 'unauthorized',
   /** The `text` field is missing or empty. */
   MISSING_TEXT: 'missing_text',
   /** The request body is not valid JSON. */

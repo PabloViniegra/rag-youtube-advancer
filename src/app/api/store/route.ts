@@ -161,15 +161,33 @@ export async function POST(
       sections: body.sections,
     })
 
-    // Mark trial as used — fire-and-forget, swallow errors (non-blocking)
-    try {
-      void supabase
-        .from('profiles')
-        .update({ trial_used: true })
-        .eq('id', user.id)
-    } catch {
-      // intentionally ignored
-    }
+    // Mark trial as used — fire-and-forget, non-blocking
+    void Promise.resolve(
+      supabase.from('profiles').update({ trial_used: true }).eq('id', user.id),
+    )
+      .then(({ error }) => {
+        if (error) {
+          console.warn(
+            '[store] Failed to mark trial_used for user',
+            user.id,
+            error,
+          )
+        }
+      })
+      .catch((err: unknown) => {
+        console.warn(
+          '[store] Unexpected error marking trial_used for user',
+          user.id,
+          err,
+        )
+      })
+      .catch((err: unknown) => {
+        console.warn(
+          '[store] Unexpected error marking trial_used for user',
+          user.id,
+          err,
+        )
+      })
 
     return NextResponse.json(result, { status: 200 })
   } catch (error) {

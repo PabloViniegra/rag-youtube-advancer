@@ -145,7 +145,7 @@ describe('auth actions', () => {
   })
 
   it('signs out and redirects to home', async () => {
-    const signOutApiMock = vi.fn().mockResolvedValue(undefined)
+    const signOutApiMock = vi.fn().mockResolvedValue({ error: null })
 
     createClientMock.mockResolvedValue({
       auth: {
