@@ -18,15 +18,67 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: 'swap',
 })
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://youtube-intelligence.app'
+
 export const metadata: Metadata = {
-  title: 'YouTube Intelligence — Crece más rápido con IA',
+  metadataBase: new URL(siteUrl),
+  title: {
+    template: '%s — YouTube Intelligence',
+    default: 'YouTube Intelligence — Tu Segundo Cerebro para YouTube',
+  },
   description:
     'Analiza cualquier video de YouTube con IA RAG. Optimiza tu hook, retención y monetización en segundos. Prueba gratis durante 14 días.',
+  keywords: [
+    'YouTube',
+    'inteligencia artificial',
+    'IA',
+    'RAG',
+    'análisis de video',
+    'creadores de contenido',
+    'segundo cerebro',
+    'resúmenes automáticos',
+    'búsqueda semántica',
+    'transcripciones YouTube',
+  ],
+  authors: [{ name: 'YouTube Intelligence', url: siteUrl }],
+  creator: 'YouTube Intelligence',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-snippet': 160,
+      'max-image-preview': 'large',
+      'max-video-preview': -1,
+    },
+  },
   openGraph: {
-    title: 'YouTube Intelligence — Crece más rápido con IA',
+    type: 'website',
+    siteName: 'YouTube Intelligence',
+    locale: 'es_ES',
+    title: 'YouTube Intelligence — Tu Segundo Cerebro para YouTube',
     description:
       'Analiza cualquier video de YouTube con IA RAG. Optimiza tu hook, retención y monetización en segundos.',
-    type: 'website',
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: 'YouTube Intelligence — Tu Segundo Cerebro para YouTube',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'YouTube Intelligence — Tu Segundo Cerebro para YouTube',
+    description:
+      'Analiza cualquier video de YouTube con IA RAG. Optimiza tu hook, retención y monetización en segundos.',
+    images: ['/opengraph-image'],
+  },
+  alternates: {
+    canonical: '/',
   },
 }
 

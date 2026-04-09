@@ -6,7 +6,16 @@ import { DashboardTopbar } from '@/components/dashboard/topbar'
 import { getCurrentUser } from '@/lib/auth/actions'
 
 export const metadata: Metadata = {
-  title: 'Dashboard — YouTube Intelligence',
+  title: {
+    template: '%s — Dashboard',
+    default: 'Dashboard — YouTube Intelligence',
+  },
+  // Exclude all authenticated dashboard routes from search engine indexing.
+  // These contain personal user data and have no public SEO value.
+  robots: {
+    index: false,
+    follow: false,
+  },
 }
 
 export default async function DashboardLayout({

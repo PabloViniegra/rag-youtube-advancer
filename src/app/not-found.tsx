@@ -1,4 +1,10 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Página no encontrada',
+  robots: { index: false, follow: false },
+}
 
 /**
  * App-level 404 boundary.

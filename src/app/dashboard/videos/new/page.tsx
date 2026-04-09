@@ -1,6 +1,12 @@
+import type { Metadata } from 'next'
 import { ViewTransition } from 'react'
 import { NewVideoOrchestrator } from './_components/new-video-orchestrator'
 import { PipelineHint } from './_components/pipeline-hint'
+
+export const metadata: Metadata = {
+  title: 'Añadir video',
+  robots: { index: false, follow: false },
+}
 
 /**
  * /dashboard/videos/new

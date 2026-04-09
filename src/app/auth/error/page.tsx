@@ -1,5 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'
+
+export const metadata: Metadata = {
+  title: 'Error de autenticación',
+  robots: { index: false, follow: false },
+}
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
 

@@ -6,6 +6,9 @@ import { LoginForm } from '@/components/auth/login-form'
 export const metadata: Metadata = {
   title: 'Acceder — YouTube Intelligence',
   description: 'Inicia sesión para acceder a tu segundo cerebro para YouTube.',
+  // Login page should not be indexed — it has no SEO value and may confuse
+  // search engines with session-dependent content.
+  robots: { index: false, follow: false },
 }
 
 interface LoginPageProps {
