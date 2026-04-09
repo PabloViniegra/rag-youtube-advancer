@@ -127,6 +127,7 @@ export default async function VideoDetailPage({ params }: PageProps) {
 
         {/* Intelligence + SEO reports — tab UI when both present, plain when only one */}
         <VideoReportTabs
+          videoId={typedVideo.id}
           reportData={reportData}
           seoReportData={seoReportData}
           irTimestamps={irTimestamps}

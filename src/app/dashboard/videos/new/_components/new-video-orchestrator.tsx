@@ -57,6 +57,9 @@ const FORM_STATE = {
   ERROR: 'error',
 } as const
 
+const PHASE_TICK_MS = 2500
+const PHASE_COMPLETE_STEP_MS = 220
+
 type FormState = (typeof FORM_STATE)[keyof typeof FORM_STATE]
 
 interface ErrorData {
@@ -75,6 +78,31 @@ export function NewVideoOrchestrator() {
   const [errorData, setErrorData] = useState<ErrorData | null>(null)
 
   const phaseTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const phaseIndexRef = useRef(0)
+
+  useEffect(() => {
+    phaseIndexRef.current = phaseIndex
+  }, [phaseIndex])
+
+  function wait(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms)
+    })
+  }
+
+  async function animateToFinalPhase(): Promise<void> {
+    const target = PHASE_COUNT - 1
+    let current = phaseIndexRef.current
+
+    while (current < target) {
+      current += 1
+      startTransition(() => {
+        setPhaseIndex(current)
+      })
+      phaseIndexRef.current = current
+      await wait(PHASE_COMPLETE_STEP_MS)
+    }
+  }
 
   useEffect(() => {
     return () => {
@@ -87,16 +115,19 @@ export function NewVideoOrchestrator() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    // Wrap in startTransition so ViewTransitions activate on the swap
-    startTransition(() => {
-      setFormState(FORM_STATE.LOADING)
-      setPhaseIndex(0)
-      setErrorData(null)
-    })
+    // Loading feedback must appear immediately, not as a low-priority transition.
+    setFormState(FORM_STATE.LOADING)
+    setPhaseIndex(0)
+    setErrorData(null)
+    phaseIndexRef.current = 0
 
     phaseTimerRef.current = setInterval(() => {
-      setPhaseIndex((prev) => Math.min(prev + 1, PHASE_COUNT - 1))
-    }, 2500)
+      setPhaseIndex((prev) => {
+        const next = Math.min(prev + 1, PHASE_COUNT - 1)
+        phaseIndexRef.current = next
+        return next
+      })
+    }, PHASE_TICK_MS)
 
     let result: IngestResult
     try {
@@ -118,6 +149,8 @@ export function NewVideoOrchestrator() {
     }
 
     if (result.ok) {
+      await animateToFinalPhase()
+
       // addTransitionType marks the navigation direction for page-level VTs
       startTransition(() => {
         addTransitionType('nav-forward')
@@ -137,10 +170,8 @@ export function NewVideoOrchestrator() {
             ? (ERROR_MESSAGES[result.code] ?? normalizedMessage)
             : normalizedMessage
 
-      startTransition(() => {
-        setErrorData({ message })
-        setFormState(FORM_STATE.ERROR)
-      })
+      setErrorData({ message })
+      setFormState(FORM_STATE.ERROR)
     }
   }
 

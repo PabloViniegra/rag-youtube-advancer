@@ -12,6 +12,9 @@ const {
   chunkTextMock,
   embedChunksMock,
   storeVideoSectionsMock,
+  videosDeleteEqUserMock,
+  videosDeleteEqIdMock,
+  videosDeleteMock,
   generateIntelligenceReportMock,
   generateSeoReportMock,
 } = vi.hoisted(() => ({
@@ -22,6 +25,9 @@ const {
   chunkTextMock: vi.fn(),
   embedChunksMock: vi.fn(),
   storeVideoSectionsMock: vi.fn(),
+  videosDeleteEqUserMock: vi.fn(),
+  videosDeleteEqIdMock: vi.fn(),
+  videosDeleteMock: vi.fn(),
   generateIntelligenceReportMock: vi.fn(),
   generateSeoReportMock: vi.fn(),
 }))
@@ -170,6 +176,10 @@ const SEO_OK = {
 } as const
 
 function setupSupabase(user: { id: string } | null = { id: 'user-1' }) {
+  videosDeleteEqUserMock.mockResolvedValue({ error: null })
+  videosDeleteEqIdMock.mockReturnValue({ eq: videosDeleteEqUserMock })
+  videosDeleteMock.mockReturnValue({ eq: videosDeleteEqIdMock })
+
   const profileMaybeSingleMock = vi.fn().mockResolvedValue({
     data: { role: 'user', subscription_active: false, trial_used: false },
     error: null,
@@ -216,6 +226,7 @@ function setupSupabase(user: { id: string } | null = { id: 'user-1' }) {
     return {
       select: vi.fn(),
       update: vi.fn(),
+      delete: videosDeleteMock,
       upsert: vi.fn(),
     }
   })
@@ -259,6 +270,7 @@ describe('ingestVideo', () => {
     expect(result.videoId).toBe('vid-uuid-123')
     expect(result.sectionCount).toBe(1)
     expect(updateTagMock).toHaveBeenCalledWith('dashboard-user-1')
+    expect(updateTagMock).toHaveBeenCalledWith('quick-prompts')
   })
 
   it('calls pipeline phases with expected payloads', async () => {
@@ -387,26 +399,30 @@ describe('ingestVideo', () => {
     expect(result.message).toBe('db write failed')
   })
 
-  it('keeps success when intelligence report generation fails (graceful)', async () => {
+  it('fails when intelligence report generation fails', async () => {
     generateIntelligenceReportMock.mockRejectedValueOnce(new Error('llm down'))
 
     const result = await ingestVideo(VALID_INPUT)
 
-    expect(result.ok).toBe(true)
-    if (!result.ok) return
-    expect(result.report).toBeNull()
-    expect(result.seoReport).toBeNull()
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.code).toBe(INGEST_ERROR.REPORT_FAILED)
+    expect(result.message).toBe('llm down')
     expect(generateSeoReportMock).not.toHaveBeenCalled()
+    expect(videosDeleteMock).toHaveBeenCalled()
+    expect(updateTagMock).not.toHaveBeenCalled()
   })
 
-  it('keeps success when SEO generation fails (graceful)', async () => {
+  it('fails when SEO generation fails', async () => {
     generateSeoReportMock.mockRejectedValueOnce(new Error('seo down'))
 
     const result = await ingestVideo(VALID_INPUT)
 
-    expect(result.ok).toBe(true)
-    if (!result.ok) return
-    expect(result.report).not.toBeNull()
-    expect(result.seoReport).toBeNull()
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.code).toBe(INGEST_ERROR.REPORT_FAILED)
+    expect(result.message).toBe('seo down')
+    expect(videosDeleteMock).toHaveBeenCalled()
+    expect(updateTagMock).not.toHaveBeenCalled()
   })
 })

@@ -8,6 +8,7 @@ import type {
 import type { SeoReport } from '@/lib/seo/types'
 import { cn } from '@/lib/utils'
 import { IntelligenceReport as IntelligenceReportView } from '../../_components/intelligence-report/intelligence-report'
+import { ReportsEmptyState } from './reports-empty-state'
 import { SeoReportView } from './seo-report'
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -27,6 +28,7 @@ const TABS: Tab[] = [
 // ── Props ────────────────────────────────────────────────────────────────────
 
 interface VideoReportTabsProps {
+  videoId: string
   reportData: IntelligenceReport | null
   seoReportData: SeoReport | null
   irTimestamps: IntelligenceTimestamp[]
@@ -35,22 +37,41 @@ interface VideoReportTabsProps {
 // ── Component ────────────────────────────────────────────────────────────────
 
 export function VideoReportTabs({
+  videoId,
   reportData,
   seoReportData,
   irTimestamps,
 }: VideoReportTabsProps) {
   const [activeTab, setActiveTab] = useState<ActiveTab>('intelligence')
 
-  // Both null — render nothing
-  if (reportData === null && seoReportData === null) return null
+  // Both null — show recovery state with regeneration actions
+  if (reportData === null && seoReportData === null) {
+    return (
+      <ReportsEmptyState
+        videoId={videoId}
+        hasIntelligence={false}
+        hasSeo={false}
+      />
+    )
+  }
 
-  // Only one non-null — skip tab bar, render as plain section
+  // Only one non-null — render section plus recovery actions for the missing report
   if (reportData === null && seoReportData !== null) {
-    return <SeoReportView report={seoReportData} irTimestamps={irTimestamps} />
+    return (
+      <div className="flex flex-col gap-6">
+        <ReportsEmptyState videoId={videoId} hasIntelligence={false} hasSeo />
+        <SeoReportView report={seoReportData} irTimestamps={irTimestamps} />
+      </div>
+    )
   }
 
   if (reportData !== null && seoReportData === null) {
-    return <IntelligenceReportView report={reportData} />
+    return (
+      <div className="flex flex-col gap-6">
+        <ReportsEmptyState videoId={videoId} hasIntelligence hasSeo={false} />
+        <IntelligenceReportView report={reportData} />
+      </div>
+    )
   }
 
   // Both available — render full tab UI.

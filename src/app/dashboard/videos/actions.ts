@@ -6,10 +6,87 @@
 
 import { revalidatePath, updateTag } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth/actions'
+import { generateIntelligenceReport } from '@/lib/intelligence/generate'
+import { logger } from '@/lib/logger'
+import { generateSeoReport } from '@/lib/seo/generate'
 import { createClient } from '@/lib/supabase/server'
+import type { Database } from '@/lib/supabase/types'
 
 export interface DeleteVideoResult {
   error?: string
+}
+
+export interface RegenerateReportResult {
+  ok: boolean
+  error?: string
+}
+
+type VideoRow = Database['public']['Tables']['videos']['Row']
+type SectionRow = Database['public']['Tables']['video_sections']['Row']
+type IntelligenceReportRow =
+  Database['public']['Tables']['intelligence_reports']['Row']
+type SeoReportRow = Database['public']['Tables']['seo_reports']['Row']
+
+interface TranscriptSource {
+  ok: boolean
+  title?: string | null
+  transcript?: string
+  error?: string
+}
+
+function buildTranscript(chunks: Pick<SectionRow, 'content'>[]): string {
+  return chunks
+    .map((chunk) => chunk.content?.trim() ?? '')
+    .filter((content) => content.length > 0)
+    .join('\n\n')
+}
+
+async function loadTranscriptSource(
+  videoId: string,
+  userId: string,
+): Promise<TranscriptSource> {
+  const supabase = await createClient()
+
+  const { data: video, error: videoError } = await supabase
+    .from('videos')
+    .select('id, title')
+    .eq('id', videoId)
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (videoError || !video) {
+    return { ok: false, error: 'Video no encontrado.' }
+  }
+
+  const { data: sections, error: sectionsError } = await supabase
+    .from('video_sections')
+    .select('content')
+    .eq('video_id', videoId)
+    .order('id')
+
+  if (sectionsError) {
+    return {
+      ok: false,
+      error: 'No se pudieron cargar los fragmentos del video.',
+    }
+  }
+
+  const transcript = buildTranscript(
+    (sections ?? []) as Pick<SectionRow, 'content'>[],
+  )
+
+  if (transcript.length === 0) {
+    return {
+      ok: false,
+      error: 'Este video no tiene fragmentos para regenerar reportes.',
+    }
+  }
+
+  return {
+    ok: true,
+    title: (video as Pick<VideoRow, 'title'>).title,
+    transcript,
+  }
 }
 
 /**
@@ -47,4 +124,123 @@ export async function deleteVideo(videoId: string): Promise<DeleteVideoResult> {
   updateTag(`dashboard-${user.id}`)
 
   return {}
+}
+
+export async function regenerateIntelligenceReport(
+  videoId: string,
+): Promise<RegenerateReportResult> {
+  const user = await getCurrentUser()
+  if (!user) return { ok: false, error: 'No autenticado.' }
+
+  if (videoId.trim() === '') {
+    return { ok: false, error: 'ID de video inválido.' }
+  }
+
+  const source = await loadTranscriptSource(videoId, user.id)
+  if (!source.ok || !source.transcript) {
+    return {
+      ok: false,
+      error: source.error ?? 'No se pudo preparar el reporte.',
+    }
+  }
+
+  const supabase = await createClient()
+
+  try {
+    const report = await generateIntelligenceReport({
+      transcript: source.transcript,
+      title: source.title ?? undefined,
+    })
+
+    const { error } = await (
+      supabase.from('intelligence_reports') as ReturnType<typeof supabase.from>
+    ).upsert(
+      {
+        video_id: videoId,
+        report,
+        generated_at: report.generatedAt,
+      } as unknown as IntelligenceReportRow,
+      { onConflict: 'video_id' },
+    )
+
+    if (error) {
+      return {
+        ok: false,
+        error: 'No se pudo guardar el informe de inteligencia regenerado.',
+      }
+    }
+
+    revalidatePath(`/dashboard/videos/${videoId}`)
+    updateTag(`dashboard-${user.id}`)
+
+    return { ok: true }
+  } catch (error) {
+    logger.error(
+      'videos-actions',
+      'Unexpected error regenerating intelligence report.',
+      error,
+    )
+    return {
+      ok: false,
+      error: 'No se pudo regenerar el informe de inteligencia.',
+    }
+  }
+}
+
+export async function regenerateSeoReport(
+  videoId: string,
+): Promise<RegenerateReportResult> {
+  const user = await getCurrentUser()
+  if (!user) return { ok: false, error: 'No autenticado.' }
+
+  if (videoId.trim() === '') {
+    return { ok: false, error: 'ID de video inválido.' }
+  }
+
+  const source = await loadTranscriptSource(videoId, user.id)
+  if (!source.ok || !source.transcript) {
+    return {
+      ok: false,
+      error: source.error ?? 'No se pudo preparar el reporte.',
+    }
+  }
+
+  const supabase = await createClient()
+
+  try {
+    const report = await generateSeoReport({
+      transcript: source.transcript,
+      title: source.title ?? undefined,
+    })
+
+    const { error } = await (
+      supabase.from('seo_reports') as ReturnType<typeof supabase.from>
+    ).upsert(
+      {
+        video_id: videoId,
+        report,
+        generated_at: report.generatedAt,
+      } as unknown as SeoReportRow,
+      { onConflict: 'video_id' },
+    )
+
+    if (error) {
+      return {
+        ok: false,
+        error: 'No se pudo guardar el SEO Pack regenerado.',
+      }
+    }
+
+    revalidatePath(`/dashboard/videos/${videoId}`)
+    updateTag(`dashboard-${user.id}`)
+
+    return { ok: true }
+  } catch (error) {
+    logger.error(
+      'videos-actions',
+      'Unexpected error regenerating SEO report.',
+      error,
+    )
+    return { ok: false, error: 'No se pudo regenerar el SEO Pack.' }
+  }
 }

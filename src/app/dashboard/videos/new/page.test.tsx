@@ -54,6 +54,7 @@ function resolveWith(result: IngestResult) {
 describe('NuevoVideoPage', () => {
   afterEach(() => {
     cleanup()
+    vi.useRealTimers()
     vi.restoreAllMocks()
     mockPush.mockReset()
   })
@@ -111,8 +112,74 @@ describe('NuevoVideoPage', () => {
       ok: true,
       videoId: 'vid-abc',
       sectionCount: 12,
-      report: null,
-      seoReport: null,
+      report: {
+        summary: {
+          tldr: { context: 'c', mainArgument: 'm', conclusion: 'x' },
+          timestamps: [],
+          keyTakeaways: ['a', 'b', 'c', 'd', 'e'],
+        },
+        repurpose: {
+          twitterThread: [
+            { position: 1, content: '1' },
+            { position: 2, content: '2' },
+            { position: 3, content: '3' },
+            { position: 4, content: '4' },
+            { position: 5, content: '5' },
+            { position: 6, content: '6' },
+            { position: 7, content: '7' },
+          ],
+          shortScript: { hook: 'h', body: 'b', cta: 'c', suggestedClip: 's' },
+          linkedinPost: 'l',
+          newsletterDraft: { subject: 'sub', body: 'body' },
+        },
+        analysis: {
+          sentiment: { tone: 'educativo', confidence: 0.9, explanation: 'ok' },
+          entities: [],
+          suggestedQuestions: ['q1', 'q2', 'q3'],
+        },
+        generatedAt: '2024-01-01T00:00:00.000Z',
+      },
+      seoReport: {
+        seoPackage: {
+          titleVariants: [
+            { variant: 'A', title: 'a', rationale: 'ra' },
+            { variant: 'B', title: 'b', rationale: 'rb' },
+            { variant: 'C', title: 'c', rationale: 'rc' },
+          ],
+          description: 'desc',
+          tags: [
+            't1',
+            't2',
+            't3',
+            't4',
+            't5',
+            't6',
+            't7',
+            't8',
+            't9',
+            't10',
+            't11',
+            't12',
+            't13',
+            't14',
+            't15',
+          ],
+        },
+        showNotes: {
+          episodeTitle: 'ep',
+          description: 'desc',
+          resources: [],
+          suggestedLinks: ['l1', 'l2'],
+        },
+        thumbnailBrief: {
+          mainElement: 'm',
+          textOverlay: 'to',
+          emotionalTone: 'trust',
+          composition: 'comp',
+          colorSuggestions: ['a', 'b', 'c', 'd'],
+        },
+        generatedAt: '2024-01-01T00:00:00.000Z',
+      },
     })
 
     render(<NuevoVideoPage />)
@@ -120,9 +187,104 @@ describe('NuevoVideoPage', () => {
     await user.type(screen.getByLabelText(/URL de YouTube/i), VALID_URL)
     await user.click(screen.getByRole('button', { name: /analizar video/i }))
 
-    await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/dashboard/videos/vid-abc')
+    await waitFor(
+      () => {
+        expect(mockPush).toHaveBeenCalledWith('/dashboard/videos/vid-abc')
+      },
+      { timeout: 3000 },
+    )
+  })
+
+  it('completes remaining phases before redirecting on success', async () => {
+    const user = userEvent.setup()
+
+    resolveWith({
+      ok: true,
+      videoId: 'vid-phases',
+      sectionCount: 10,
+      report: {
+        summary: {
+          tldr: { context: 'c', mainArgument: 'm', conclusion: 'x' },
+          timestamps: [],
+          keyTakeaways: ['a', 'b', 'c', 'd', 'e'],
+        },
+        repurpose: {
+          twitterThread: [
+            { position: 1, content: '1' },
+            { position: 2, content: '2' },
+            { position: 3, content: '3' },
+            { position: 4, content: '4' },
+            { position: 5, content: '5' },
+            { position: 6, content: '6' },
+            { position: 7, content: '7' },
+          ],
+          shortScript: { hook: 'h', body: 'b', cta: 'c', suggestedClip: 's' },
+          linkedinPost: 'l',
+          newsletterDraft: { subject: 'sub', body: 'body' },
+        },
+        analysis: {
+          sentiment: { tone: 'educativo', confidence: 0.9, explanation: 'ok' },
+          entities: [],
+          suggestedQuestions: ['q1', 'q2', 'q3'],
+        },
+        generatedAt: '2024-01-01T00:00:00.000Z',
+      },
+      seoReport: {
+        seoPackage: {
+          titleVariants: [
+            { variant: 'A', title: 'a', rationale: 'ra' },
+            { variant: 'B', title: 'b', rationale: 'rb' },
+            { variant: 'C', title: 'c', rationale: 'rc' },
+          ],
+          description: 'desc',
+          tags: [
+            't1',
+            't2',
+            't3',
+            't4',
+            't5',
+            't6',
+            't7',
+            't8',
+            't9',
+            't10',
+            't11',
+            't12',
+            't13',
+            't14',
+            't15',
+          ],
+        },
+        showNotes: {
+          episodeTitle: 'ep',
+          description: 'desc',
+          resources: [],
+          suggestedLinks: ['l1', 'l2'],
+        },
+        thumbnailBrief: {
+          mainElement: 'm',
+          textOverlay: 'to',
+          emotionalTone: 'trust',
+          composition: 'comp',
+          colorSuggestions: ['a', 'b', 'c', 'd'],
+        },
+        generatedAt: '2024-01-01T00:00:00.000Z',
+      },
     })
+
+    render(<NuevoVideoPage />)
+
+    await user.type(screen.getByLabelText(/URL de YouTube/i), VALID_URL)
+    await user.click(screen.getByRole('button', { name: /analizar video/i }))
+
+    expect(mockPush).not.toHaveBeenCalled()
+
+    await waitFor(
+      () => {
+        expect(mockPush).toHaveBeenCalledWith('/dashboard/videos/vid-phases')
+      },
+      { timeout: 3000 },
+    )
   })
 
   // ── Error state — known error codes ─────────────────────────────────────────

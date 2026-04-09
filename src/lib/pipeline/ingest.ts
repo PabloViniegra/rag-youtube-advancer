@@ -9,8 +9,8 @@
  *   2. chunkText              — split into overlapping segments
  *   3. embedChunks            — convert segments into 1536-dim vectors
  *   4. storeVideoSections     — persist video + sections to Supabase
- *   5. generateIntelligenceReport — 3 parallel LLM calls → Intelligence Report
- *   6. generateSeoReport          — 3 parallel LLM calls → SEO Pack
+ *   5. generateIntelligenceReport — required phase, fails the ingestion on error
+ *   6. generateSeoReport          — required phase, fails the ingestion on error
  */
 
 import { updateTag } from 'next/cache'
@@ -21,6 +21,7 @@ import type { EmbeddedChunk } from '@/lib/ai/types'
 import { CHUNK_CONFIG } from '@/lib/ai/types'
 import { generateIntelligenceReport } from '@/lib/intelligence/generate'
 import type { IntelligenceReport } from '@/lib/intelligence/types'
+import { logger } from '@/lib/logger'
 import { canIndexVideo, resolvePlan } from '@/lib/plans'
 import { generateSeoReport } from '@/lib/seo/generate'
 import type { SeoReport } from '@/lib/seo/types'
@@ -38,7 +39,6 @@ import type {
   IngestErrorCode,
   IngestInput,
   IngestResult,
-  IngestSuccess,
 } from './types'
 import { INGEST_ERROR } from './types'
 
@@ -52,6 +52,26 @@ type SeoReportRow = Database['public']['Tables']['seo_reports']['Row']
 
 function ingestError(code: IngestErrorCode, message: string): IngestError {
   return { ok: false, code, message }
+}
+
+async function rollbackStoredVideo(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  videoId: string,
+  userId: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from('videos')
+    .delete()
+    .eq('id', videoId)
+    .eq('user_id', userId)
+
+  if (error) {
+    logger.warn(
+      'ingest',
+      `Failed to rollback video ${videoId} after report generation failure.`,
+      error,
+    )
+  }
 }
 
 // ─── Server Action ────────────────────────────────────────────────────────────
@@ -147,26 +167,14 @@ export async function ingestVideo(input: IngestInput): Promise<IngestResult> {
     })
     videoId = result.videoId
     sectionCount = result.count
-
-    // Mark trial as used — fire-and-forget, non-blocking
-    void supabase
-      .from('profiles')
-      .update({ trial_used: true })
-      .eq('id', user.id)
-
-    // Invalidate dashboard cache so next load reflects the new video
-    updateTag(`dashboard-${user.id}`)
-
-    // Invalidate quick-prompts cache so new AI chips are generated on next visit
-    updateTag('quick-prompts')
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'Storing video sections failed.'
     return ingestError(INGEST_ERROR.STORE_FAILED, message)
   }
 
-  // ── Phase 5 — Intelligence Report (graceful: failure doesn't block) ────────
-  let report: IngestSuccess['report'] = null
+  // ── Phase 5 — Intelligence Report (required) ───────────────────────────────
+  let report: IntelligenceReport
 
   try {
     const intelligenceReport = await generateIntelligenceReport({
@@ -174,7 +182,7 @@ export async function ingestVideo(input: IngestInput): Promise<IngestResult> {
       title,
     })
 
-    const { data: inserted } = await (
+    const { data: inserted, error: upsertError } = await (
       supabase.from('intelligence_reports') as ReturnType<typeof supabase.from>
     )
       .upsert(
@@ -188,44 +196,63 @@ export async function ingestVideo(input: IngestInput): Promise<IngestResult> {
       .select('id')
       .single()
 
-    if (inserted) {
-      report = intelligenceReport as IntelligenceReport
+    if (upsertError || !inserted) {
+      throw new Error('Failed to persist intelligence report.')
     }
-  } catch {
-    // Phase 5 failure is graceful — the video is already indexed.
+
+    report = intelligenceReport
+  } catch (error) {
+    await rollbackStoredVideo(supabase, videoId, user.id)
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'No se pudo generar el informe de inteligencia.'
+    return ingestError(INGEST_ERROR.REPORT_FAILED, message)
   }
 
-  // ── Phase 6 — SEO Pack (graceful: only runs if Phase 5 succeeded) ──────────
-  let seoReport: IngestSuccess['seoReport'] = null
+  // ── Phase 6 — SEO Pack (required) ───────────────────────────────────────────
+  let seoReport: SeoReport
 
-  if (report !== null) {
-    try {
-      const seoReportData = await generateSeoReport({
-        transcript: fullText,
-        title,
-      })
+  try {
+    const seoReportData = await generateSeoReport({
+      transcript: fullText,
+      title,
+    })
 
-      const { data: inserted } = await (
-        supabase.from('seo_reports') as ReturnType<typeof supabase.from>
+    const { data: inserted, error: upsertError } = await (
+      supabase.from('seo_reports') as ReturnType<typeof supabase.from>
+    )
+      .upsert(
+        {
+          video_id: videoId,
+          report: seoReportData,
+          generated_at: seoReportData.generatedAt,
+        } as unknown as SeoReportRow,
+        { onConflict: 'video_id' },
       )
-        .upsert(
-          {
-            video_id: videoId,
-            report: seoReportData,
-            generated_at: seoReportData.generatedAt,
-          } as unknown as SeoReportRow,
-          { onConflict: 'video_id' },
-        )
-        .select('id')
-        .single()
+      .select('id')
+      .single()
 
-      if (inserted) {
-        seoReport = seoReportData as SeoReport
-      }
-    } catch {
-      // Phase 6 failure is graceful — Intelligence Report remains available.
+    if (upsertError || !inserted) {
+      throw new Error('Failed to persist SEO report.')
     }
+
+    seoReport = seoReportData
+  } catch (error) {
+    await rollbackStoredVideo(supabase, videoId, user.id)
+    const message =
+      error instanceof Error ? error.message : 'No se pudo generar el SEO Pack.'
+    return ingestError(INGEST_ERROR.REPORT_FAILED, message)
   }
+
+  // Finalization (only after all 6 phases succeed)
+  await supabase.from('profiles').update({ trial_used: true }).eq('id', user.id)
+
+  // Invalidate dashboard cache so next load reflects the new video
+  updateTag(`dashboard-${user.id}`)
+
+  // Invalidate quick-prompts cache so new AI chips are generated on next visit
+  updateTag('quick-prompts')
 
   return { ok: true, videoId, sectionCount, report, seoReport }
 }
