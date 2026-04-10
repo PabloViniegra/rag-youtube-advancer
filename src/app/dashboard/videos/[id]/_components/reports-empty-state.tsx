@@ -4,17 +4,17 @@ import { useRouter } from 'next/navigation'
 import { startTransition, useState, useTransition } from 'react'
 import { sileo } from 'sileo'
 import {
-  regenerateIntelligenceReport,
   type RegenerateReportResult,
+  regenerateIntelligenceReport,
   regenerateSeoReport,
 } from '../../actions'
+import { ReportCard } from './reports-empty-state-card'
 import {
   GENERATION_TARGET,
   type GenerationTarget,
-  type ReportKind,
   REPORT_CARDS,
+  type ReportKind,
 } from './reports-empty-state-config'
-import { ReportCard } from './reports-empty-state-card'
 
 interface ReportsEmptyStateProps {
   videoId: string

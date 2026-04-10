@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { generateWeeklyDigest } from '@/lib/weekly-digest'
-import { logger } from '@/lib/logger'
 
 function getWeekStart(now: Date): string {
   const d = new Date(now)

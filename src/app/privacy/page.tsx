@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import { Navbar } from '@/components/landing/navbar'
 import { Footer } from '@/components/landing/footer'
+import { Navbar } from '@/components/landing/navbar'
 import { getCurrentUser } from '@/lib/auth/actions'
 
 export const metadata: Metadata = {

@@ -78,7 +78,6 @@ describe('augmentAnswer', () => {
     vi.clearAllMocks()
     mockGenerateText.mockResolvedValue({
       text: 'React hooks are functions.',
-      // biome-ignore lint/suspicious/noExplicitAny: mock return value
     } as any)
     mockAiGateway.mockReturnValue(FAKE_MODEL as never)
   })

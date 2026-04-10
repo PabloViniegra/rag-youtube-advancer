@@ -17,7 +17,7 @@ function getMessagePrefix(context: string): string {
 export const logger = {
   log(context: string, message: string, ...args: unknown[]) {
     console.log(getMessagePrefix(context), message, ...args)
-    Sentry.logger.log(`${getMessagePrefix(context)} ${message}`)
+    Sentry.logger.info(`${getMessagePrefix(context)} ${message}`)
     flushSentry()
   },
 

@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
 import type Stripe from 'stripe'
 import { stripeWebhookSecret } from '@/lib/env'
+import { logger } from '@/lib/logger'
 import { stripe } from '@/lib/stripe/client'
 import { STRIPE_WEBHOOK_EVENT } from '@/lib/stripe/types'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { logger } from '@/lib/logger'
 
 // ── Webhook handler ──────────────────────────────────────────────────────────
 

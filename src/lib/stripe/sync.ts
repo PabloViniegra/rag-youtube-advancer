@@ -17,9 +17,9 @@
  *   at period end, which is handled by the webhook route.
  */
 
+import { logger } from '@/lib/logger'
 import { stripe } from '@/lib/stripe/client'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import { logger } from '@/lib/logger'
 
 export type SyncResult = { synced: true; active: boolean } | { synced: false }
 

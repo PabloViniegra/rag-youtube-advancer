@@ -17,11 +17,11 @@
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { generateSeoReport } from '@/lib/seo/generate'
 import type { SeoReport } from '@/lib/seo/types'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
-import { logger } from '@/lib/logger'
 
 type SeoReportRow = Database['public']['Tables']['seo_reports']['Row']
 type AppSupabaseClient = SupabaseClient<Database>

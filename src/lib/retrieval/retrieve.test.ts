@@ -78,7 +78,6 @@ describe('retrieveSections', () => {
   it('returns matches and count when RPC succeeds', async () => {
     const supabase = createSupabaseMock({ data: MATCH_ROWS, error: null })
 
-    // biome-ignore lint/suspicious/noExplicitAny: test mock
     const result = await retrieveSections(supabase as any, buildInput())
 
     expect(result.count).toBe(2)
@@ -88,7 +87,6 @@ describe('retrieveSections', () => {
   it('maps snake_case DB rows to camelCase domain objects', async () => {
     const supabase = createSupabaseMock({ data: MATCH_ROWS, error: null })
 
-    // biome-ignore lint/suspicious/noExplicitAny: test mock
     const result = await retrieveSections(supabase as any, buildInput())
 
     expect(result.matches[0]).toEqual({
@@ -109,7 +107,6 @@ describe('retrieveSections', () => {
     const supabase = createSupabaseMock({ data: MATCH_ROWS, error: null })
     const input = buildInput()
 
-    // biome-ignore lint/suspicious/noExplicitAny: test mock
     await retrieveSections(supabase as any, input)
 
     expect(mockGenerateEmbedding).toHaveBeenCalledOnce()
@@ -120,7 +117,6 @@ describe('retrieveSections', () => {
     const supabase = createSupabaseMock({ data: MATCH_ROWS, error: null })
     const input = buildInput({ matchThreshold: 0.8, matchCount: 3 })
 
-    // biome-ignore lint/suspicious/noExplicitAny: test mock
     await retrieveSections(supabase as any, input)
 
     expect(supabase._mocks.rpcMock).toHaveBeenCalledWith(
@@ -139,7 +135,6 @@ describe('retrieveSections', () => {
   it('returns empty matches and count 0 when RPC returns no rows', async () => {
     const supabase = createSupabaseMock({ data: [], error: null })
 
-    // biome-ignore lint/suspicious/noExplicitAny: test mock
     const result = await retrieveSections(supabase as any, buildInput())
 
     expect(result).toEqual({ matches: [], count: 0 })
@@ -148,7 +143,6 @@ describe('retrieveSections', () => {
   it('handles null data from RPC gracefully (treats as empty)', async () => {
     const supabase = createSupabaseMock({ data: null, error: null })
 
-    // biome-ignore lint/suspicious/noExplicitAny: test mock
     const result = await retrieveSections(supabase as any, buildInput())
 
     expect(result).toEqual({ matches: [], count: 0 })
@@ -161,7 +155,6 @@ describe('retrieveSections', () => {
     const supabase = createSupabaseMock({ data: null, error: null })
 
     await expect(
-      // biome-ignore lint/suspicious/noExplicitAny: test mock
       retrieveSections(supabase as any, buildInput()),
     ).rejects.toThrow('gateway timeout')
   })
@@ -173,7 +166,6 @@ describe('retrieveSections', () => {
     })
 
     await expect(
-      // biome-ignore lint/suspicious/noExplicitAny: test mock
       retrieveSections(supabase as any, buildInput()),
     ).rejects.toThrow('match_video_sections RPC failed: rpc call failed')
   })

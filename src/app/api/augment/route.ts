@@ -32,10 +32,10 @@ import type {
   AugmentSuccessResponse,
 } from '@/lib/augmentation/types'
 import { AUGMENT_API_ERROR, AUGMENT_DEFAULTS } from '@/lib/augmentation/types'
+import { logger } from '@/lib/logger'
 import { retrieveSections } from '@/lib/retrieval/retrieve'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
-import { logger } from '@/lib/logger'
 
 type ProfileRow = Database['public']['Tables']['profiles']['Row']
 type VideoTitleRow = Pick<

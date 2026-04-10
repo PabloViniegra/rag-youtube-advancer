@@ -100,11 +100,7 @@ describe('storeVideoSections', () => {
 
   it('returns videoId and count when all DB steps succeed', async () => {
     const supabase = createSupabaseMock({})
-    const result = await storeVideoSections(
-      // biome-ignore lint/suspicious/noExplicitAny: test mock
-      supabase as any,
-      buildInput(),
-    )
+    const result = await storeVideoSections(supabase as any, buildInput())
 
     expect(result).toEqual({ videoId: 'video-uuid-1', count: 2 })
   })
@@ -113,7 +109,6 @@ describe('storeVideoSections', () => {
     const supabase = createSupabaseMock({})
     const input = buildInput()
 
-    // biome-ignore lint/suspicious/noExplicitAny: test mock
     await storeVideoSections(supabase as any, input)
 
     expect(supabase._mocks.upsertMock).toHaveBeenCalledWith(
@@ -128,7 +123,6 @@ describe('storeVideoSections', () => {
 
   it('calls delete on video_sections with the resolved videoId', async () => {
     const supabase = createSupabaseMock({})
-    // biome-ignore lint/suspicious/noExplicitAny: test mock
     await storeVideoSections(supabase as any, buildInput())
 
     expect(supabase._mocks.deleteMock).toHaveBeenCalled()
@@ -140,7 +134,6 @@ describe('storeVideoSections', () => {
 
   it('calls insert with correctly shaped rows', async () => {
     const supabase = createSupabaseMock({})
-    // biome-ignore lint/suspicious/noExplicitAny: test mock
     await storeVideoSections(supabase as any, buildInput())
 
     expect(supabase._mocks.insertMock).toHaveBeenCalledWith(
@@ -164,7 +157,6 @@ describe('storeVideoSections', () => {
   it('skips insert and returns count 0 when sections array is empty', async () => {
     const supabase = createSupabaseMock({})
     const result = await storeVideoSections(
-      // biome-ignore lint/suspicious/noExplicitAny: test mock
       supabase as any,
       buildInput({ sections: [] }),
     )
@@ -181,7 +173,6 @@ describe('storeVideoSections', () => {
     })
 
     await expect(
-      // biome-ignore lint/suspicious/noExplicitAny: test mock
       storeVideoSections(supabase as any, buildInput()),
     ).rejects.toThrow('Failed to upsert video: upsert failed')
   })
@@ -192,7 +183,6 @@ describe('storeVideoSections', () => {
     })
 
     await expect(
-      // biome-ignore lint/suspicious/noExplicitAny: test mock
       storeVideoSections(supabase as any, buildInput()),
     ).rejects.toThrow('Failed to upsert video: no data returned')
   })
@@ -203,7 +193,6 @@ describe('storeVideoSections', () => {
     })
 
     await expect(
-      // biome-ignore lint/suspicious/noExplicitAny: test mock
       storeVideoSections(supabase as any, buildInput()),
     ).rejects.toThrow('Failed to delete existing sections: delete failed')
   })
@@ -214,7 +203,6 @@ describe('storeVideoSections', () => {
     })
 
     await expect(
-      // biome-ignore lint/suspicious/noExplicitAny: test mock
       storeVideoSections(supabase as any, buildInput()),
     ).rejects.toThrow('Failed to insert video sections: insert failed')
   })

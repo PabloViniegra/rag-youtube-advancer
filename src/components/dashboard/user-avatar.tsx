@@ -6,7 +6,6 @@ interface UserAvatarProps {
 export function UserAvatar({ name, avatarUrl }: UserAvatarProps) {
   if (avatarUrl) {
     return (
-      // biome-ignore lint/performance/noImgElement: External avatar URLs vary by provider and are user-generated.
       <img
         src={avatarUrl}
         alt={name}

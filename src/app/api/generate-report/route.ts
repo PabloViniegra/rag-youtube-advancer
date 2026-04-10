@@ -19,9 +19,9 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { generateIntelligenceReport } from '@/lib/intelligence/generate'
 import type { IntelligenceReport } from '@/lib/intelligence/types'
+import { logger } from '@/lib/logger'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
-import { logger } from '@/lib/logger'
 
 type ReportRow = Database['public']['Tables']['intelligence_reports']['Row']
 type AppSupabaseClient = SupabaseClient<Database>

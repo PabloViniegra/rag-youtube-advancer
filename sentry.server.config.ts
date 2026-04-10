@@ -7,7 +7,5 @@ export function init() {
     tracesSampleRate: 1.0,
     enableLogs: true,
     debug: true,
-    flushTimeout: 1000,
-    // Force send immediately
   })
 }

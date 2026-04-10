@@ -23,6 +23,7 @@
  * Runtime: Node.js (default — consistent with other /api routes).
  */
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import { retrieveSections } from '@/lib/retrieval/retrieve'
 import type {
   RetrieveErrorResponse,
@@ -32,7 +33,6 @@ import type {
 import { RETRIEVE_API_ERROR, RETRIEVE_DEFAULTS } from '@/lib/retrieval/types'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
-import { logger } from '@/lib/logger'
 
 type ProfileRow = Database['public']['Tables']['profiles']['Row']
 

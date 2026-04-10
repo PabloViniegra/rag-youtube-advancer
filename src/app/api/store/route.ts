@@ -23,6 +23,7 @@
  */
 import { NextResponse } from 'next/server'
 import type { EmbeddedChunk } from '@/lib/ai/types'
+import { logger } from '@/lib/logger'
 import { canIndexVideo, resolvePlan } from '@/lib/plans'
 import { storeVideoSections } from '@/lib/storage/store'
 import type {
@@ -34,7 +35,6 @@ import { STORE_API_ERROR } from '@/lib/storage/types'
 import { getVideoCount } from '@/lib/supabase/queries'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
-import { logger } from '@/lib/logger'
 
 type ProfileRow = Database['public']['Tables']['profiles']['Row']
 

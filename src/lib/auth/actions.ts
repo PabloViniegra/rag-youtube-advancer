@@ -2,8 +2,8 @@
 
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import { logger } from '@/lib/logger'
+import { createClient } from '@/lib/supabase/server'
 
 /**
  * Returns the absolute origin URL for the current request.
