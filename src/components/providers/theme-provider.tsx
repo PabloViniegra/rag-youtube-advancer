@@ -1,13 +1,6 @@
 'use client'
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 
 const THEME = {
   LIGHT: 'light',
@@ -28,6 +21,7 @@ interface ThemeContextValue {
   theme: Theme
   resolvedTheme: ResolvedTheme
   setTheme: (theme: Theme) => void
+  toggleTheme: () => void
 }
 
 interface ThemeProviderProps {
@@ -75,6 +69,13 @@ export function ThemeProvider({
     setThemeState(defaultTheme)
   }, [defaultTheme, storageKey])
 
+  const toggleTheme = () => {
+    const nextTheme =
+      resolvedTheme === RESOLVED_THEME.DARK ? THEME.LIGHT : THEME.DARK
+    setThemeState(nextTheme)
+    localStorage.setItem(storageKey, nextTheme)
+  }
+
   useEffect(() => {
     const nextResolvedTheme: ResolvedTheme =
       theme === THEME.SYSTEM
@@ -113,24 +114,15 @@ export function ThemeProvider({
     }
   }, [enableSystem, theme])
 
-  const toggleTheme = useCallback(() => {
-    const nextTheme =
-      resolvedTheme === RESOLVED_THEME.DARK ? THEME.LIGHT : THEME.DARK
-    setThemeState(nextTheme)
-    localStorage.setItem(storageKey, nextTheme)
-  }, [resolvedTheme, storageKey])
-
-  const contextValue = useMemo<ThemeContextValue>(() => {
-    return {
-      theme,
-      resolvedTheme,
-      setTheme: (nextTheme: Theme) => {
-        setThemeState(nextTheme)
-        localStorage.setItem(storageKey, nextTheme)
-      },
-      toggleTheme,
-    }
-  }, [resolvedTheme, storageKey, theme, toggleTheme])
+  const contextValue: ThemeContextValue = {
+    theme,
+    resolvedTheme,
+    setTheme: (nextTheme: Theme) => {
+      setThemeState(nextTheme)
+      localStorage.setItem(storageKey, nextTheme)
+    },
+    toggleTheme,
+  }
 
   return (
     <THEME_CONTEXT.Provider value={contextValue}>
