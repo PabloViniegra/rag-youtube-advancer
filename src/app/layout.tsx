@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Outfit, Plus_Jakarta_Sans } from 'next/font/google'
 import { Suspense } from 'react'
+import { CookieConsent } from '@/components/cookie-consent/cookie-consent'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import './globals.css'
 
@@ -98,6 +99,8 @@ export default function RootLayout({
           {/* Suspense boundary allows dynamic routes (dashboard, auth) to
               stream in their content while the static shell is prerendered. */}
           <Suspense>{children}</Suspense>
+          {/* Cookie consent banner — rendered client-side after hydration */}
+          <CookieConsent />
         </ThemeProvider>
       </body>
     </html>

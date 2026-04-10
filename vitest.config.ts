@@ -29,6 +29,9 @@ const COVERAGE_INCLUDES = [
   'src/lib/seo/chapter-markers.ts',
   'src/lib/seo/generate.ts',
   'src/lib/seo/prompts.ts',
+  // Cookie consent
+  'src/components/cookie-consent/use-cookie-consent.ts',
+  'src/components/cookie-consent/cookie-consent.tsx',
 ] as const
 
 export default defineConfig({
