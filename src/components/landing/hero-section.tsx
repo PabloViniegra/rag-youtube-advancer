@@ -58,7 +58,7 @@ export function HeroSection({ isAuthenticated }: HeroSectionProps) {
         <p className="mt-4 text-sm text-on-surface-variant font-label">
           {isAuthenticated
             ? 'Añade un video para empezar'
-            : 'Sin tarjeta de crédito\u00a0·\u00a0Resultados en 30 segundos'}
+            : '1 video gratis\u00a0·\u00a0Resultados en 30 segundos'}
         </p>
       </div>
     </section>

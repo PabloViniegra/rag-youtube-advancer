@@ -9,9 +9,7 @@ export function CtaSection({ isAuthenticated }: CtaSectionProps) {
   const primaryHref = isAuthenticated
     ? '/dashboard'
     : '/login?redirectTo=/dashboard'
-  const primaryLabel = isAuthenticated
-    ? 'Ir al Dashboard'
-    : 'Empieza Gratis — 14 días'
+  const primaryLabel = isAuthenticated ? 'Ir al Dashboard' : 'Empieza Gratis'
 
   return (
     <section className="px-6 py-32 bg-primary" id="pricing">
@@ -73,7 +71,9 @@ export function CtaSection({ isAuthenticated }: CtaSectionProps) {
         </div>
 
         <p className="mt-6 text-on-primary/55 font-label text-sm">
-          Sin tarjeta de crédito&nbsp;·&nbsp;14 días de prueba completa
+          1 video gratis{' '}
+          <span className="text-on-primary/40">·&nbsp;·&nbsp;</span>
+          Sin límite con Pro
         </p>
       </div>
     </section>

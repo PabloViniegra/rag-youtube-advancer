@@ -15,7 +15,7 @@ const siteUrl =
 export const metadata: Metadata = {
   title: 'YouTube Intelligence — Crece más rápido con IA',
   description:
-    'Transforma cualquier video de YouTube en conocimiento accionable. Búsqueda semántica, resúmenes IA y análisis RAG para creadores de contenido. Prueba gratis 14 días.',
+    'Transforma cualquier video de YouTube en conocimiento accionable. Búsqueda semántica, resúmenes IA y análisis RAG para creadores de contenido. 1 video gratis con cuenta free.',
   alternates: {
     canonical: '/',
   },
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     url: '/',
     title: 'YouTube Intelligence — Crece más rápido con IA',
     description:
-      'Transforma cualquier video de YouTube en conocimiento accionable. Búsqueda semántica, resúmenes IA y análisis RAG para creadores de contenido.',
+      'Transforma cualquier video de YouTube en conocimiento accionable con búsqueda semántica y análisis RAG.',
   },
 }
 
