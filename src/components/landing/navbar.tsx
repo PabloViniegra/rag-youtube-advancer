@@ -1,4 +1,10 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { HamburgerIcon } from '@/components/dashboard/icons'
+import { LandingMobileDrawer } from '@/components/landing/landing-mobile-drawer'
 import { NavLinks } from '@/components/landing/nav-links'
 import { GitHubStarButton } from '@/components/ui/github-star-button'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
@@ -8,25 +14,47 @@ interface NavbarProps {
 }
 
 export function Navbar({ isAuthenticated }: NavbarProps) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [closing, setClosing] = useState(false)
+  const pathname = usePathname()
+  const openBtnRef = useRef<HTMLButtonElement>(null)
+
+  const closeMenu = useCallback(() => {
+    setClosing(true)
+    const timer = setTimeout(() => {
+      setMenuOpen(false)
+      setClosing(false)
+      openBtnRef.current?.focus()
+    }, 200)
+    return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    if (!pathname) return
+    setMenuOpen(false)
+    setClosing(false)
+  }, [pathname])
+
   return (
     <>
-      {/* Skip link — first focusable element on the page (WCAG 2.4.1) */}
+      {/* Skip link */}
       <a
         href="#main-content"
-        className="fixed left-2 top-2 z-[100] -translate-y-16 rounded-lg bg-primary px-4 py-2 font-body text-sm font-bold text-on-primary shadow-lg transition-transform focus:translate-y-0 focus-visible:translate-y-0"
+        className="fixed left-2 top-2 z-[100] -translate-y-16 rounded-lg bg-primary px-4 py-2 font-body text-sm font-bold text-on-primary shadow-lg transition-transform focus:translate-y-0 focus-visible:translate-y-0 sr-only focus:not:sr-only"
+        suppressHydrationWarning
       >
         Saltar al contenido principal
       </a>
 
+      {/* Desktop nav */}
       <nav
         aria-label="Principal"
-        className="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-md border-b border-outline-variant/40"
+        className="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-md border-b border-outline-variant/40 hidden md:block"
       >
-        <div className="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
-          {/* Brand — link to home (convention + usability) */}
+        <div className="flex justify-between items-center px-6 lg:px-8 py-4 max-w-7xl mx-auto">
           <Link
             href="/"
-            className="text-xl font-extrabold tracking-tighter text-on-surface uppercase font-headline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded"
+            className="text-lg lg:text-xl font-extrabold tracking-tighter text-on-surface uppercase font-headline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded"
           >
             YouTube Intelligence
           </Link>
@@ -54,6 +82,46 @@ export function Navbar({ isAuthenticated }: NavbarProps) {
           </div>
         </div>
       </nav>
+
+      {/* Mobile nav */}
+      <nav
+        aria-label="Principal"
+        className="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-md border-b border-outline-variant/40 md:hidden"
+      >
+        <div className="flex justify-between items-center px-4 py-3">
+          <Link
+            href="/"
+            className="text-base font-extrabold tracking-tight text-on-surface uppercase font-headline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded"
+          >
+            YouTube Intelligence
+          </Link>
+
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <button
+              ref={openBtnRef}
+              type="button"
+              onClick={() => setMenuOpen(true)}
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              aria-label="Abrir menú de navegación"
+              aria-expanded={menuOpen}
+              aria-controls="mobile-nav-drawer"
+            >
+              <HamburgerIcon />
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile drawer */}
+      {(menuOpen || closing) && (
+        <LandingMobileDrawer
+          isAuthenticated={isAuthenticated}
+          closing={closing}
+          pathname={pathname}
+          onClose={closeMenu}
+        />
+      )}
     </>
   )
 }

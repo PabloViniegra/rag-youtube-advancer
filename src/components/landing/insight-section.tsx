@@ -13,16 +13,16 @@ function VisuallyHidden({ children }: { children: React.ReactNode }) {
 
 export function InsightSection() {
   return (
-    <section className="px-6 py-24 bg-surface-container-low">
+    <section className="px-4 sm:px-6 py-16 md:py-24 bg-surface-container-low">
       <div className="max-w-5xl mx-auto">
         {/* Section header */}
-        <div className="mb-12 text-center">
+        <div className="mb-10 md:mb-12 text-center">
           <p className="text-on-surface-variant font-label text-xs font-semibold uppercase tracking-widest mb-3">
             Análisis en tiempo real
           </p>
-          <h2 className="text-3xl md:text-4xl font-headline font-extrabold text-on-surface leading-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-headline font-extrabold text-on-surface leading-tight">
             Ve exactamente qué está fallando
-            <br />
+            <br className="hidden sm:block" />
             en tu video.
           </h2>
         </div>

@@ -8,7 +8,7 @@ const FOOTER_LINKS = [
 export function Footer() {
   return (
     <footer className="w-full bg-inverse-surface border-t border-inverse-on-surface/10">
-      <div className="flex flex-col md:flex-row justify-between items-center px-12 py-10 w-full max-w-7xl mx-auto gap-8">
+      <div className="flex flex-col md:flex-row justify-between items-center px-4 sm:px-6 md:px-12 py-8 md:py-10 w-full max-w-7xl mx-auto gap-6 md:gap-8">
         {/* Brand — link to home for keyboard / AT users */}
         <Link
           href="/"

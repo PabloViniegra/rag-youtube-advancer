@@ -1,11 +1,9 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useEffect, useRef, useTransition } from 'react'
 import { sileo } from 'sileo'
 import { deleteVideo } from '../actions'
 
-// isOpen is no longer a prop — the parent controls mounting/unmounting,
-// which lets the outer ViewTransition animate enter/exit correctly.
 interface DeleteVideoModalProps {
   videoId: string
   videoTitle: string | null
@@ -26,6 +24,30 @@ export function DeleteVideoModal({
   onDeleteOptimistic,
 }: DeleteVideoModalProps) {
   const [isPending, startTransition] = useTransition()
+  const dialogRef = useRef<HTMLDialogElement>(null)
+  const confirmButtonRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog) return
+
+    dialog.showModal()
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        onClose()
+      }
+    }
+
+    dialog.addEventListener('keydown', handleKeyDown)
+    confirmButtonRef.current?.focus()
+
+    return () => {
+      dialog.removeEventListener('keydown', handleKeyDown)
+      dialog.close()
+    }
+  }, [onClose])
 
   function handleConfirm() {
     startTransition(async () => {
@@ -46,74 +68,81 @@ export function DeleteVideoModal({
     })
   }
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+    if (e.target === dialogRef.current) {
+      onClose()
+    }
+  }
+
   return (
-    <div
-      role="dialog"
+    <dialog
+      ref={dialogRef}
       aria-modal="true"
       aria-labelledby="delete-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      onClick={handleBackdropClick}
+      onCancel={(e) => {
+        e.preventDefault()
+        onClose()
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          onClose()
+        }
+      }}
+      className="m-auto rounded-2xl border border-outline-variant bg-surface p-6 shadow-xl backdrop:bg-inverse-surface/40"
     >
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-inverse-surface/40 backdrop-blur-sm"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Panel */}
-      <div className="relative z-10 w-full max-w-sm rounded-2xl border border-outline-variant bg-surface p-6 shadow-xl">
-        <div className="mb-1 flex items-center gap-2">
-          <WarningIcon />
-          <h2
-            id="delete-modal-title"
-            className="font-headline text-base font-bold text-on-surface"
-          >
-            Desindexar video
-          </h2>
-        </div>
-
-        {videoTitle && (
-          <p className="mb-4 font-body text-sm italic text-on-surface-variant">
-            "{videoTitle}"
-          </p>
-        )}
-
-        <p className="mb-3 font-body text-xs text-on-surface-variant">
-          Se eliminará permanentemente:
-        </p>
-        <ul className="mb-6 space-y-1.5">
-          {IMPACT_ITEMS.map((item) => (
-            <li
-              key={item}
-              className="flex items-center gap-2 font-body text-xs text-error"
-            >
-              <XIcon />
-              {item}
-            </li>
-          ))}
-        </ul>
-
-        <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isPending}
-            className="h-9 rounded-lg px-4 font-body text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={handleConfirm}
-            disabled={isPending}
-            className="inline-flex h-9 items-center gap-2 rounded-lg bg-error px-4 font-body text-sm font-semibold text-on-error transition-colors hover:bg-error/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/40 disabled:opacity-70"
-          >
-            {isPending ? <SpinnerIcon /> : null}
-            {isPending ? 'Eliminando…' : 'Sí, eliminar'}
-          </button>
-        </div>
+      <div className="mb-1 flex items-center gap-2">
+        <WarningIcon />
+        <h2
+          id="delete-modal-title"
+          className="font-headline text-base font-bold text-on-surface"
+        >
+          Desindexar video
+        </h2>
       </div>
-    </div>
+
+      {videoTitle && (
+        <p className="mb-4 font-body text-sm italic text-on-surface-variant">
+          "{videoTitle}"
+        </p>
+      )}
+
+      <p className="mb-3 font-body text-xs text-on-surface-variant">
+        Se eliminará permanentemente:
+      </p>
+      <ul className="mb-6 space-y-1.5">
+        {IMPACT_ITEMS.map((item) => (
+          <li
+            key={item}
+            className="flex items-center gap-2 font-body text-xs text-error"
+          >
+            <XIcon />
+            {item}
+          </li>
+        ))}
+      </ul>
+
+      <div className="flex justify-end gap-3">
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={isPending}
+          className="h-9 rounded-lg px-4 font-body text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50"
+        >
+          Cancelar
+        </button>
+        <button
+          ref={confirmButtonRef}
+          type="button"
+          onClick={handleConfirm}
+          disabled={isPending}
+          className="inline-flex h-9 items-center gap-2 rounded-lg bg-error px-4 font-body text-sm font-semibold text-on-error transition-colors hover:bg-error/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/40 disabled:opacity-70"
+        >
+          {isPending ? <SpinnerIcon /> : null}
+          {isPending ? 'Eliminando…' : 'Sí, eliminar'}
+        </button>
+      </div>
+    </dialog>
   )
 }
 

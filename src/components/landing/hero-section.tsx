@@ -11,7 +11,7 @@ export function HeroSection({ isAuthenticated }: HeroSectionProps) {
     : '/login?redirectTo=/dashboard'
 
   return (
-    <section className="px-6 py-20 md:py-32">
+    <section className="px-4 py-16 md:py-20 lg:py-24">
       <div className="max-w-5xl mx-auto text-center">
         {/* Social proof badge — replaces generic "RAG AI Technology" */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-container mb-8 border border-primary/20">
@@ -22,20 +22,20 @@ export function HeroSection({ isAuthenticated }: HeroSectionProps) {
         </div>
 
         {/* Heading — solid color, no gradient */}
-        <h1 className="text-5xl md:text-7xl font-headline font-extrabold tracking-tight mb-6 leading-[1.05]">
-          Maximiza tus Ingresos en <br />
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-headline font-extrabold tracking-tight mb-4 sm:mb-6 leading-[1.05]">
+          Maximiza tus Ingresos en <br className="hidden sm:block" />
           <span className="text-primary">YouTube con IA</span>
         </h1>
 
         {/* Subheading — specific, action-oriented */}
-        <p className="text-lg md:text-xl text-on-surface-variant max-w-2xl mx-auto mb-12 font-body leading-relaxed">
+        <p className="text-base sm:text-lg md:text-xl text-on-surface-variant max-w-xl md:max-w-2xl mx-auto mb-8 md:mb-12 font-body leading-relaxed">
           Pega la URL de cualquier video. Nuestra tecnología RAG analiza el
           hook, la retención y la monetización para darte estrategias
           accionables en segundos.
         </p>
 
         {/* URL input — with format hint for error prevention */}
-        <div className="max-w-2xl mx-auto bg-surface-container-low p-2 rounded-xl border border-outline-variant/40 flex flex-col md:flex-row gap-2 shadow-sm">
+        <div className="max-w-xl md:max-w-2xl mx-auto bg-surface-container-low p-3 sm:p-4 rounded-xl border border-outline-variant/40 flex flex-col sm:flex-row gap-2 sm:gap-3 shadow-sm">
           <div className="flex-1 flex items-center px-4 gap-3 bg-surface-bright rounded-lg border border-transparent focus-within:border-primary/40 transition-all">
             <Link2 className="text-on-surface-variant shrink-0" size={20} />
             <input

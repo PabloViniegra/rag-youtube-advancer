@@ -24,22 +24,25 @@ const STEPS = [
 
 export function ProcessSection() {
   return (
-    <section className="bg-inverse-surface px-6 py-24" id="features">
+    <section
+      className="bg-inverse-surface px-4 sm:px-6 py-16 md:py-24"
+      id="features"
+    >
       <div className="max-w-7xl mx-auto">
         {/* Header — left-aligned, editorial */}
-        <div className="mb-16 max-w-xl">
-          <p className="text-inverse-on-surface/50 font-label text-xs font-semibold uppercase tracking-widest mb-4">
+        <div className="mb-12 md:mb-16 max-w-xl">
+          <p className="text-inverse-on-surface/50 font-label text-xs font-semibold uppercase tracking-widest mb-3 md:mb-4">
             Cómo funciona
           </p>
-          <h2 className="text-4xl md:text-5xl font-headline font-extrabold text-inverse-on-surface leading-[1.05]">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-headline font-extrabold text-inverse-on-surface leading-[1.05]">
             De URL a estrategia
-            <br />
+            <br className="hidden sm:block" />
             en tres pasos.
           </h2>
         </div>
 
         {/* Steps — numbered, left-aligned, no centered-card template */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-8">
           {STEPS.map((step) => (
             <div key={step.number} className="flex flex-col gap-5">
               {/* Large number as the visual anchor */}

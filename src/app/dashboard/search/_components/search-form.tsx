@@ -41,10 +41,12 @@ function SearchInput({
   value,
   onChange,
   disabled,
+  error,
 }: {
   value: string
   onChange: (v: string) => void
   disabled: boolean
+  error: SearchFormError | null
 }) {
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -52,6 +54,10 @@ function SearchInput({
       e.currentTarget.form?.requestSubmit()
     }
   }
+
+  const isInvalid = error !== null
+  const errorId = 'search-query-error'
+  const hintId = 'search-query-hint'
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -73,15 +79,18 @@ function SearchInput({
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         disabled={disabled}
-        aria-describedby="search-query-hint"
+        aria-invalid={isInvalid ? 'true' : undefined}
+        aria-describedby={`${hintId} ${error ? errorId : ''}`}
         className="w-full resize-none rounded-xl border border-outline-variant bg-surface-container-low px-4 py-3 font-body text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
       />
-      <p
-        id="search-query-hint"
-        className="font-body text-xs text-on-surface-variant"
-      >
+      <p id={hintId} className="font-body text-xs text-on-surface-variant">
         Busca en todos tus videos a la vez.
       </p>
+      {error && (
+        <p id={errorId} role="alert" className="font-body text-xs text-error">
+          {error.message}
+        </p>
+      )}
     </div>
   )
 }
@@ -109,7 +118,7 @@ function ExampleQuestions({
             key={q}
             type="button"
             onClick={() => onExampleClick(q)}
-            className="inline-flex items-center rounded-full border border-outline-variant bg-surface-container-low px-3 py-1.5 font-body text-xs font-medium text-on-surface transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            className="inline-flex min-h-[24px] min-w-[24px] items-center rounded-full border border-outline-variant bg-surface-container-low px-3 py-1.5 font-body text-xs font-medium text-on-surface transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
             {q}
           </button>
@@ -136,6 +145,7 @@ export function SearchForm({
         value={query}
         onChange={onQueryChange}
         disabled={isLoading}
+        error={error}
       />
 
       {showExamples && <ExampleQuestions onExampleClick={onSuggestionClick} />}
