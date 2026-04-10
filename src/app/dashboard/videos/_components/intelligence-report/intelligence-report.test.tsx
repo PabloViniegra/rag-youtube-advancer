@@ -169,6 +169,26 @@ describe('IntelligenceReport', () => {
     expect(screen.queryByText(/TL;DW/)).not.toBeInTheDocument()
   })
 
+  it('allows expanding LinkedIn post and newsletter draft', async () => {
+    const user = userEvent.setup()
+    render(<IntelligenceReport report={MOCK_REPORT} />)
+
+    await user.click(screen.getByRole('tab', { name: 'Reutilizar Contenido' }))
+
+    const expandButtons = screen.getAllByRole('button', {
+      name: 'Ver completo',
+    })
+    expect(expandButtons).toHaveLength(2)
+
+    await user.click(expandButtons[0])
+    await user.click(expandButtons[1])
+
+    const collapseButtons = screen.getAllByRole('button', { name: 'Ver menos' })
+    expect(collapseButtons).toHaveLength(2)
+    expect(collapseButtons[0]).toHaveAttribute('aria-expanded', 'true')
+    expect(collapseButtons[1]).toHaveAttribute('aria-expanded', 'true')
+  })
+
   // ── Tab switching: analysis ───────────────────────────────────────────────
 
   it('shows analysis content when its tab is clicked', async () => {

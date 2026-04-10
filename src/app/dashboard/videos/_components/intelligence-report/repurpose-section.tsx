@@ -6,6 +6,7 @@ import type {
   TweetEntry,
 } from '@/lib/intelligence/types'
 import { CopyButton } from './copy-button'
+import { ExpandableText } from './expandable-text'
 import { LinkedInIcon, MailIcon, VideoIcon, XIcon } from './icons'
 
 // ── Props ───────────────────────────────────────────────────────────────────
@@ -122,9 +123,7 @@ function LinkedInCard({ post }: LinkedInCardProps) {
       title="Post de LinkedIn"
       copyText={post}
     >
-      <p className="line-clamp-6 whitespace-pre-line font-body text-sm leading-relaxed text-on-surface">
-        {post}
-      </p>
+      <ExpandableText text={post} collapsedClassName="line-clamp-6" />
     </ContentCard>
   )
 }
@@ -153,9 +152,10 @@ function NewsletterCard({ newsletter }: NewsletterCardProps) {
             {newsletter.subject}
           </p>
         </div>
-        <p className="line-clamp-4 whitespace-pre-line font-body text-sm leading-relaxed text-on-surface">
-          {newsletter.body}
-        </p>
+        <ExpandableText
+          text={newsletter.body}
+          collapsedClassName="line-clamp-4"
+        />
       </div>
     </ContentCard>
   )

@@ -42,7 +42,7 @@ export default function NuevoVideoPage() {
           </h1>
           <p className="font-body text-sm text-on-surface-variant">
             Pega la URL de un video de YouTube para indexarlo. Lo analizamos en
-            cinco pasos automáticos:
+            seis pasos automáticos:
           </p>
           <PipelineHint />
         </header>

@@ -65,7 +65,7 @@ interface StepDotProps {
 
 function StepDot({ label, fullLabel, state, index }: StepDotProps) {
   return (
-    <div className="flex flex-col items-center gap-1.5">
+    <div className="relative z-10 flex flex-col items-center gap-1.5">
       {/* Accessible full label — visible to screen readers and test queries */}
       <span className="sr-only">{fullLabel}</span>
       <div
@@ -151,12 +151,12 @@ export function PhaseProgress({ phaseIndex }: PhaseProgressProps) {
         {/* Background track */}
         <div
           aria-hidden="true"
-          className="absolute top-4 left-4 right-4 h-0.5 -translate-y-1/2 rounded-full bg-outline-variant"
+          className="absolute top-4 left-4 right-4 z-0 h-0.5 -translate-y-1/2 rounded-full bg-outline-variant"
         />
         {/* Filled track */}
         <div
           aria-hidden="true"
-          className="absolute top-4 left-4 h-0.5 -translate-y-1/2 rounded-full bg-primary transition-all duration-700"
+          className="absolute top-4 left-4 z-0 h-0.5 -translate-y-1/2 rounded-full bg-primary transition-all duration-700"
           style={{
             width: `calc(${progressPct}% * (100% - 2rem) / 100)`,
           }}

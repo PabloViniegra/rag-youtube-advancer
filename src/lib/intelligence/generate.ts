@@ -23,6 +23,8 @@ import type {
 } from './types'
 import { INTELLIGENCE_CONFIG } from './types'
 
+const STRUCTURED_OUTPUT_RETRY_COUNT = 1
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /**
@@ -54,6 +56,47 @@ function parseJsonResponse<T>(raw: string, label: string): T {
   }
 }
 
+interface GenerateStructuredSectionInput {
+  model: ReturnType<typeof aiGateway>
+  system: string
+  prompt: string
+  maxOutputTokens: number
+  label: string
+}
+
+async function generateStructuredSection<T>(
+  input: GenerateStructuredSectionInput,
+): Promise<T> {
+  let lastError: unknown
+
+  for (
+    let attempt = 0;
+    attempt <= STRUCTURED_OUTPUT_RETRY_COUNT;
+    attempt += 1
+  ) {
+    const result = await generateText({
+      model: input.model,
+      system: input.system,
+      prompt: input.prompt,
+      maxOutputTokens: input.maxOutputTokens,
+      temperature: 0,
+    })
+
+    try {
+      return parseJsonResponse<T>(result.text, input.label)
+    } catch (error) {
+      lastError = error
+    }
+  }
+
+  const message =
+    lastError instanceof Error ? lastError.message : String(lastError)
+
+  throw new Error(
+    `Failed to generate ${input.label} as valid JSON after ${STRUCTURED_OUTPUT_RETRY_COUNT + 1} attempts. ${message}`,
+  )
+}
+
 // ─── Core generation ──────────────────────────────────────────────────────────
 
 export interface GenerateReportInput {
@@ -80,40 +123,30 @@ export async function generateIntelligenceReport(
   const model = aiGateway(INTELLIGENCE_CONFIG.model)
   const maxOutputTokens = INTELLIGENCE_CONFIG.maxOutputTokens
 
-  // Fire all 3 calls in parallel — no dependencies between them
-  const [summaryResult, repurposeResult, analysisResult] = await Promise.all([
-    generateText({
+  // Fire all 3 calls in parallel — each call retries once if JSON is malformed.
+  const [summary, repurpose, analysis] = await Promise.all([
+    generateStructuredSection<IntelligenceSummary>({
       model,
       system: PROMPT_SUMMARY,
       prompt: userPrompt,
       maxOutputTokens,
+      label: 'summary',
     }),
-    generateText({
+    generateStructuredSection<IntelligenceRepurpose>({
       model,
       system: PROMPT_REPURPOSE,
       prompt: userPrompt,
       maxOutputTokens,
+      label: 'repurpose',
     }),
-    generateText({
+    generateStructuredSection<IntelligenceAnalysis>({
       model,
       system: PROMPT_ANALYSIS,
       prompt: userPrompt,
       maxOutputTokens,
+      label: 'analysis',
     }),
   ])
-
-  const summary = parseJsonResponse<IntelligenceSummary>(
-    summaryResult.text,
-    'summary',
-  )
-  const repurpose = parseJsonResponse<IntelligenceRepurpose>(
-    repurposeResult.text,
-    'repurpose',
-  )
-  const analysis = parseJsonResponse<IntelligenceAnalysis>(
-    analysisResult.text,
-    'analysis',
-  )
 
   return {
     summary,

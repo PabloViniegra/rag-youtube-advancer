@@ -1,7 +1,7 @@
 /**
  * PipelineHint
  *
- * Visual hint that communicates the 5-phase ingestion pipeline to the user
+ * Visual hint that communicates the 6-phase ingestion pipeline to the user
  * before they submit the form. Reinforces the value proposition.
  * Server Component — no interactivity needed.
  *

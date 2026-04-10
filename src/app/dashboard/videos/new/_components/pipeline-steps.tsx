@@ -154,4 +154,36 @@ export const PIPELINE_STEPS = [
       </svg>
     ),
   },
+  {
+    label: 'SEO Pack',
+    icon: (
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden="true"
+        className="text-primary"
+      >
+        <path
+          d="M10.5 3h-5A2.5 2.5 0 0 0 3 5.5v5A2.5 2.5 0 0 0 5.5 13h5A2.5 2.5 0 0 0 13 10.5v-5A2.5 2.5 0 0 0 10.5 3z"
+          stroke="currentColor"
+          strokeWidth="1.75"
+        />
+        <path
+          d="M13 13l8 8"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+        />
+        <circle
+          cx="17.5"
+          cy="17.5"
+          r="3.5"
+          stroke="currentColor"
+          strokeWidth="1.75"
+        />
+      </svg>
+    ),
+  },
 ] as const
