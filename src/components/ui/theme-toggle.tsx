@@ -5,11 +5,25 @@ import { useEffect, useState } from 'react'
 import { useTheme } from '@/components/providers/theme-provider'
 import { cn } from '@/lib/utils'
 
+function handleThemeToggle(
+  resolvedTheme: 'dark' | 'light',
+  setTheme: (theme: 'dark' | 'light') => void,
+) {
+  const newTheme = resolvedTheme === 'dark' ? 'light' : 'dark'
+  if (!document.startViewTransition) {
+    setTheme(newTheme)
+    return
+  }
+
+  document.startViewTransition(() => {
+    setTheme(newTheme)
+  })
+}
+
 export function ThemeToggle() {
   const { setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
-  // Avoid hydration mismatch — only render active state after mount
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -23,7 +37,7 @@ export function ThemeToggle() {
     >
       <button
         type="button"
-        onClick={() => setTheme('light')}
+        onClick={() => handleThemeToggle(resolvedTheme, setTheme)}
         aria-pressed={mounted ? !isDark : undefined}
         aria-label="Modo claro"
         title="Modo claro"
@@ -38,7 +52,7 @@ export function ThemeToggle() {
       </button>
       <button
         type="button"
-        onClick={() => setTheme('dark')}
+        onClick={() => handleThemeToggle(resolvedTheme, setTheme)}
         aria-pressed={mounted ? isDark : undefined}
         aria-label="Modo oscuro"
         title="Modo oscuro"

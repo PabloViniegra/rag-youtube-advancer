@@ -1,6 +1,13 @@
 'use client'
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 
 const THEME = {
   LIGHT: 'light',
@@ -106,6 +113,13 @@ export function ThemeProvider({
     }
   }, [enableSystem, theme])
 
+  const toggleTheme = useCallback(() => {
+    const nextTheme =
+      resolvedTheme === RESOLVED_THEME.DARK ? THEME.LIGHT : THEME.DARK
+    setThemeState(nextTheme)
+    localStorage.setItem(storageKey, nextTheme)
+  }, [resolvedTheme, storageKey])
+
   const contextValue = useMemo<ThemeContextValue>(() => {
     return {
       theme,
@@ -114,8 +128,9 @@ export function ThemeProvider({
         setThemeState(nextTheme)
         localStorage.setItem(storageKey, nextTheme)
       },
+      toggleTheme,
     }
-  }, [resolvedTheme, storageKey, theme])
+  }, [resolvedTheme, storageKey, theme, toggleTheme])
 
   return (
     <THEME_CONTEXT.Provider value={contextValue}>
