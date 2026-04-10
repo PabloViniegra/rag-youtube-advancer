@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { NavLinks } from '@/components/landing/nav-links'
+import { GitHubStarButton } from '@/components/ui/github-star-button'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 interface NavbarProps {
@@ -29,29 +31,11 @@ export function Navbar({ isAuthenticated }: NavbarProps) {
             YouTube Intelligence
           </Link>
 
-          {/* Nav links — list semantics help screen readers announce count */}
-          <ul className="hidden md:flex gap-8 items-center list-none m-0 p-0">
-            <li>
-              <a
-                className="font-body text-sm font-semibold text-primary border-b-2 border-primary pb-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded"
-                href="#features"
-                aria-current="true"
-              >
-                Features
-              </a>
-            </li>
-            <li>
-              <a
-                className="font-body text-sm font-semibold text-on-surface-variant hover:text-on-surface transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded"
-                href="#pricing"
-              >
-                Pricing
-              </a>
-            </li>
-          </ul>
+          <NavLinks />
 
           <div className="flex items-center gap-3">
             <ThemeToggle />
+            <GitHubStarButton />
             {isAuthenticated ? (
               <Link
                 href="/dashboard"
