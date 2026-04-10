@@ -245,13 +245,13 @@ SENTRY_PROJECT=your_project
 
 ```bash
 # Run all tests
-bun test
+bun run test
 
 # Run tests with coverage
-bun test:coverage
+bun run test:coverage
 
 # Run tests in watch mode
-bun test --watch
+bun run test --watch
 ```
 
 ### Test Coverage
