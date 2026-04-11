@@ -29,8 +29,8 @@ export function ProcessSection() {
       id="features"
     >
       <div className="max-w-7xl mx-auto">
-        {/* Header — left-aligned, editorial */}
-        <div className="mb-12 md:mb-16 max-w-xl">
+        {/* Header — scroll-driven reveal */}
+        <div className="mb-12 md:mb-16 max-w-xl reveal-on-scroll">
           <p className="text-inverse-on-surface/50 font-label text-xs font-semibold uppercase tracking-widest mb-3 md:mb-4">
             Cómo funciona
           </p>
@@ -41,10 +41,13 @@ export function ProcessSection() {
           </h2>
         </div>
 
-        {/* Steps — numbered, left-aligned, no centered-card template */}
+        {/* Steps — each reveals as it enters viewport */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-8">
           {STEPS.map((step) => (
-            <div key={step.number} className="flex flex-col gap-5">
+            <div
+              key={step.number}
+              className="flex flex-col gap-5 reveal-on-scroll"
+            >
               {/* Large number as the visual anchor */}
               <span className="text-6xl md:text-7xl font-headline font-extrabold text-inverse-primary leading-none tabular-nums">
                 {step.number}

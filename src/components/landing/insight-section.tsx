@@ -5,6 +5,7 @@ import {
   TrendingDown,
   TrendingUp,
 } from 'lucide-react'
+import { CountUpNumber } from './count-up-number'
 
 /** Visually hidden but readable by screen readers */
 function VisuallyHidden({ children }: { children: React.ReactNode }) {
@@ -16,7 +17,7 @@ export function InsightSection() {
     <section className="px-4 sm:px-6 py-16 md:py-24 bg-surface-container-low">
       <div className="max-w-5xl mx-auto">
         {/* Section header */}
-        <div className="mb-10 md:mb-12 text-center">
+        <div className="mb-10 md:mb-12 text-center reveal-on-scroll">
           <p className="text-on-surface-variant font-label text-xs font-semibold uppercase tracking-widest mb-3">
             Análisis en tiempo real
           </p>
@@ -27,8 +28,8 @@ export function InsightSection() {
           </h2>
         </div>
 
-        {/* Product demo card — looks like real RAG output */}
-        <div className="bg-surface-bright border border-outline-variant/50 rounded-2xl overflow-hidden shadow-sm">
+        {/* Product demo card — scroll-reveal entrance */}
+        <div className="bg-surface-bright border border-outline-variant/50 rounded-2xl overflow-hidden shadow-sm reveal-on-scroll">
           {/* Video metadata bar */}
           <div className="border-b border-outline-variant/40 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface-container-low/60">
             <div className="flex items-center gap-3 min-w-0">
@@ -59,9 +60,11 @@ export function InsightSection() {
                 Hook Score
               </p>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-2xl font-headline font-extrabold text-primary tabular-nums">
-                  4.2
-                </span>
+                <CountUpNumber
+                  value={4.2}
+                  decimals={1}
+                  className="text-2xl font-headline font-extrabold text-primary tabular-nums"
+                />
                 <span className="text-sm text-on-surface-variant">/10</span>
                 <TrendingDown
                   className="text-error ml-0.5"
@@ -78,9 +81,11 @@ export function InsightSection() {
                 Abandono :08s
               </p>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-2xl font-headline font-extrabold text-error tabular-nums">
-                  68%
-                </span>
+                <CountUpNumber
+                  value={68}
+                  suffix="%"
+                  className="text-2xl font-headline font-extrabold text-error tabular-nums"
+                />
                 <AlertCircle
                   className="text-error ml-0.5"
                   size={15}
@@ -95,9 +100,12 @@ export function InsightSection() {
                 CTR Estimado
               </p>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-2xl font-headline font-extrabold text-on-surface tabular-nums">
-                  3.8%
-                </span>
+                <CountUpNumber
+                  value={3.8}
+                  decimals={1}
+                  suffix="%"
+                  className="text-2xl font-headline font-extrabold text-on-surface tabular-nums"
+                />
               </div>
             </div>
 
@@ -106,9 +114,12 @@ export function InsightSection() {
                 RPM Potencial
               </p>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-2xl font-headline font-extrabold text-secondary tabular-nums">
-                  +18%
-                </span>
+                <CountUpNumber
+                  value={18}
+                  prefix="+"
+                  suffix="%"
+                  className="text-2xl font-headline font-extrabold text-secondary tabular-nums"
+                />
                 <TrendingUp
                   className="text-secondary ml-0.5"
                   size={15}

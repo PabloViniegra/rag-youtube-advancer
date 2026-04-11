@@ -4,7 +4,7 @@ import Image from 'next/image'
 export function BentoGrid() {
   return (
     <section className="px-4 sm:px-6 py-16 md:py-24 max-w-7xl mx-auto">
-      <div className="mb-12 md:mb-16">
+      <div className="mb-12 md:mb-16 reveal-on-scroll">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-headline font-extrabold mb-3 md:mb-4">
           Herramientas de Inteligencia
         </h2>
@@ -15,7 +15,7 @@ export function BentoGrid() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
         {/* Main analytics card */}
-        <div className="lg:col-span-8 bg-surface-container-low rounded-2xl sm:rounded-3xl overflow-hidden border border-outline-variant/40 flex flex-col min-h-[280px] sm:min-h-[300px]">
+        <div className="lg:col-span-8 bg-surface-container-low rounded-2xl sm:rounded-3xl overflow-hidden border border-outline-variant/40 flex flex-col min-h-[280px] sm:min-h-[300px] reveal-on-scroll">
           <div className="p-8">
             <span className="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold uppercase tracking-wider mb-4 inline-block">
               Destacado
@@ -42,7 +42,7 @@ export function BentoGrid() {
         </div>
 
         {/* Hook generator card */}
-        <div className="lg:col-span-4 bg-surface-container-low rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-outline-variant/40 flex flex-col">
+        <div className="lg:col-span-4 bg-surface-container-low rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-outline-variant/40 flex flex-col reveal-on-scroll">
           <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-6">
             <Wand2 className="text-primary" size={20} aria-hidden="true" />
           </div>
@@ -56,14 +56,14 @@ export function BentoGrid() {
             <div className="p-3 bg-primary-container rounded-lg text-xs font-body text-on-primary-container">
               &ldquo;El error que te está costando...&rdquo;
             </div>
-            <div className="p-3 bg-surface-container-highest rounded-lg text-xs font-body text-on-surface-variant opacity-50">
+            <div className="p-3 bg-surface-container-highest rounded-lg text-xs font-body text-on-surface-variant opacity-50 brain-shimmer">
               Generando más hooks...
             </div>
           </div>
         </div>
 
         {/* SEO Optimizer */}
-        <div className="lg:col-span-4 bg-surface-container-low rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-outline-variant/40">
+        <div className="lg:col-span-4 bg-surface-container-low rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-outline-variant/40 reveal-on-scroll">
           <h3 className="text-xl font-headline font-bold mb-2">
             SEO Optimizer
           </h3>
@@ -84,7 +84,7 @@ export function BentoGrid() {
         </div>
 
         {/* Thumbnail engine */}
-        <div className="lg:col-span-8 bg-surface-container-low rounded-2xl sm:rounded-3xl overflow-hidden border border-outline-variant/40 flex items-center p-6 sm:p-8">
+        <div className="lg:col-span-8 bg-surface-container-low rounded-2xl sm:rounded-3xl overflow-hidden border border-outline-variant/40 flex items-center p-6 sm:p-8 reveal-on-scroll">
           <div className="w-1/2">
             <h3 className="text-xl font-headline font-bold mb-2">
               Thumbnail Engine

@@ -15,7 +15,7 @@ export function CtaSection({ isAuthenticated }: CtaSectionProps) {
     <section className="px-4 sm:px-6 py-20 md:py-32 bg-primary" id="pricing">
       <div className="max-w-4xl mx-auto text-center">
         {/* Trust metric */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-on-primary/10 mb-6 sm:mb-8 border border-on-primary/20">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-on-primary/10 mb-6 sm:mb-8 border border-on-primary/20 reveal-on-scroll">
           <TrendingUp className="text-on-primary shrink-0" size={14} />
           <span className="text-xs font-label font-semibold text-on-primary tracking-wider">
             +23% CTR promedio en los primeros 30 días
@@ -23,7 +23,7 @@ export function CtaSection({ isAuthenticated }: CtaSectionProps) {
         </div>
 
         {/* Headline — specific, not generic */}
-        <h2 className="text-3xl sm:text-4xl md:text-6xl font-headline font-black mb-3 sm:mb-4 leading-tight text-on-primary">
+        <h2 className="text-3xl sm:text-4xl md:text-6xl font-headline font-black mb-3 sm:mb-4 leading-tight text-on-primary reveal-on-scroll">
           Para creadores
           <br className="hidden sm:block" />
           que van en serio.

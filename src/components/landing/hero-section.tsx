@@ -13,29 +13,54 @@ export function HeroSection({ isAuthenticated }: HeroSectionProps) {
   return (
     <section className="px-4 py-16 md:py-20 lg:py-24">
       <div className="max-w-5xl mx-auto text-center">
-        {/* Social proof badge — replaces generic "RAG AI Technology" */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-container mb-8 border border-primary/20">
-          <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
+        {/* Social proof badge — live pulse dot signals real-time data */}
+        <div
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-container mb-8 border border-primary/20 animate-fade-in"
+          style={{ animationDelay: '0ms' }}
+        >
+          <span className="w-2 h-2 rounded-full bg-primary shrink-0 animate-live-pulse" />
           <span className="text-xs font-label font-semibold text-on-primary-container tracking-wider uppercase">
             847 creadores en acceso anticipado
           </span>
         </div>
 
-        {/* Heading — solid color, no gradient */}
+        {/* Heading — line-by-line clip-path reveal */}
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-headline font-extrabold tracking-tight mb-4 sm:mb-6 leading-[1.05]">
-          Maximiza tus Ingresos en <br className="hidden sm:block" />
-          <span className="text-primary">YouTube con IA</span>
+          {/* Line 1 — masked container clips text until it slides up */}
+          <span className="block overflow-hidden pb-1">
+            <span
+              className="block animate-clip-up"
+              style={{ animationDelay: '120ms' }}
+            >
+              Maximiza tus Ingresos en
+            </span>
+          </span>
+          {/* Line 2 — 280ms offset for cinematic stagger */}
+          <span className="block overflow-hidden pb-1">
+            <span
+              className="block animate-clip-up text-primary"
+              style={{ animationDelay: '280ms' }}
+            >
+              YouTube con IA
+            </span>
+          </span>
         </h1>
 
-        {/* Subheading — specific, action-oriented */}
-        <p className="text-base sm:text-lg md:text-xl text-on-surface-variant max-w-xl md:max-w-2xl mx-auto mb-8 md:mb-12 font-body leading-relaxed">
+        {/* Subheading */}
+        <p
+          className="text-base sm:text-lg md:text-xl text-on-surface-variant max-w-xl md:max-w-2xl mx-auto mb-8 md:mb-12 font-body leading-relaxed animate-fade-up"
+          style={{ animationDelay: '460ms' }}
+        >
           Pega la URL de cualquier video. Nuestra tecnología RAG analiza el
           hook, la retención y la monetización para darte estrategias
           accionables en segundos.
         </p>
 
-        {/* URL input — with format hint for error prevention */}
-        <div className="max-w-xl md:max-w-2xl mx-auto bg-surface-container-low p-3 sm:p-4 rounded-xl border border-outline-variant/40 flex flex-col sm:flex-row gap-2 sm:gap-3 shadow-sm">
+        {/* URL input */}
+        <div
+          className="max-w-xl md:max-w-2xl mx-auto bg-surface-container-low p-3 sm:p-4 rounded-xl border border-outline-variant/40 flex flex-col sm:flex-row gap-2 sm:gap-3 shadow-sm animate-fade-up"
+          style={{ animationDelay: '600ms' }}
+        >
           <div className="flex-1 flex items-center px-4 gap-3 bg-surface-bright rounded-lg border border-transparent focus-within:border-primary/40 transition-all">
             <Link2 className="text-on-surface-variant shrink-0" size={20} />
             <input
@@ -54,8 +79,11 @@ export function HeroSection({ isAuthenticated }: HeroSectionProps) {
           </Link>
         </div>
 
-        {/* Reassurance copy — directly below CTA */}
-        <p className="mt-4 text-sm text-on-surface-variant font-label">
+        {/* Reassurance copy */}
+        <p
+          className="mt-4 text-sm text-on-surface-variant font-label animate-fade-in"
+          style={{ animationDelay: '760ms' }}
+        >
           {isAuthenticated
             ? 'Añade un video para empezar'
             : '1 video gratis\u00a0·\u00a0Resultados en 30 segundos'}

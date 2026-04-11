@@ -422,11 +422,86 @@
   .stagger-item {
     animation-delay: calc(var(--i, 0) * 60ms);
   }
+
+  /* Clip-path text reveal — for hero headline lines */
+  .animate-clip-up {
+    animation: clip-up var(--duration-slow) var(--ease-out-expo) both;
+  }
+
+  /* Gentle float loop — for live badges */
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  /* Live presence pulse */
+  .animate-live-pulse {
+    animation: live-pulse 2.5s ease-in-out infinite;
+  }
+}
+
+/* ============================================================
+   Scroll-driven reveal — triggers as element enters viewport
+   Uses CSS Scroll-Driven Animations (Chrome 115+, Safari 18+).
+   Falls back to static display in unsupported browsers.
+   ============================================================ */
+
+@supports (animation-timeline: scroll()) {
+  .reveal-on-scroll {
+    animation: fade-up linear both;
+    animation-timeline: view(block);
+    animation-range: entry 0% entry 40%;
+  }
+
+  /* Stagger offset for sibling .reveal-on-scroll items */
+  .reveal-on-scroll:nth-child(2) { animation-range: entry 8% entry 48%; }
+  .reveal-on-scroll:nth-child(3) { animation-range: entry 16% entry 56%; }
+  .reveal-on-scroll:nth-child(4) { animation-range: entry 24% entry 64%; }
+
+  /* Reduced motion — disable scroll-driven animations; show elements immediately */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal-on-scroll {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 /* ============================================================
    Brain-fill shimmer — liquid progress bar shine effect
    ============================================================ */
+
+@layer base {
+  /* Clip-path line reveal — hero headline entrance */
+  @keyframes clip-up {
+    from {
+      clip-path: inset(0 0 110% 0);
+      transform: translateY(20px);
+    }
+    to {
+      clip-path: inset(0 0 0% 0);
+      transform: translateY(0);
+    }
+  }
+
+  /* Gentle float — badge / decorative elements */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+  }
+
+  /* Live indicator pulse — status/presence dot */
+  @keyframes live-pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.5);
+      opacity: 0.45;
+    }
+  }
+}
 
 @layer base {
   @keyframes shimmer-sweep {
