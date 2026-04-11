@@ -28,7 +28,7 @@ export function LibraryStatus({ videoCount }: LibraryStatusProps) {
         </div>
         <Link
           href="/dashboard/videos/new"
-          className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-primary px-4 py-2.5 font-body text-sm font-bold text-on-primary transition-all hover:bg-primary-dim active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-primary px-4 py-2.5 font-body text-sm font-bold text-on-primary transition-all hover:bg-primary-dim active:scale-[0.98]"
         >
           <PlusIcon />
           Añadir video
@@ -47,7 +47,7 @@ export function LibraryStatus({ videoCount }: LibraryStatusProps) {
       </p>
       <Link
         href="/dashboard/videos"
-        className="font-body text-xs font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:rounded"
+        className="font-body text-xs font-medium text-primary underline-offset-2 hover:underline"
       >
         Gestionar →
       </Link>

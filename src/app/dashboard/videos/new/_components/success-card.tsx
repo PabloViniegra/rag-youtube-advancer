@@ -1,6 +1,23 @@
-import Link from 'next/link'
+'use client'
+
+/**
+ * SuccessCard
+ *
+ * Shown after a successful video ingestion. Displays:
+ *  - animated checkmark + section count
+ *  - BrainNodesViz (SVG brain visualization)
+ *  - BrainCapacityMeter (fill bar)
+ *  - ConfettiParticles (first-video celebration)
+ *  - IntelligenceReport (or fallback note)
+ *  - CTA buttons
+ */
+
+import { useRouter } from 'next/navigation'
 import { IntelligenceReportView } from '@/app/dashboard/videos/_components/intelligence-report'
 import type { IntelligenceReport } from '@/lib/intelligence/types'
+import { BrainCapacityMeter } from './brain-capacity-meter'
+import { BrainNodesViz } from './brain-nodes-viz'
+import { ConfettiParticles } from './confetti-particles'
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -13,18 +30,31 @@ export interface SuccessData {
 interface SuccessCardProps {
   data: SuccessData
   onReset: () => void
+  totalVideoCount: number
+  isFirstVideo: boolean
 }
 
 // ── Main Component ──────────────────────────────────────────────────────────
 
-export function SuccessCard({ data, onReset }: SuccessCardProps) {
+export function SuccessCard({
+  data,
+  onReset,
+  totalVideoCount,
+  isFirstVideo,
+}: SuccessCardProps) {
   return (
     <section
       aria-labelledby="success-heading"
-      className="flex flex-col gap-8 animate-fade-up"
+      className="relative flex flex-col gap-8 animate-fade-up"
     >
-      {/* Header — checkmark + stat */}
-      <SuccessHeader sectionCount={data.sectionCount} />
+      <ConfettiParticles show={isFirstVideo} />
+
+      {/* Header — checkmark + stat + brain viz + capacity meter */}
+      <SuccessHeader
+        sectionCount={data.sectionCount}
+        newSectionCount={data.sectionCount}
+        totalVideoCount={totalVideoCount}
+      />
 
       {/* Intelligence Report or fallback note */}
       {data.report ? (
@@ -34,17 +64,28 @@ export function SuccessCard({ data, onReset }: SuccessCardProps) {
       )}
 
       {/* CTA buttons */}
-      <SuccessCta onReset={onReset} />
+      <SuccessCta videoId={data.videoId} onReset={onReset} />
     </section>
   )
 }
 
 // ── Header ──────────────────────────────────────────────────────────────────
 
-function SuccessHeader({ sectionCount }: { sectionCount: number }) {
+interface SuccessHeaderProps {
+  sectionCount: number
+  newSectionCount: number
+  totalVideoCount: number
+}
+
+function SuccessHeader({
+  sectionCount,
+  newSectionCount,
+  totalVideoCount,
+}: SuccessHeaderProps) {
   return (
-    <div className="flex flex-col items-center gap-5 rounded-2xl border border-outline-variant bg-background p-6 text-center shadow-sm">
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 animate-fade-in">
+    <div className="flex flex-col gap-4 rounded-2xl border border-outline-variant bg-background p-6 text-center shadow-sm">
+      {/* Animated checkmark */}
+      <div className="flex h-14 w-14 items-center justify-center self-center rounded-full bg-primary/10 animate-fade-in">
         <svg
           width="28"
           height="28"
@@ -61,7 +102,7 @@ function SuccessHeader({ sectionCount }: { sectionCount: number }) {
             strokeLinejoin="round"
             pathLength="1"
             strokeDasharray="1"
-            className="[stroke-dashoffset:1] [animation:stroke-draw_0.5s_var(--ease-out-expo)_0.15s_both]"
+            className="[stroke-dashoffset:1] [animation:stroke-draw_0.5s_var(--ease-out-expo)_0.15s_both] motion-reduce:animation-none"
           />
         </svg>
       </div>
@@ -86,6 +127,17 @@ function SuccessHeader({ sectionCount }: { sectionCount: number }) {
           </span>
         </div>
       </div>
+
+      {/* Brain visualization */}
+      <div className="flex justify-center">
+        <BrainNodesViz />
+      </div>
+
+      {/* Capacity meter */}
+      <BrainCapacityMeter
+        newSectionCount={newSectionCount}
+        totalVideoCount={totalVideoCount}
+      />
     </div>
   )
 }
@@ -105,54 +157,39 @@ function ReportFallbackNote() {
 
 // ── CTA buttons ─────────────────────────────────────────────────────────────
 
-function SuccessCta({ onReset }: { onReset: () => void }) {
+interface SuccessCtaProps {
+  videoId: string
+  onReset: () => void
+}
+
+function SuccessCta({ videoId, onReset }: SuccessCtaProps) {
+  const router = useRouter()
+
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="flex w-full flex-col gap-3 sm:flex-row">
-        <Link
-          href="/dashboard/search"
-          className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-body text-sm font-bold text-on-primary transition-all hover:bg-primary-dim active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+        <button
+          type="button"
+          onClick={() => router.push(`/dashboard/videos/${videoId}`)}
+          className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-body text-sm font-bold text-on-primary transition-all hover:bg-primary-dim active:scale-[0.98]"
         >
-          <SearchIcon />
-          Buscar en mi cerebro
-        </Link>
+          Ver video
+        </button>
         <button
           type="button"
           onClick={onReset}
-          className="flex-1 inline-flex items-center justify-center rounded-xl border border-outline-variant px-4 py-3 font-body text-sm font-semibold text-on-surface transition-all hover:bg-surface-container active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          className="flex-1 inline-flex items-center justify-center rounded-xl border border-outline-variant px-4 py-3 font-body text-sm font-semibold text-on-surface transition-all hover:bg-surface-container active:scale-[0.98]"
         >
           Añadir otro video
         </button>
       </div>
 
-      <Link
-        href="/dashboard/videos"
-        className="inline-flex min-h-[44px] items-center px-2 font-body text-xs text-on-surface-variant transition-colors hover:text-on-surface focus-visible:outline-none focus-visible:rounded focus-visible:ring-1 focus-visible:ring-primary/40"
+      <a
+        href="/dashboard/search"
+        className="inline-flex min-h-[44px] items-center px-2 font-body text-xs text-on-surface-variant transition-colors hover:text-on-surface"
       >
-        Ver todos mis videos →
-      </Link>
+        Buscar en mi cerebro →
+      </a>
     </div>
-  )
-}
-
-// ── Icons ───────────────────────────────────────────────────────────────────
-
-function SearchIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="m21 21-4.35-4.35"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
   )
 }

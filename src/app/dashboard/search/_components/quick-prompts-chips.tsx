@@ -28,7 +28,7 @@ export function QuickPromptsChips({ questions }: QuickPromptsChipsProps) {
             key={q}
             type="button"
             onClick={() => setQuery(q)}
-            className="inline-flex items-center rounded-full border border-outline-variant bg-surface-container-low px-3 py-1.5 font-body text-xs font-medium text-on-surface transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            className="inline-flex items-center rounded-full border border-outline-variant bg-surface-container-low px-3 py-1.5 font-body text-xs font-medium text-on-surface transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
           >
             {q}
           </button>

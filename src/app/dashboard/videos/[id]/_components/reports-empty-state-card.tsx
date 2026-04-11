@@ -41,7 +41,7 @@ export function ReportCard({
           type="button"
           onClick={() => onGenerate(config.kind)}
           disabled={isPending}
-          className="inline-flex min-h-[44px] items-center rounded-lg bg-primary px-3.5 font-body text-sm font-semibold text-on-primary transition-all hover:brightness-110 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-[44px] items-center rounded-lg bg-primary px-3.5 font-body text-sm font-semibold text-on-primary transition-all hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? 'Generando…' : config.actionLabel}
         </button>

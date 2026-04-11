@@ -63,7 +63,7 @@ export function DashboardTopbar({ displayName }: DashboardTopbarProps) {
             ref={openBtnRef}
             type="button"
             onClick={() => setMenuOpen(true)}
-            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-on-surface-variant/60 transition-colors hover:bg-inverse-on-surface/10 hover:text-inverse-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-on-surface-variant/60 transition-colors hover:bg-inverse-on-surface/10 hover:text-inverse-on-surface"
             aria-label="Abrir menú de navegación"
             aria-expanded={menuOpen}
             aria-controls="mobile-nav-drawer"

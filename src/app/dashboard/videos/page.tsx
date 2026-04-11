@@ -69,7 +69,7 @@ export default async function VideosPage() {
           <Link
             href="/dashboard/videos/new"
             transitionTypes={['nav-forward']}
-            className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 font-body text-sm font-bold text-on-primary shadow-sm transition-all hover:bg-primary-dim active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 font-body text-sm font-bold text-on-primary shadow-sm transition-all hover:bg-primary-dim active:scale-[0.98]"
           >
             <PlusIcon />
             Añadir video

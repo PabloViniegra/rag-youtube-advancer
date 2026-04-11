@@ -32,7 +32,7 @@ export function UpgradeToPro() {
         type="button"
         disabled={isPending}
         onClick={handleUpgrade}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-body text-sm font-semibold text-on-primary transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50 disabled:cursor-not-allowed"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-body text-sm font-semibold text-on-primary transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <StripeIcon />
         {isPending
@@ -63,7 +63,7 @@ export function ManageSubscription() {
         type="button"
         disabled={isPending}
         onClick={handleManage}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-outline-variant bg-surface-container px-6 py-3 font-body text-sm font-semibold text-on-surface transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50 disabled:cursor-not-allowed"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-outline-variant bg-surface-container px-6 py-3 font-body text-sm font-semibold text-on-surface transition-opacity hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <StripeIcon />
         {isPending ? 'Abriendo portal...' : 'Gestionar suscripcion'}

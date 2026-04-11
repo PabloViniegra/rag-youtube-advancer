@@ -26,6 +26,7 @@ export type DashboardData = {
   videoCount: number
   sectionCount: number
   recentVideos: DashboardVideoItem[]
+  activityDays: boolean[]
 }
 
 /**
@@ -44,7 +45,12 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
   cacheLife('minutes')
 
   if (!userId) {
-    return { videoCount: 0, sectionCount: 0, recentVideos: [] }
+    return {
+      videoCount: 0,
+      sectionCount: 0,
+      recentVideos: [],
+      activityDays: Array(7).fill(false),
+    }
   }
 
   const { data } = await supabaseAdmin
@@ -54,6 +60,15 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     .order('created_at', { ascending: false })
 
   const allVideos = (data ?? []) as VideoRow[]
+
+  // ── Activity days — last 7 calendar days ─────────────────────────────────
+  const now = new Date()
+  const activityDays: boolean[] = Array.from({ length: 7 }, (_, i) => {
+    const day = new Date(now)
+    day.setDate(now.getDate() - (6 - i))
+    const dayStr = day.toISOString().slice(0, 10) // "YYYY-MM-DD"
+    return allVideos.some((v) => v.created_at.slice(0, 10) === dayStr)
+  })
 
   return {
     videoCount: allVideos.length,
@@ -68,5 +83,6 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
       created_at: v.created_at,
       sectionCount: v.video_sections[0]?.count ?? 0,
     })),
+    activityDays,
   }
 }

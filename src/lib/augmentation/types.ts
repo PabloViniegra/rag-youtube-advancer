@@ -4,6 +4,25 @@
 
 import type { VideoSectionMatch } from '@/lib/retrieval/types'
 
+// ─────────────────────────────────────────────
+// Augmentation — streaming chunk types
+// ─────────────────────────────────────────────
+
+/** Alias kept for clarity — stream sources share the retrieval type. */
+export type AugmentSource = VideoSectionMatch
+
+/**
+ * Discriminated union for SSE stream chunks emitted by `augmentAnswerStream`.
+ *
+ * - `sources`  — emitted once up-front with all retrieved sections.
+ * - `token`    — emitted per LLM text delta.
+ * - `done`     — emitted once when generation is complete, with related queries.
+ */
+export type AugmentStreamChunk =
+  | { type: 'sources'; payload: AugmentSource[] }
+  | { type: 'token'; payload: string }
+  | { type: 'done'; relatedQueries: string[] }
+
 /**
  * Parameters for an LLM augmentation call.
  *

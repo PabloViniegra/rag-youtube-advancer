@@ -26,7 +26,7 @@ export async function DashboardMainContent({
   userId,
   displayName,
 }: DashboardMainContentProps) {
-  const [{ videoCount, sectionCount, recentVideos }, digest] =
+  const [{ videoCount, sectionCount, recentVideos, activityDays }, digest] =
     await Promise.all([getDashboardData(userId), getLatestDigest(userId)])
 
   const hasVideos = videoCount > 0
@@ -42,7 +42,7 @@ export async function DashboardMainContent({
 
       <QuickActions hasVideos={hasVideos} />
 
-      <BrainStatus videoCount={videoCount} />
+      <BrainStatus videoCount={videoCount} activityDays={activityDays} />
 
       {/* Returns null when videoCount === 0 */}
       <ContextualTip videoCount={videoCount} />

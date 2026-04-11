@@ -97,7 +97,7 @@ export function VideoDetailHeader({
           <Link
             href={`/dashboard/search?video=${video.youtube_id}`}
             transitionTypes={['nav-forward']}
-            className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 font-body text-sm font-semibold text-on-primary shadow-sm transition-all hover:brightness-110 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 font-body text-sm font-semibold text-on-primary shadow-sm transition-all hover:brightness-110 active:scale-[0.98]"
           >
             <SearchIcon />
             Hacer una pregunta
@@ -106,7 +106,7 @@ export function VideoDetailHeader({
           <Link
             href="/dashboard/videos"
             transitionTypes={['nav-back']}
-            className="inline-flex h-10 items-center gap-2 rounded-xl border border-outline-variant px-5 font-body text-sm font-semibold text-on-surface-variant transition-all hover:bg-surface-container hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            className="inline-flex h-10 items-center gap-2 rounded-xl border border-outline-variant px-5 font-body text-sm font-semibold text-on-surface-variant transition-all hover:bg-surface-container hover:text-on-surface"
           >
             Volver a mis videos
           </Link>

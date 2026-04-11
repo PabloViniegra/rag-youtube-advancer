@@ -117,6 +117,17 @@
   [data-tabular-nums] {
     font-variant-numeric: tabular-nums;
   }
+
+  /* ── Global focus ring ─────────────────────────────────────
+     Single source of truth — per-component focus-visible
+     overrides have been removed across the codebase.
+     ─────────────────────────────────────────────────────── */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+    border-radius: 4px;
+    box-shadow: 0 0 0 4px color-mix(in oklch, var(--color-primary) 20%, transparent);
+  }
 }
 
 /* ============================================================
@@ -194,6 +205,38 @@
       opacity: 1;
     }
     to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes brain-node-appear {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes confetti-fall {
+    0% {
+      transform: translateY(-10px) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(60px) rotate(360deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
       opacity: 0;
     }
   }
@@ -382,6 +425,41 @@
 }
 
 /* ============================================================
+   Brain-fill shimmer — liquid progress bar shine effect
+   ============================================================ */
+
+@layer base {
+  @keyframes shimmer-sweep {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(200%);
+    }
+  }
+}
+
+@layer utilities {
+  .brain-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .brain-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklch, white 30%, transparent) 50%,
+      transparent 100%
+    );
+    animation: shimmer-sweep 2s var(--ease-out-expo) infinite;
+  }
+}
+
+/* ============================================================
    Motion — Respect user preferences
    Suppress all animation/transition for users who prefer
    reduced motion (vestibular disorders, epilepsy, etc.).
@@ -396,6 +474,10 @@
       animation-iteration-count: 1;
       transition-duration: 0.01ms;
       scroll-behavior: auto;
+    }
+
+    .brain-shimmer::after {
+      animation: none;
     }
   }
 }

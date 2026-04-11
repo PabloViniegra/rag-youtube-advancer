@@ -61,7 +61,7 @@ export function VideoCard({ video, variant = 'default' }: VideoCardProps) {
         <div className="absolute inset-0 flex items-end bg-gradient-to-t from-primary/90 via-primary/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <Link
             href={`/dashboard/videos/${video.id}`}
-            className="w-full px-4 pb-4 font-headline text-sm font-bold text-on-primary focus-visible:outline-none"
+            className="w-full px-4 pb-4 font-headline text-sm font-bold text-on-primary"
             aria-label={`Ver detalles de ${video.title ?? video.youtube_id}`}
             tabIndex={-1}
             aria-hidden="true"
@@ -76,7 +76,7 @@ export function VideoCard({ video, variant = 'default' }: VideoCardProps) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Abrir en YouTube"
-          className="absolute right-2.5 top-2.5 flex size-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm transition-opacity duration-200 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 hover:bg-black/80 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+          className="absolute right-2.5 top-2.5 flex size-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm transition-opacity duration-200 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 hover:bg-black/80 focus-visible:opacity-100"
         >
           <YoutubeIcon />
         </a>
@@ -108,7 +108,7 @@ export function VideoCard({ video, variant = 'default' }: VideoCardProps) {
           {/* Visible "Ver detalles" link — primary tap target on mobile */}
           <Link
             href={`/dashboard/videos/${video.id}`}
-            className="inline-flex min-h-[44px] min-w-[44px] items-center rounded px-1 font-body text-xs font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            className="inline-flex min-h-[44px] min-w-[44px] items-center rounded px-1 font-body text-xs font-semibold text-primary underline-offset-2 hover:underline"
           >
             Ver detalles
           </Link>

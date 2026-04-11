@@ -127,7 +127,7 @@ export function DeleteVideoModal({
           type="button"
           onClick={onClose}
           disabled={isPending}
-          className="h-9 rounded-lg px-4 font-body text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50"
+          className="h-9 rounded-lg px-4 font-body text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-container disabled:opacity-50"
         >
           Cancelar
         </button>
@@ -136,7 +136,7 @@ export function DeleteVideoModal({
           type="button"
           onClick={handleConfirm}
           disabled={isPending}
-          className="inline-flex h-9 items-center gap-2 rounded-lg bg-error px-4 font-body text-sm font-semibold text-on-error transition-colors hover:bg-error/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/40 disabled:opacity-70"
+          className="inline-flex h-9 items-center gap-2 rounded-lg bg-error px-4 font-body text-sm font-semibold text-on-error transition-colors hover:bg-error/90 disabled:opacity-70"
         >
           {isPending ? <SpinnerIcon /> : null}
           {isPending ? 'Eliminando…' : 'Sí, eliminar'}

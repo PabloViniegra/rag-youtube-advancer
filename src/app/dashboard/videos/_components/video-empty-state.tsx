@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { BrainEmptyIllustration } from '@/components/ui/brain-empty-illustration'
 import { cn } from '@/lib/utils'
 
 export function VideoEmptyState() {
@@ -6,13 +7,11 @@ export function VideoEmptyState() {
     <div className="flex flex-col gap-10">
       {/* ── Editorial hero empty state ── */}
       <div className="relative overflow-hidden rounded-xl border border-dashed border-outline-variant bg-primary-container/20 px-8 py-14 md:px-16">
-        {/* Large background numeral — structural decoration */}
-        <span
-          className="pointer-events-none absolute -right-4 -top-6 font-headline text-[11rem] font-extrabold leading-none text-outline-variant/20 select-none"
+        {/* Large background illustration — structural decoration */}
+        <BrainEmptyIllustration
+          className="pointer-events-none absolute -right-4 -top-6 h-auto w-48 text-outline-variant/20 select-none"
           aria-hidden="true"
-        >
-          0
-        </span>
+        />
 
         <div className="relative flex flex-col gap-6 md:max-w-lg">
           {/* Overline */}
@@ -37,7 +36,7 @@ export function VideoEmptyState() {
           {/* CTA */}
           <Link
             href="/dashboard/videos/new"
-            className="inline-flex w-fit h-11 items-center gap-2 rounded-xl bg-primary px-6 font-body text-sm font-bold text-on-primary shadow-sm transition-all hover:bg-primary-dim active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            className="inline-flex w-fit h-11 items-center gap-2 rounded-xl bg-primary px-6 font-body text-sm font-bold text-on-primary shadow-sm transition-all hover:bg-primary-dim active:scale-[0.98]"
           >
             <PlusIcon />
             Indexar primer video

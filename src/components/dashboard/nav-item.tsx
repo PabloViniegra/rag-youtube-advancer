@@ -24,7 +24,7 @@ export function NavItem({ href, label, icon: Icon }: NavItemProps) {
       href={href}
       aria-current={isActive ? 'page' : undefined}
       className={cn(
-        'group relative flex min-w-0 items-center gap-3 rounded-lg px-3 py-3 font-body text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
+        'group relative flex min-w-0 items-center gap-3 rounded-lg px-3 py-3 font-body text-sm font-semibold transition-all',
         isActive
           ? 'bg-primary text-on-primary'
           : 'text-on-surface-variant/70 hover:bg-inverse-on-surface/8 hover:text-inverse-on-surface',

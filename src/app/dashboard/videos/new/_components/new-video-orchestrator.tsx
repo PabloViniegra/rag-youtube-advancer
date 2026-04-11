@@ -4,9 +4,10 @@
  * NewVideoOrchestrator
  *
  * Client component that owns the ingestion state machine:
- *   idle → loading → error (success redirects immediately)
+ *   idle → loading → error | success
  *
- * Extracted from new/page.tsx so the static hero section is SSR'd.
+ * On success: shows SuccessCard instead of immediately redirecting.
+ * "Ver video" inside SuccessCard handles the final navigation.
  */
 
 import { useRouter } from 'next/navigation'
@@ -20,51 +21,31 @@ import {
 import { ingestVideo } from '@/lib/pipeline/ingest'
 import type { IngestResult } from '@/lib/pipeline/types'
 import { INGEST_ERROR } from '@/lib/pipeline/types'
+import { resolveIngestErrorMessage } from './ingest-error-messages'
 import { IngestForm } from './ingest-form'
 import { PHASE_COUNT } from './phase-progress'
+import type { SuccessData } from './success-card'
+import { SuccessCard } from './success-card'
 
-// ── Constants ─────────────────────────────────────────────────────────────────
-
-const ERROR_MESSAGES: Record<string, string> = {
-  [INGEST_ERROR.INVALID_URL]: 'La URL de YouTube no es válida.',
-  [INGEST_ERROR.TRANSCRIPT_FAILED]:
-    'No se pudo extraer la transcripción del video.',
-  [INGEST_ERROR.CHUNK_FAILED]: 'Error al procesar el texto del video.',
-  [INGEST_ERROR.EMBED_FAILED]: 'Error al generar los embeddings.',
-  [INGEST_ERROR.STORE_FAILED]: 'Error al guardar el video en la base de datos.',
-  [INGEST_ERROR.REPORT_FAILED]: 'Error al generar el informe de inteligencia.',
-  [INGEST_ERROR.UNAUTHORIZED]: 'Debes iniciar sesión para añadir videos.',
-  [INGEST_ERROR.FORBIDDEN]:
-    'Necesitas una suscripción activa para añadir videos.',
-  [INGEST_ERROR.VIDEO_LIMIT_REACHED]:
-    'Has alcanzado el limite de tu plan gratuito (1 video). Actualiza a Pro para seguir indexando.',
-}
-
-const GENERIC_INGEST_MESSAGES = [
-  'Transcript extraction failed.',
-  'Text chunking failed.',
-  'Embedding generation failed.',
-  'Storing video sections failed.',
-  'Invalid transcript response.',
-  'Invalid chunk response.',
-  'Invalid embed response.',
-  'Invalid store response.',
-] as const satisfies readonly string[]
+// ── Types ─────────────────────────────────────────────────────────────────────
 
 const FORM_STATE = {
   IDLE: 'idle',
   LOADING: 'loading',
   ERROR: 'error',
+  SUCCESS: 'success',
 } as const
-
-const PHASE_TICK_MS = 2500
-const PHASE_COMPLETE_STEP_MS = 220
 
 type FormState = (typeof FORM_STATE)[keyof typeof FORM_STATE]
 
 interface ErrorData {
   message: string
 }
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+const PHASE_TICK_MS = 2500
+const PHASE_COMPLETE_STEP_MS = 220
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -76,13 +57,33 @@ export function NewVideoOrchestrator() {
   const [formState, setFormState] = useState<FormState>(FORM_STATE.IDLE)
   const [phaseIndex, setPhaseIndex] = useState(0)
   const [errorData, setErrorData] = useState<ErrorData | null>(null)
+  const [successData, setSuccessData] = useState<SuccessData | null>(null)
+  const [videoCount, setVideoCount] = useState(0)
 
   const phaseTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const phaseIndexRef = useRef(0)
 
+  // Fetch current video count on mount for capacity meter / first-video detection
+  useEffect(() => {
+    fetch('/api/library-stats')
+      .then((res) => res.json() as Promise<{ videoCount: number }>)
+      .then((data) => setVideoCount(data.videoCount))
+      .catch(() => {
+        // Non-critical — defaults to 0 (triggers first-video confetti if real count > 0)
+      })
+  }, [])
+
   useEffect(() => {
     phaseIndexRef.current = phaseIndex
   }, [phaseIndex])
+
+  useEffect(() => {
+    return () => {
+      if (phaseTimerRef.current !== null) {
+        clearInterval(phaseTimerRef.current)
+      }
+    }
+  }, [])
 
   function wait(ms: number): Promise<void> {
     return new Promise((resolve) => {
@@ -104,21 +105,13 @@ export function NewVideoOrchestrator() {
     }
   }
 
-  useEffect(() => {
-    return () => {
-      if (phaseTimerRef.current !== null) {
-        clearInterval(phaseTimerRef.current)
-      }
-    }
-  }, [])
-
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    // Loading feedback must appear immediately, not as a low-priority transition.
     setFormState(FORM_STATE.LOADING)
     setPhaseIndex(0)
     setErrorData(null)
+    setSuccessData(null)
     phaseIndexRef.current = 0
 
     phaseTimerRef.current = setInterval(() => {
@@ -151,29 +144,40 @@ export function NewVideoOrchestrator() {
     if (result.ok) {
       await animateToFinalPhase()
 
-      // addTransitionType marks the navigation direction for page-level VTs
-      startTransition(() => {
-        addTransitionType('nav-forward')
-        router.push(`/dashboard/videos/${result.videoId}`)
+      setSuccessData({
+        videoId: result.videoId,
+        sectionCount: result.sectionCount,
+        report: result.report,
       })
+      setFormState(FORM_STATE.SUCCESS)
     } else {
-      const normalizedMessage = result.message.trim()
-      const isGenericMessage = GENERIC_INGEST_MESSAGES.some(
-        (message) => message === normalizedMessage,
-      )
-
-      const message =
-        normalizedMessage === ''
-          ? (ERROR_MESSAGES[result.code] ??
-            'Error inesperado. Inténtalo de nuevo.')
-          : isGenericMessage
-            ? (ERROR_MESSAGES[result.code] ?? normalizedMessage)
-            : normalizedMessage
-
+      const message = resolveIngestErrorMessage(result.code, result.message)
       setErrorData({ message })
       setFormState(FORM_STATE.ERROR)
     }
   }
+
+  function handleReset() {
+    setFormState(FORM_STATE.IDLE)
+    setSuccessData(null)
+    setUrl('')
+    setTitle('')
+  }
+
+  // ── Success state ──────────────────────────────────────────────────────────
+
+  if (formState === FORM_STATE.SUCCESS && successData !== null) {
+    return (
+      <SuccessCard
+        data={successData}
+        onReset={handleReset}
+        totalVideoCount={videoCount}
+        isFirstVideo={videoCount === 0}
+      />
+    )
+  }
+
+  // ── Form states (idle / loading / error) ───────────────────────────────────
 
   return (
     <IngestForm

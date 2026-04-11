@@ -44,7 +44,7 @@ export function RecentVideos({ videos }: RecentVideosProps) {
         <Link
           href="/dashboard/videos"
           transitionTypes={['nav-forward']}
-          className="font-body text-xs font-semibold text-primary transition-colors hover:text-primary-dim focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          className="font-body text-xs font-semibold text-primary transition-colors hover:text-primary-dim"
         >
           Ver todos →
         </Link>
@@ -63,7 +63,7 @@ export function RecentVideos({ videos }: RecentVideosProps) {
               <Link
                 href={`/dashboard/videos/${video.id}`}
                 transitionTypes={['nav-forward']}
-                className="group flex items-center gap-3 rounded-lg border border-outline-variant bg-background px-3 py-3 transition-colors hover:border-outline hover:bg-surface-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                className="group flex items-center gap-3 rounded-lg border border-outline-variant bg-background px-3 py-3 transition-colors hover:border-outline hover:bg-surface-container"
               >
                 {/* YouTube thumbnail */}
                 <div className="relative h-8 w-14 flex-shrink-0 overflow-hidden rounded bg-surface-container-high">

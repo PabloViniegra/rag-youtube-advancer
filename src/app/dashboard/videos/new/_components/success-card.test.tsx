@@ -14,6 +14,20 @@ import type { SuccessData } from './success-card'
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
+// ViewTransition is a React canary API — shim it so components render in jsdom
+vi.mock('react', async () => {
+  const actual = await vi.importActual<typeof import('react')>('react')
+  return {
+    ...actual,
+    ViewTransition: ({ children }: { children?: React.ReactNode }) => children,
+    addTransitionType: vi.fn(),
+  }
+})
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}))
+
 vi.mock('next/link', () => ({
   default: ({
     href,
@@ -84,7 +98,14 @@ describe('SuccessCard', () => {
   })
 
   it('renders the success heading', () => {
-    render(<SuccessCard data={BASE_DATA} onReset={vi.fn()} />)
+    render(
+      <SuccessCard
+        data={BASE_DATA}
+        onReset={vi.fn()}
+        totalVideoCount={5}
+        isFirstVideo={false}
+      />,
+    )
 
     expect(
       screen.getByRole('heading', { name: '¡Video indexado!' }),
@@ -92,21 +113,42 @@ describe('SuccessCard', () => {
   })
 
   it('renders section count and fragment label', () => {
-    render(<SuccessCard data={BASE_DATA} onReset={vi.fn()} />)
+    render(
+      <SuccessCard
+        data={BASE_DATA}
+        onReset={vi.fn()}
+        totalVideoCount={5}
+        isFirstVideo={false}
+      />,
+    )
 
     expect(screen.getByText('15')).toBeInTheDocument()
     expect(screen.getByText(/fragmentos en memoria/i)).toBeInTheDocument()
   })
 
   it('renders intelligence report when report is provided', () => {
-    render(<SuccessCard data={BASE_DATA} onReset={vi.fn()} />)
+    render(
+      <SuccessCard
+        data={BASE_DATA}
+        onReset={vi.fn()}
+        totalVideoCount={5}
+        isFirstVideo={false}
+      />,
+    )
 
     expect(screen.getByTestId('intelligence-report')).toBeInTheDocument()
   })
 
   it('renders fallback note when report is null', () => {
     const data: SuccessData = { ...BASE_DATA, report: null }
-    render(<SuccessCard data={data} onReset={vi.fn()} />)
+    render(
+      <SuccessCard
+        data={data}
+        onReset={vi.fn()}
+        totalVideoCount={5}
+        isFirstVideo={false}
+      />,
+    )
 
     expect(
       screen.getByText(/El informe de inteligencia no pudo generarse/i),
@@ -114,25 +156,34 @@ describe('SuccessCard', () => {
     expect(screen.queryByTestId('intelligence-report')).not.toBeInTheDocument()
   })
 
-  it('renders navigation links with correct hrefs', () => {
-    render(<SuccessCard data={BASE_DATA} onReset={vi.fn()} />)
+  it('renders search link with correct href', () => {
+    render(
+      <SuccessCard
+        data={BASE_DATA}
+        onReset={vi.fn()}
+        totalVideoCount={5}
+        isFirstVideo={false}
+      />,
+    )
 
     const searchLink = screen.getByRole('link', {
       name: /buscar en mi cerebro/i,
     })
     expect(searchLink).toHaveAttribute('href', '/dashboard/search')
-
-    const videosLink = screen.getByRole('link', {
-      name: /ver todos mis videos/i,
-    })
-    expect(videosLink).toHaveAttribute('href', '/dashboard/videos')
   })
 
   it('calls onReset when "Añadir otro video" is clicked', async () => {
     const user = userEvent.setup()
     const handleReset = vi.fn()
 
-    render(<SuccessCard data={BASE_DATA} onReset={handleReset} />)
+    render(
+      <SuccessCard
+        data={BASE_DATA}
+        onReset={handleReset}
+        totalVideoCount={5}
+        isFirstVideo={false}
+      />,
+    )
 
     await user.click(screen.getByRole('button', { name: /añadir otro video/i }))
 
@@ -141,7 +192,14 @@ describe('SuccessCard', () => {
 
   it('renders correct section count for different values', () => {
     const data: SuccessData = { ...BASE_DATA, sectionCount: 42 }
-    render(<SuccessCard data={data} onReset={vi.fn()} />)
+    render(
+      <SuccessCard
+        data={data}
+        onReset={vi.fn()}
+        totalVideoCount={5}
+        isFirstVideo={false}
+      />,
+    )
 
     expect(screen.getByText('42')).toBeInTheDocument()
     expect(screen.queryByText('15')).not.toBeInTheDocument()

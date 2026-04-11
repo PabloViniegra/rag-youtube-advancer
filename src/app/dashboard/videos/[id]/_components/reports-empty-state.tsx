@@ -141,7 +141,7 @@ export function ReportsEmptyState({
             type="button"
             onClick={handleGenerateAll}
             disabled={isPending}
-            className="inline-flex min-h-[44px] items-center rounded-lg border border-outline-variant bg-background px-3.5 font-body text-sm font-semibold text-on-surface transition-all hover:bg-surface-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-[44px] items-center rounded-lg border border-outline-variant bg-background px-3.5 font-body text-sm font-semibold text-on-surface transition-all hover:bg-surface-container disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isPending && activeTarget === GENERATION_TARGET.ALL
               ? 'Regenerando todo…'

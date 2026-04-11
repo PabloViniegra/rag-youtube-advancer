@@ -39,7 +39,7 @@ export function ErrorBanner({ error, onSuggestionClick }: ErrorBannerProps) {
                   key={s}
                   type="button"
                   onClick={() => onSuggestionClick(s)}
-                  className="inline-flex items-center rounded-full border border-error/30 bg-background px-3 py-1.5 font-body text-xs font-medium text-on-surface transition-colors hover:bg-surface-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                  className="inline-flex items-center rounded-full border border-error/30 bg-background px-3 py-1.5 font-body text-xs font-medium text-on-surface transition-colors hover:bg-surface-container"
                 >
                   {s}
                 </button>

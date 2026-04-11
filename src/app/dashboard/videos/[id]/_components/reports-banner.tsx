@@ -121,7 +121,7 @@ export function ReportsBanner({
           <button
             type="button"
             onClick={clearBannerParams}
-            className="inline-flex min-h-[44px] items-center rounded-lg border border-on-secondary-container/20 px-3.5 font-body text-sm font-semibold text-on-secondary-container transition-colors hover:bg-secondary-container/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            className="inline-flex min-h-[44px] items-center rounded-lg border border-on-secondary-container/20 px-3.5 font-body text-sm font-semibold text-on-secondary-container transition-colors hover:bg-secondary-container/40"
           >
             Cerrar
           </button>
@@ -130,7 +130,7 @@ export function ReportsBanner({
             type="button"
             onClick={handleRegenerateAll}
             disabled={isPending}
-            className="inline-flex min-h-[44px] items-center rounded-lg bg-primary px-3.5 font-body text-sm font-semibold text-on-primary transition-all hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-[44px] items-center rounded-lg bg-primary px-3.5 font-body text-sm font-semibold text-on-primary transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isPending ? 'Regenerando…' : 'Regenerar ahora'}
           </button>

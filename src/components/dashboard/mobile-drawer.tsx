@@ -126,7 +126,7 @@ export function MobileDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-on-surface-variant/60 transition-colors hover:bg-inverse-on-surface/10 hover:text-inverse-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-on-surface-variant/60 transition-colors hover:bg-inverse-on-surface/10 hover:text-inverse-on-surface"
             aria-label="Cerrar menú"
           >
             <CloseIcon />
@@ -149,7 +149,7 @@ export function MobileDrawer({
                 onClick={onClose}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
-                  'animate-fade-up stagger-item flex items-center gap-3 rounded-lg px-3 py-3 font-body text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
+                  'animate-fade-up stagger-item flex items-center gap-3 rounded-lg px-3 py-3 font-body text-sm font-semibold transition-all',
                   isActive
                     ? 'bg-primary text-on-primary'
                     : 'text-on-surface-variant/70 hover:bg-inverse-on-surface/8 hover:text-inverse-on-surface',
@@ -173,7 +173,7 @@ export function MobileDrawer({
           <form action={signOut}>
             <button
               type="submit"
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-3 font-body text-sm font-semibold text-on-surface-variant/70 transition-all hover:bg-error-container/60 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-3 font-body text-sm font-semibold text-on-surface-variant/70 transition-all hover:bg-error-container/60 hover:text-error"
             >
               <LogOutIcon />
               Cerrar sesión

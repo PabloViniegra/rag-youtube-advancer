@@ -74,7 +74,7 @@ export function DashboardSidebar({
           <form action={signOut}>
             <button
               type="submit"
-              className="rounded-lg p-2.5 text-on-surface-variant/60 transition-colors hover:bg-error-container/60 hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              className="rounded-lg p-2.5 text-on-surface-variant/60 transition-colors hover:bg-error-container/60 hover:text-error"
               title="Cerrar sesión"
               aria-label="Cerrar sesión"
             >

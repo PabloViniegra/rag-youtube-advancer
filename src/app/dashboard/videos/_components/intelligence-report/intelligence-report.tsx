@@ -64,7 +64,6 @@ export function IntelligenceReport({ report }: IntelligenceReportProps) {
               onClick={() => startTransition(() => setActiveTab(tab.id))}
               className={cn(
                 'flex-1 rounded-lg px-4 py-2.5 font-headline text-sm font-bold transition-all duration-150',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
                 activeTab === tab.id
                   ? 'bg-primary text-on-primary shadow-sm'
                   : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface',

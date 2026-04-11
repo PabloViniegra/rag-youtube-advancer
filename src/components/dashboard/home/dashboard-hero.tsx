@@ -1,3 +1,5 @@
+import { DashboardHeroStats } from './dashboard-hero-stats'
+
 interface DashboardHeroProps {
   displayName: string
   videoCount: number
@@ -29,9 +31,14 @@ export function DashboardHero({
         Hola, <span className="text-primary">{displayName}</span>.
       </h1>
       <p className="mt-2 font-body text-sm text-on-surface-variant">
-        {hasVideos
-          ? `${videoCount} video${videoCount === 1 ? '' : 's'} indexado${videoCount === 1 ? '' : 's'} · ${sectionCount.toLocaleString('es-ES')} fragmentos en memoria`
-          : 'Tu cerebro está vacío — empieza a llenarlo.'}
+        {hasVideos ? (
+          <DashboardHeroStats
+            videoCount={videoCount}
+            sectionCount={sectionCount}
+          />
+        ) : (
+          'Tu cerebro está vacío — empieza a llenarlo.'
+        )}
       </p>
     </header>
   )

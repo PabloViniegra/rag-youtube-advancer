@@ -47,7 +47,7 @@ export function VideoCardActions({
           aria-expanded={menuOpen}
           aria-haspopup="menu"
           onClick={handleMenuToggle}
-          className="flex size-8 items-center justify-center rounded-full bg-surface/80 text-on-surface-variant backdrop-blur-sm transition-colors hover:bg-surface hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          className="flex size-8 items-center justify-center rounded-full bg-surface/80 text-on-surface-variant backdrop-blur-sm transition-colors hover:bg-surface hover:text-on-surface"
         >
           <DotsIcon />
         </button>
@@ -70,7 +70,7 @@ export function VideoCardActions({
                   type="button"
                   role="menuitem"
                   onClick={handleDeleteClick}
-                  className="flex w-full items-center gap-2.5 px-4 py-2.5 font-body text-sm text-error transition-colors hover:bg-error-container focus-visible:bg-error-container focus-visible:outline-none"
+                  className="flex w-full items-center gap-2.5 px-4 py-2.5 font-body text-sm text-error transition-colors hover:bg-error-container focus-visible:bg-error-container"
                 >
                   <TrashIcon />
                   Eliminar video

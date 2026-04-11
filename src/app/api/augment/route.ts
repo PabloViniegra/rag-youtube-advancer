@@ -25,7 +25,7 @@
  * Runtime: Node.js (default).
  */
 import { NextResponse } from 'next/server'
-import { augmentAnswer } from '@/lib/augmentation/augment'
+import { augmentAnswer, augmentAnswerStream } from '@/lib/augmentation/augment'
 import type {
   AugmentErrorResponse,
   AugmentRequest,
@@ -51,6 +51,13 @@ function errorResponse(
   status: number,
 ): NextResponse<AugmentErrorResponse> {
   return NextResponse.json({ error: message, code }, { status })
+}
+
+function sseErrorEvent(
+  message: string,
+  code: AugmentErrorResponse['code'],
+): string {
+  return `data: ${JSON.stringify({ type: 'error', error: message, code })}\n\n`
 }
 
 function isAugmentRequest(body: unknown): body is AugmentRequest {
@@ -189,6 +196,51 @@ export async function POST(
     }))
 
     // Step 5 — augment: inject context and generate answer
+    const acceptsSSE = request.headers.get('Accept') === 'text/event-stream'
+
+    if (acceptsSSE) {
+      // ── SSE streaming path ──────────────────────────────────────────────────
+      const encoder = new TextEncoder()
+
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            for await (const chunk of augmentAnswerStream({
+              query: body.query,
+              matches: enrichedMatches,
+            })) {
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`),
+              )
+            }
+          } catch (streamError) {
+            logger.error('augment-sse', 'Stream error:', streamError)
+            controller.enqueue(
+              encoder.encode(
+                sseErrorEvent(
+                  'An unexpected error occurred during streaming.',
+                  AUGMENT_API_ERROR.INTERNAL_ERROR,
+                ),
+              ),
+            )
+          } finally {
+            controller.close()
+          }
+        },
+      })
+
+      return new Response(stream, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache, no-transform',
+          Connection: 'keep-alive',
+          'X-Accel-Buffering': 'no',
+        },
+      }) as unknown as NextResponse<AugmentSuccessResponse | AugmentErrorResponse>
+    }
+
+    // ── JSON path (non-streaming callers) ──────────────────────────────────
     const result = await augmentAnswer({
       query: body.query,
       matches: enrichedMatches,

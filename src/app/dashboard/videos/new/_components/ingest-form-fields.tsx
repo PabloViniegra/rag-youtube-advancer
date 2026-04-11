@@ -152,7 +152,7 @@ export function SubmitButton({ disabled }: { disabled: boolean }) {
     <button
       type="submit"
       disabled={disabled}
-      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-4 font-body text-base font-semibold text-on-primary transition-all hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-4 font-body text-base font-semibold text-on-primary transition-all hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
     >
       <SparkIcon />
       Analizar video

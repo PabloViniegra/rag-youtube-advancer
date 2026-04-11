@@ -63,7 +63,7 @@ export function WeeklyDigest({ digest }: WeeklyDigestProps) {
               <Link
                 key={q}
                 href={`/dashboard/search?q=${encodeURIComponent(q)}`}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-1.5 text-xs font-semibold text-on-primary transition-all hover:bg-primary-dim active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-1.5 text-xs font-semibold text-on-primary transition-all hover:bg-primary-dim active:scale-[0.98]"
               >
                 {q}
                 <ArrowRightIcon />

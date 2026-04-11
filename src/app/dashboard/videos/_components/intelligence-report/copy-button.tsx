@@ -37,7 +37,6 @@ export function CopyButton({
       className={cn(
         'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5',
         'font-body text-xs font-semibold transition-colors duration-150',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
         copied
           ? 'bg-secondary-container text-on-secondary-container'
           : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface',

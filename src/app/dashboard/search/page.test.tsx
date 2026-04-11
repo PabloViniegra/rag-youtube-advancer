@@ -49,11 +49,53 @@ import { SearchOrchestrator } from './_components/search-orchestrator'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+/** Mock a plain JSON fetch response — used for non-ok (error) responses. */
 function mockFetch(status: number, body: unknown) {
   vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
     new Response(JSON.stringify(body), {
       status,
       headers: { 'Content-Type': 'application/json' },
+    }),
+  )
+}
+
+interface SSESource {
+  id: string
+  videoId: string
+  content: string
+  similarity: number
+}
+
+/**
+ * Mock a successful SSE fetch response.
+ * Emits: sources → token → done, matching the streaming protocol in
+ * SearchOrchestrator (Accept: text/event-stream).
+ */
+function mockSSEFetch(
+  sources: SSESource[],
+  answer: string,
+  relatedQueries: string[] = [],
+) {
+  const encoder = new TextEncoder()
+  const events = [
+    `data: ${JSON.stringify({ type: 'sources', payload: sources })}\n\n`,
+    `data: ${JSON.stringify({ type: 'token', payload: answer })}\n\n`,
+    `data: ${JSON.stringify({ type: 'done', relatedQueries })}\n\n`,
+  ]
+
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      for (const event of events) {
+        controller.enqueue(encoder.encode(event))
+      }
+      controller.close()
+    },
+  })
+
+  vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+    new Response(stream, {
+      status: 200,
+      headers: { 'Content-Type': 'text/event-stream' },
     }),
   )
 }
@@ -101,9 +143,8 @@ describe('SearchOrchestrator', () => {
   it('renders the answer and sources on success', async () => {
     const user = userEvent.setup()
 
-    mockFetch(200, {
-      answer: 'React es una librería de UI.',
-      sources: [
+    mockSSEFetch(
+      [
         {
           id: 'sec-1',
           videoId: 'vid-1',
@@ -111,8 +152,8 @@ describe('SearchOrchestrator', () => {
           similarity: 0.95,
         },
       ],
-      sourceCount: 1,
-    })
+      'React es una librería de UI.',
+    )
 
     render(<SearchOrchestrator />)
 
@@ -285,9 +326,8 @@ describe('SearchOrchestrator', () => {
   it('shows sources count heading when sources are present', async () => {
     const user = userEvent.setup()
 
-    mockFetch(200, {
-      answer: 'La respuesta.',
-      sources: [
+    mockSSEFetch(
+      [
         {
           id: 'sec-1',
           videoId: 'vid-1',
@@ -301,8 +341,8 @@ describe('SearchOrchestrator', () => {
           similarity: 0.6,
         },
       ],
-      sourceCount: 2,
-    })
+      'La respuesta.',
+    )
 
     render(<SearchOrchestrator />)
 

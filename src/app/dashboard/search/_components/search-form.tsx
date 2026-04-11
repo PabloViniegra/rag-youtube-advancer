@@ -87,7 +87,8 @@ function SearchInput({
         Busca en todos tus videos a la vez.
       </p>
       {error && (
-        <p id={errorId} role="alert" className="font-body text-xs text-error">
+        // aria-describedby target — ErrorBanner is the live region (role="alert")
+        <p id={errorId} className="font-body text-xs text-error">
           {error.message}
         </p>
       )}
@@ -118,7 +119,7 @@ function ExampleQuestions({
             key={q}
             type="button"
             onClick={() => onExampleClick(q)}
-            className="inline-flex min-h-[24px] min-w-[24px] items-center rounded-full border border-outline-variant bg-surface-container-low px-3 py-1.5 font-body text-xs font-medium text-on-surface transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            className="inline-flex min-h-[24px] min-w-[24px] items-center rounded-full border border-outline-variant bg-surface-container-low px-3 py-1.5 font-body text-xs font-medium text-on-surface transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
           >
             {q}
           </button>
@@ -140,7 +141,12 @@ export function SearchForm({
   onSuggestionClick,
 }: SearchFormProps) {
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+    <form
+      onSubmit={onSubmit}
+      className="flex flex-col gap-4"
+      noValidate
+      data-search-form
+    >
       <SearchInput
         value={query}
         onChange={onQueryChange}
@@ -158,7 +164,7 @@ export function SearchForm({
         <button
           type="submit"
           disabled={!query.trim() || isLoading}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-body text-sm font-semibold text-on-primary transition-all hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-body text-sm font-semibold text-on-primary transition-all hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
         >
           Buscar
         </button>

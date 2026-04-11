@@ -29,7 +29,7 @@ export function ExpandableText({
         type="button"
         onClick={() => setExpanded((prev) => !prev)}
         aria-expanded={expanded}
-        className="mt-2 self-start font-body text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+        className="mt-2 self-start font-body text-xs font-semibold text-primary hover:underline"
       >
         {expanded ? 'Ver menos' : 'Ver completo'}
       </button>

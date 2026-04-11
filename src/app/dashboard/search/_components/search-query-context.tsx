@@ -12,10 +12,16 @@ import { createContext, use } from 'react'
 
 interface SearchQueryContextValue {
   setQuery: (q: string) => void
+  /**
+   * Sets the query AND immediately triggers a search submission.
+   * Used by RelatedQueries chips to avoid fragile DOM manipulation.
+   */
+  submitQuery: (q: string) => void
 }
 
 export const SearchQueryContext = createContext<SearchQueryContextValue>({
   setQuery: () => {},
+  submitQuery: () => {},
 })
 
 export function useSearchQuery(): SearchQueryContextValue {

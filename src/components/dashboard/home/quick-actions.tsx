@@ -54,7 +54,7 @@ export function QuickActions({ hasVideos }: QuickActionsProps) {
       <Link
         href="/dashboard/videos/new"
         transitionTypes={['nav-forward']}
-        className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary font-body text-sm font-bold text-on-primary shadow-sm transition-colors hover:bg-primary-dim active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+        className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary font-body text-sm font-bold text-on-primary shadow-sm transition-colors hover:bg-primary-dim active:scale-[0.98]"
       >
         <PlusIcon />
         {hasVideos ? 'Indexar video' : 'Indexar mi primer video'}
@@ -65,7 +65,7 @@ export function QuickActions({ hasVideos }: QuickActionsProps) {
         <Link
           href="/dashboard/search"
           transitionTypes={['nav-forward']}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-background font-body text-sm font-semibold text-on-surface transition-colors hover:border-outline hover:bg-surface-container active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-background font-body text-sm font-semibold text-on-surface transition-colors hover:border-outline hover:bg-surface-container active:scale-[0.98]"
         >
           <SearchIcon />
           Buscar en memoria

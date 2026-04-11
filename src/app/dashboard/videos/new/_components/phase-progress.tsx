@@ -94,6 +94,12 @@ function StepDot({ label, fullLabel, state, index }: StepDotProps) {
               strokeWidth="2.2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              pathLength="1"
+              strokeDasharray="1"
+              className="[stroke-dashoffset:1] motion-reduce:animation-none"
+              style={{
+                animation: `stroke-draw 0.4s var(--ease-out-expo) ${index * 80}ms both`,
+              }}
             />
           </svg>
         ) : state === PHASE_STEP_STATE.active ? (

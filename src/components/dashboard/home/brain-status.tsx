@@ -1,9 +1,16 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+
 import { cn } from '@/lib/utils'
 
 const OPTIMAL_VIDEOS = 25
 
+const DAY_KEYS = ['lun', 'mar', 'mie', 'jue', 'vie', 'sab', 'dom'] as const
+
 interface BrainStatusProps {
   videoCount: number
+  activityDays?: boolean[]
 }
 
 const STATUS_LABELS = {
@@ -22,11 +29,21 @@ function getStatusLabel(pct: number): StatusLabel {
   return STATUS_LABELS.optimized
 }
 
-export function BrainStatus({ videoCount }: BrainStatusProps) {
+export function BrainStatus({ videoCount, activityDays }: BrainStatusProps) {
   const rawPct = Math.round((videoCount / OPTIMAL_VIDEOS) * 100)
   const pct = Math.min(rawPct, 100)
   const statusLabel = getStatusLabel(pct)
   const isEmpty = pct === 0
+
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    // Single RAF tick so the fill animates from 0 on first paint
+    const id = requestAnimationFrame(() => setMounted(true))
+    return () => cancelAnimationFrame(id)
+  }, [])
+
+  const days = activityDays ?? Array<boolean>(7).fill(false)
 
   return (
     <div className="rounded-lg border border-outline-variant bg-surface-container-low p-4">
@@ -44,7 +61,7 @@ export function BrainStatus({ videoCount }: BrainStatusProps) {
         </span>
       </div>
 
-      {/* Progress track */}
+      {/* Progress track — liquid fill */}
       <div
         className="mb-3 h-1.5 overflow-hidden rounded-full bg-outline-variant"
         role="progressbar"
@@ -55,10 +72,15 @@ export function BrainStatus({ videoCount }: BrainStatusProps) {
       >
         <div
           className={cn(
-            'h-full rounded-full transition-all duration-500',
+            'brain-shimmer relative h-full overflow-hidden rounded-full motion-reduce:transition-none',
             isEmpty ? 'bg-outline-variant' : 'bg-primary',
           )}
-          style={{ width: `${Math.max(pct, 2)}%` }}
+          style={{
+            width: mounted ? `${Math.max(pct, 2)}%` : '0%',
+            transition: mounted
+              ? 'width 1.2s cubic-bezier(0.22, 1, 0.36, 1)'
+              : 'none',
+          }}
         />
       </div>
 
@@ -69,6 +91,23 @@ export function BrainStatus({ videoCount }: BrainStatusProps) {
         <span className="font-body text-[11px] text-on-surface-variant">
           {videoCount} / {OPTIMAL_VIDEOS} videos
         </span>
+      </div>
+
+      {/* Weekly activity streak */}
+      <div
+        className="mt-3 flex items-center gap-1.5"
+        role="img"
+        aria-label="Actividad últimos 7 días"
+      >
+        {days.map((active, i) => (
+          <span
+            key={DAY_KEYS[i]}
+            className={cn(
+              'inline-block h-2.5 w-2.5 rounded-sm',
+              active ? 'bg-primary' : 'bg-outline-variant opacity-40',
+            )}
+          />
+        ))}
       </div>
     </div>
   )

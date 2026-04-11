@@ -1,14 +1,24 @@
 'use client'
 
 /**
- * AnswerCard — /bolder + /delight
+ * AnswerCard — /bolder + /delight + SSE streaming
  *
- * /bolder:  Answer anchored by a crimson left border and text-xl typography.
- * /delight: Copy button with a 2-second "Copiado ✓" feedback state.
+ * /bolder:    Answer anchored by a crimson left border and text-xl typography.
+ * /delight:   Copy button with a 2-second "Copiado ✓" feedback state.
+ * streaming:  Blinking cursor while `isStreaming` is true.
+ *             FeedbackRow + RelatedQueries shown only after streaming ends.
  */
 
 import { useState, ViewTransition } from 'react'
 import type { VideoSectionMatch } from '@/lib/retrieval/types'
+import {
+  CheckIcon,
+  ClipboardIcon,
+  RegenerateIcon,
+  ThumbDownIcon,
+  ThumbUpIcon,
+} from './answer-card-icons'
+import { RelatedQueries } from './related-queries'
 import { SourceCard } from './source-card'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -17,6 +27,13 @@ export interface AnswerData {
   answer: string
   sources: VideoSectionMatch[]
   sourceCount: number
+}
+
+interface AnswerCardProps {
+  data: AnswerData
+  isStreaming?: boolean
+  relatedQueries?: string[]
+  onRegenerate?: () => void
 }
 
 // ── CopyButton ────────────────────────────────────────────────────────────────
@@ -39,7 +56,7 @@ function CopyButton({ text }: { text: string }) {
       type="button"
       onClick={handleCopy}
       aria-label={copied ? 'Copiado' : 'Copiar respuesta'}
-      className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-body text-xs font-medium text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+      className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-body text-xs font-medium text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
     >
       {copied ? <CheckIcon /> : <ClipboardIcon />}
       {copied ? 'Copiado' : 'Copiar'}
@@ -47,9 +64,62 @@ function CopyButton({ text }: { text: string }) {
   )
 }
 
+// ── FeedbackRow ───────────────────────────────────────────────────────────────
+
+interface FeedbackRowProps {
+  answerText: string
+  onRegenerate?: () => void
+}
+
+function FeedbackRow({ answerText, onRegenerate }: FeedbackRowProps) {
+  const [vote, setVote] = useState<'up' | 'down' | null>(null)
+
+  return (
+    <div className="flex items-center gap-2 pt-1">
+      <button
+        type="button"
+        aria-label="Respuesta útil"
+        aria-pressed={vote === 'up'}
+        onClick={() => setVote((v) => (v === 'up' ? null : 'up'))}
+        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface aria-pressed:text-primary"
+      >
+        <ThumbUpIcon />
+      </button>
+      <button
+        type="button"
+        aria-label="Respuesta no útil"
+        aria-pressed={vote === 'down'}
+        onClick={() => setVote((v) => (v === 'down' ? null : 'down'))}
+        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface aria-pressed:text-primary"
+      >
+        <ThumbDownIcon />
+      </button>
+
+      <div className="ml-auto flex items-center gap-2">
+        <CopyButton text={answerText} />
+        {onRegenerate && (
+          <button
+            type="button"
+            onClick={onRegenerate}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-1.5 font-body text-xs font-medium text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
+          >
+            <RegenerateIcon />
+            Regenerar
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── AnswerCard ────────────────────────────────────────────────────────────────
 
-export function AnswerCard({ data }: { data: AnswerData }) {
+export function AnswerCard({
+  data,
+  isStreaming = false,
+  relatedQueries,
+  onRegenerate,
+}: AnswerCardProps) {
   return (
     <ViewTransition enter="slide-up" default="none">
       <section aria-labelledby="answer-heading" className="flex flex-col gap-6">
@@ -62,11 +132,29 @@ export function AnswerCard({ data }: { data: AnswerData }) {
             >
               Respuesta
             </h2>
-            <CopyButton text={data.answer} />
+            {/* Copy button in header only while streaming (no FeedbackRow yet) */}
+            {isStreaming && <CopyButton text={data.answer} />}
           </div>
+
           <p className="whitespace-pre-wrap break-words font-body text-xl leading-relaxed text-on-surface">
             {data.answer}
+            {isStreaming && (
+              <span
+                aria-hidden
+                className="ml-px inline-block h-[1em] w-0.5 translate-y-0.5 bg-primary align-middle [animation:blink_0.8s_steps(1)_infinite] motion-reduce:hidden"
+              />
+            )}
           </p>
+
+          {/* Feedback row — only after streaming completes */}
+          {!isStreaming && (
+            <div className="mt-4">
+              <FeedbackRow
+                answerText={data.answer}
+                onRegenerate={onRegenerate}
+              />
+            </div>
+          )}
         </div>
 
         {/* Source fragments */}
@@ -82,57 +170,12 @@ export function AnswerCard({ data }: { data: AnswerData }) {
             </ol>
           </div>
         )}
+
+        {/* Related queries — only after streaming completes */}
+        {!isStreaming && relatedQueries && relatedQueries.length > 0 && (
+          <RelatedQueries queries={relatedQueries} />
+        )}
       </section>
     </ViewTransition>
-  )
-}
-
-// ── Icons ─────────────────────────────────────────────────────────────────────
-
-function ClipboardIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-    >
-      <rect
-        x="9"
-        y="2"
-        width="6"
-        height="4"
-        rx="1"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path
-        d="M9 4H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
-
-function CheckIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M20 6L9 17l-5-5"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   )
 }

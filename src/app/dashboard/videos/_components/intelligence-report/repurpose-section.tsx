@@ -63,7 +63,7 @@ function TwitterThreadCard({ thread }: TwitterThreadCardProps) {
         <button
           type="button"
           onClick={() => setExpanded(true)}
-          className="mt-2 font-body text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          className="mt-2 font-body text-xs font-semibold text-primary hover:underline"
         >
           Ver hilo completo →
         </button>

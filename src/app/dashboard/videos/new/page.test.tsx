@@ -106,7 +106,7 @@ describe('NuevoVideoPage', () => {
 
   // ── Success state — redirect ─────────────────────────────────────────────────
 
-  it('redirects to video detail page on successful ingestion', async () => {
+  it('shows SuccessCard after successful ingestion', async () => {
     const user = userEvent.setup()
     resolveWith({
       ok: true,
@@ -189,13 +189,18 @@ describe('NuevoVideoPage', () => {
 
     await waitFor(
       () => {
-        expect(mockPush).toHaveBeenCalledWith('/dashboard/videos/vid-abc')
+        expect(
+          screen.getByRole('heading', { name: '¡Video indexado!' }),
+        ).toBeInTheDocument()
       },
       { timeout: 3000 },
     )
+    // router.push is NOT called here — navigation happens only when the user
+    // explicitly clicks "Ver video" inside SuccessCard
+    expect(mockPush).not.toHaveBeenCalled()
   })
 
-  it('completes remaining phases before redirecting on success', async () => {
+  it('shows SuccessCard after phases complete on success', async () => {
     const user = userEvent.setup()
 
     resolveWith({
@@ -277,14 +282,18 @@ describe('NuevoVideoPage', () => {
     await user.type(screen.getByLabelText(/URL de YouTube/i), VALID_URL)
     await user.click(screen.getByRole('button', { name: /analizar video/i }))
 
+    // router.push is NOT called automatically — user must click "Ver video" in SuccessCard
     expect(mockPush).not.toHaveBeenCalled()
 
     await waitFor(
       () => {
-        expect(mockPush).toHaveBeenCalledWith('/dashboard/videos/vid-phases')
+        expect(
+          screen.getByRole('heading', { name: '¡Video indexado!' }),
+        ).toBeInTheDocument()
       },
       { timeout: 3000 },
     )
+    expect(mockPush).not.toHaveBeenCalled()
   })
 
   // ── Error state — known error codes ─────────────────────────────────────────
