@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { ViewTransition } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
-import { VideoGrid } from './_components/video-grid'
+import { VideosPageClient } from './_components/videos-page-client'
 
 type VideoRow = Database['public']['Tables']['videos']['Row']
 
@@ -77,7 +77,7 @@ export default async function VideosPage() {
         </div>
 
         {/* ── Content ── */}
-        <VideoGrid initialVideos={videoList} />
+        <VideosPageClient initialVideos={videoList} />
       </div>
     </ViewTransition>
   )
