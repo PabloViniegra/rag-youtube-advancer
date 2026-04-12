@@ -45,7 +45,7 @@ export function CountUpNumber({
           const elapsed = now - startTime
           const progress = Math.min(elapsed / duration, 1)
           // ease-out-quart: 1 - (1 - t)^4
-          const eased = 1 - Math.pow(1 - progress, 4)
+          const eased = 1 - (1 - progress) ** 4
           setCurrent(eased * value)
           if (progress < 1) requestAnimationFrame(tick)
         }

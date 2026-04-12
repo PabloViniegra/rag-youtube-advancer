@@ -11,7 +11,7 @@
  * stopping the animation entirely so the loading state remains perceivable.
  */
 
-import { type ButtonHTMLAttributes } from 'react'
+import type { ButtonHTMLAttributes } from 'react'
 import { cn } from '@/lib/utils'
 
 // ── Types ─────────────────────────────────────────────────────────────────────

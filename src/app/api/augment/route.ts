@@ -237,7 +237,9 @@ export async function POST(
           Connection: 'keep-alive',
           'X-Accel-Buffering': 'no',
         },
-      }) as unknown as NextResponse<AugmentSuccessResponse | AugmentErrorResponse>
+      }) as unknown as NextResponse<
+        AugmentSuccessResponse | AugmentErrorResponse
+      >
     }
 
     // ── JSON path (non-streaming callers) ──────────────────────────────────

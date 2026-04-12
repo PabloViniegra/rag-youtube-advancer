@@ -126,7 +126,8 @@
     outline: 2px solid var(--color-primary);
     outline-offset: 3px;
     border-radius: 4px;
-    box-shadow: 0 0 0 4px color-mix(in oklch, var(--color-primary) 20%, transparent);
+    box-shadow: 0 0 0 4px
+      color-mix(in oklch, var(--color-primary) 20%, transparent);
   }
 }
 
@@ -453,9 +454,15 @@
   }
 
   /* Stagger offset for sibling .reveal-on-scroll items */
-  .reveal-on-scroll:nth-child(2) { animation-range: entry 8% entry 48%; }
-  .reveal-on-scroll:nth-child(3) { animation-range: entry 16% entry 56%; }
-  .reveal-on-scroll:nth-child(4) { animation-range: entry 24% entry 64%; }
+  .reveal-on-scroll:nth-child(2) {
+    animation-range: entry 8% entry 48%;
+  }
+  .reveal-on-scroll:nth-child(3) {
+    animation-range: entry 16% entry 56%;
+  }
+  .reveal-on-scroll:nth-child(4) {
+    animation-range: entry 24% entry 64%;
+  }
 
   /* Reduced motion — disable scroll-driven animations; show elements immediately */
   @media (prefers-reduced-motion: reduce) {
@@ -486,13 +493,19 @@
 
   /* Gentle float — badge / decorative elements */
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(-6px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
   }
 
   /* Live indicator pulse — status/presence dot */
   @keyframes live-pulse {
-    0%, 100% {
+    0%,
+    100% {
       transform: scale(1);
       opacity: 1;
     }
@@ -521,7 +534,7 @@
   }
 
   .brain-shimmer::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     background: linear-gradient(

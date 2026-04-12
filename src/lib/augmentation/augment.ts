@@ -9,7 +9,7 @@
  *   3. Call generateText() via Vercel AI Gateway.
  *   4. Return the answer along with the source sections.
  */
-import { generateText, streamText } from 'ai'
+import { generateText, type StreamTextResult, streamText } from 'ai'
 import { aiGateway } from '@/lib/ai/gateway'
 import type { VideoSectionMatch } from '@/lib/retrieval/types'
 import type {
@@ -122,7 +122,7 @@ export async function* augmentAnswerStream(
   const contextBlock = buildContextBlock(matches)
   const userMessage = buildUserMessage(query, contextBlock)
 
-  let result
+  let result: StreamTextResult<Record<string, never>, never>
   try {
     result = streamText({
       model: aiGateway(AUGMENTATION_CONFIG.model),

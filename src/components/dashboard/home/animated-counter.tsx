@@ -33,7 +33,7 @@ export function AnimatedCounter({
       if (startTime === null) startTime = timestamp
       const elapsed = timestamp - startTime
       const progress = Math.min(elapsed / duration, 1)
-      const eased = 1 - Math.pow(1 - progress, 3)
+      const eased = 1 - (1 - progress) ** 3
 
       setDisplay(Math.round(eased * target))
 
