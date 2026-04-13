@@ -27,19 +27,21 @@ export function DashboardHero({
       <span className="mb-3 inline-block rounded-sm bg-primary-container px-2 py-0.5 font-headline text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
         {overline}
       </span>
-      <h1 className="font-headline text-4xl font-black leading-[1.05] text-on-surface md:text-5xl">
-        Hola, <span className="text-primary">{displayName}</span>.
+      <h1 className="font-headline text-5xl font-extrabold tracking-tight leading-[0.95] text-on-surface md:text-6xl">
+        Hola, <span className="text-primary font-black">{displayName}</span>.
       </h1>
-      <p className="mt-2 font-body text-sm text-on-surface-variant">
+      <div className="mt-5">
         {hasVideos ? (
           <DashboardHeroStats
             videoCount={videoCount}
             sectionCount={sectionCount}
           />
         ) : (
-          'Tu cerebro está vacío — empieza a llenarlo.'
+          <p className="font-body text-base font-medium text-on-surface-variant">
+            Tu cerebro está vacío — empieza a llenarlo.
+          </p>
         )}
-      </p>
+      </div>
     </header>
   )
 }

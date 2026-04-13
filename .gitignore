@@ -40,6 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# accidental transpiled artifacts in source
+src/**/*.js
+
 # AI
 /.agents/
 /.claude/

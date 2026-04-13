@@ -74,7 +74,7 @@ function SearchInput({
         id="search-query"
         rows={3}
         required
-        placeholder="¿Qué explica el video sobre inteligencia artificial?"
+        placeholder="¿Qué tema quieres buscar en tus videos?"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}

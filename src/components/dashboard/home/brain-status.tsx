@@ -72,7 +72,7 @@ export function BrainStatus({ videoCount, activityDays }: BrainStatusProps) {
       >
         <div
           className={cn(
-            'brain-shimmer relative h-full overflow-hidden rounded-full motion-reduce:transition-none',
+            'relative h-full overflow-hidden rounded-full motion-reduce:transition-none',
             isEmpty ? 'bg-outline-variant' : 'bg-primary',
           )}
           style={{
@@ -89,7 +89,7 @@ export function BrainStatus({ videoCount, activityDays }: BrainStatusProps) {
           {statusLabel}
         </span>
         <span className="font-body text-[11px] text-on-surface-variant">
-          {videoCount} / {OPTIMAL_VIDEOS} videos
+          {videoCount} / {OPTIMAL_VIDEOS} videos · óptimo
         </span>
       </div>
 
@@ -97,8 +97,11 @@ export function BrainStatus({ videoCount, activityDays }: BrainStatusProps) {
       <div
         className="mt-3 flex items-center gap-1.5"
         role="img"
-        aria-label="Actividad últimos 7 días"
+        aria-label="Actividad esta semana"
       >
+        <span className="font-body text-[10px] text-on-surface-variant mr-1">
+          Actividad:
+        </span>
         {days.map((active, i) => (
           <span
             key={DAY_KEYS[i]}

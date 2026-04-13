@@ -26,7 +26,7 @@ export function VideoDetailHeader({
   const youtubeUrl = `https://www.youtube.com/watch?v=${video.youtube_id}`
 
   return (
-    <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
+    <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:gap-12">
       {/* Thumbnail */}
       <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-2xl bg-surface-container sm:w-64">
         <ViewTransition
@@ -46,58 +46,54 @@ export function VideoDetailHeader({
       </div>
 
       {/* Meta */}
-      <div className="flex flex-1 flex-col gap-4">
-        <h1 className="font-headline text-2xl font-extrabold leading-tight text-on-surface">
+      <div className="flex flex-1 flex-col gap-6">
+        <h1 className="font-headline text-3xl font-extrabold leading-[1.1] tracking-tight text-on-surface">
           {video.title ?? 'Sin título'}
         </h1>
 
-        {/* Stats row */}
-        <dl className="flex flex-wrap gap-4">
-          <div className="flex flex-col gap-0.5">
-            <dt className="font-body text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
-              Fragmentos indexados
-            </dt>
-            <dd className="font-headline text-2xl font-bold text-primary">
-              {sectionCount}
-            </dd>
-          </div>
-
-          <div className="flex flex-col gap-0.5">
-            <dt className="font-body text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
+        {/* Stats row - reorganizado: fecha como anchor, fragments como secondary */}
+        <div className="flex flex-wrap gap-x-8 gap-y-4">
+          <div className="flex flex-col gap-1">
+            <span className="font-body text-xs font-medium uppercase tracking-wider text-on-surface-variant">
               Indexado el
-            </dt>
-            <dd className="font-body text-sm text-on-surface">
-              <time dateTime={video.created_at}>
-                {formatDate(video.created_at)}
-              </time>
-            </dd>
+            </span>
+            <time
+              dateTime={video.created_at}
+              className="font-body text-sm text-on-surface"
+            >
+              {formatDate(video.created_at)}
+            </time>
           </div>
 
-          <div className="flex flex-col gap-0.5">
-            <dt className="font-body text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
-              YouTube ID
-            </dt>
-            <dd>
-              <a
-                href={youtubeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Abrir video ${video.youtube_id} en YouTube`}
-                className="inline-flex items-center gap-1.5 rounded-full bg-primary-container px-2.5 py-0.5 font-body text-xs font-medium text-on-primary-container transition-colors hover:bg-primary hover:text-on-primary"
-              >
-                <YoutubeIcon />
-                {video.youtube_id}
-              </a>
-            </dd>
+          <div className="flex flex-col gap-1">
+            <span className="font-body text-xs font-medium uppercase tracking-wider text-on-surface-variant">
+              Fragmentos
+            </span>
+            <span className="font-headline text-lg font-bold text-primary">
+              {sectionCount}
+            </span>
           </div>
-        </dl>
+
+          <div className="flex items-center gap-2">
+            <a
+              href={youtubeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Ver en YouTube`}
+              className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 font-body text-xs font-medium text-on-surface-variant transition-colors hover:bg-surface-container-hover hover:text-on-surface"
+            >
+              <YoutubeIcon />
+              <span>{video.youtube_id}</span>
+            </a>
+          </div>
+        </div>
 
         {/* Actions */}
-        <div className="mt-auto flex flex-wrap gap-3 pt-2">
+        <div className="mt-2 flex flex-wrap gap-3">
           <Link
             href={`/dashboard/search?video=${video.youtube_id}`}
             transitionTypes={['nav-forward']}
-            className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 font-body text-sm font-semibold text-on-primary shadow-sm transition-all hover:brightness-110 active:scale-[0.98]"
+            className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-6 font-body text-sm font-semibold text-on-primary shadow-sm transition-all hover:brightness-110 active:scale-[0.98]"
           >
             <SearchIcon />
             Hacer una pregunta
@@ -106,9 +102,9 @@ export function VideoDetailHeader({
           <Link
             href="/dashboard/videos"
             transitionTypes={['nav-back']}
-            className="inline-flex h-10 items-center gap-2 rounded-xl border border-outline-variant px-5 font-body text-sm font-semibold text-on-surface-variant transition-all hover:bg-surface-container hover:text-on-surface"
+            className="inline-flex h-11 items-center gap-2 rounded-xl border border-outline-variant px-5 font-body text-sm font-medium text-on-surface-variant transition-all hover:bg-surface-container-hover hover:text-on-surface"
           >
-            Volver a mis videos
+            Volver
           </Link>
         </div>
       </div>

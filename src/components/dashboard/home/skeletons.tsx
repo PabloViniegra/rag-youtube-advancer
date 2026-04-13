@@ -43,13 +43,22 @@ export function DashboardSkeleton({ displayName }: DashboardSkeletonProps) {
         <p className="font-headline text-4xl font-black leading-[1.05] text-on-surface md:text-5xl">
           Hola, <span className="text-primary">{displayName}</span>.
         </p>
-        {/* Stats subtitle placeholder */}
-        <PulseBar className="mt-2 h-4 w-64" />
+        {/* Stats block placeholder */}
+        <div className="mt-5 flex items-end gap-8">
+          <div className="flex flex-col gap-1">
+            <PulseBar className="h-10 w-16 md:h-12" />
+            <PulseBar className="h-2.5 w-24" />
+          </div>
+          <div className="mb-1 h-8 w-px bg-outline-variant" />
+          <div className="flex flex-col gap-1">
+            <PulseBar className="h-10 w-16 md:h-12" />
+            <PulseBar className="h-2.5 w-32" />
+          </div>
+        </div>
       </header>
 
-      {/* ── Quick actions ── */}
-      <div className="grid grid-cols-2 gap-3">
-        <PulseBar className="h-11 rounded-lg" />
+      {/* ── Quick actions — single col skeleton; real component decides cols based on hasVideos ── */}
+      <div className="grid grid-cols-1 gap-3">
         <PulseBar className="h-11 rounded-lg" />
       </div>
 

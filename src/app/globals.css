@@ -528,23 +528,6 @@
 }
 
 @layer utilities {
-  .brain-shimmer {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .brain-shimmer::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      color-mix(in oklch, white 30%, transparent) 50%,
-      transparent 100%
-    );
-    animation: shimmer-sweep 2s var(--ease-out-expo) infinite;
-  }
 }
 
 /* ============================================================

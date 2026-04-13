@@ -24,11 +24,17 @@ vi.mock('../actions', () => ({
   getVideoSectionStats: getVideoSectionStatsMock,
 }))
 
+vi.mock('navigator.clipboard', () => ({
+  default: {
+    writeText: vi.fn().mockResolvedValue(undefined),
+  },
+}))
+
 // ─── Imports (after mocks) ────────────────────────────────────────────────────
 
 import { VideoPropertiesModal } from './video-properties-modal'
 
-// ─── Tests ────────────────────────────────────────────────────────────────────
+// ─── Tests ───────────────────────────────────────────────────────────────────
 
 describe('VideoPropertiesModal', () => {
   const defaultProps = {
@@ -65,7 +71,6 @@ describe('VideoPropertiesModal', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     expect(screen.getByText('Propiedades del video')).toBeInTheDocument()
     expect(screen.getByText('Mi video de prueba')).toBeInTheDocument()
-    expect(screen.getByText('dQw4w9WgXcQ')).toBeInTheDocument()
   })
 
   it('shows the YouTube link with correct href', () => {
@@ -78,9 +83,12 @@ describe('VideoPropertiesModal', () => {
     expect(link).toHaveAttribute('target', '_blank')
   })
 
-  it('shows truncated internal ID', () => {
+  it('shows full internal ID with copy button', () => {
     render(<VideoPropertiesModal {...defaultProps} />)
-    expect(screen.getByText(/abc123de/)).toBeInTheDocument()
+    const copyButton = screen.getByRole('button', {
+      name: /copiar id interno/i,
+    })
+    expect(copyButton).toBeInTheDocument()
   })
 
   it('shows section stats after loading', async () => {

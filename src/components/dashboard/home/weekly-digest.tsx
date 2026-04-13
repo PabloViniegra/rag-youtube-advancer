@@ -13,10 +13,10 @@ export function WeeklyDigest({ digest }: WeeklyDigestProps) {
   return (
     <aside
       aria-label="Resumen semanal"
-      className="rounded-lg border border-tertiary-container bg-tertiary-container/30 px-5 py-4"
+      className="rounded-lg border border-outline-variant bg-surface-container-low px-5 py-4"
     >
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm font-semibold text-on-tertiary-container">
+        <p className="text-sm font-semibold text-on-surface">
           Insights · esta semana
         </p>
         <WeeklyDigestDismissButton digestId={digest.id} />
@@ -31,7 +31,7 @@ export function WeeklyDigest({ digest }: WeeklyDigestProps) {
             {digest.topics.map((topic) => (
               <span
                 key={topic}
-                className="rounded-full bg-tertiary-container px-3 py-1 text-xs font-medium text-on-tertiary-container"
+                className="rounded bg-surface-container px-3 py-1 text-xs font-medium text-on-surface-variant"
               >
                 {topic}
               </span>

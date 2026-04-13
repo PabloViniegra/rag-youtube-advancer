@@ -54,7 +54,7 @@ export function QuickActions({ hasVideos }: QuickActionsProps) {
       <Link
         href="/dashboard/videos/new"
         transitionTypes={['nav-forward']}
-        className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary font-body text-sm font-bold text-on-primary shadow-sm transition-colors hover:bg-primary-dim active:scale-[0.98]"
+        className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-primary font-body text-sm font-bold text-on-primary shadow-md transition-colors hover:bg-primary-dim active:scale-[0.98]"
       >
         <PlusIcon />
         {hasVideos ? 'Indexar video' : 'Indexar mi primer video'}

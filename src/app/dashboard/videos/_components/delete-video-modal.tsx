@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useTransition } from 'react'
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { sileo } from 'sileo'
 import { deleteVideo } from '../actions'
 
@@ -24,32 +24,18 @@ export function DeleteVideoModal({
   onDeleteOptimistic,
 }: DeleteVideoModalProps) {
   const [isPending, startTransition] = useTransition()
+  const [confirmText, setConfirmText] = useState('')
   const dialogRef = useRef<HTMLDialogElement>(null)
-  const confirmButtonRef = useRef<HTMLButtonElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
+  const canDelete =
+    confirmText.toLowerCase() === videoTitle?.toLowerCase() ||
+    confirmText.toLowerCase() === 'eliminar' ||
+    confirmText.toLowerCase() === 'delete'
 
-    dialog.showModal()
+  const handleConfirm = useCallback(() => {
+    if (!canDelete) return
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        onClose()
-      }
-    }
-
-    dialog.addEventListener('keydown', handleKeyDown)
-    confirmButtonRef.current?.focus()
-
-    return () => {
-      dialog.removeEventListener('keydown', handleKeyDown)
-      dialog.close()
-    }
-  }, [onClose])
-
-  function handleConfirm() {
     startTransition(async () => {
       onDeleteOptimistic()
       onClose()
@@ -66,7 +52,21 @@ export function DeleteVideoModal({
         })
       }
     })
-  }
+  }, [canDelete, videoId, onDeleteOptimistic, onClose])
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        onClose()
+      }
+      if (e.key === 'Enter' && canDelete && !isPending) {
+        e.preventDefault()
+        handleConfirm()
+      }
+    },
+    [onClose, canDelete, isPending, handleConfirm],
+  )
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
     if (e.target === dialogRef.current) {
@@ -74,30 +74,47 @@ export function DeleteVideoModal({
     }
   }
 
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog) return
+
+    dialog.showModal()
+    dialog.addEventListener('keydown', handleKeyDown)
+    setTimeout(() => inputRef.current?.focus(), 50)
+
+    return () => {
+      dialog.removeEventListener('keydown', handleKeyDown)
+      dialog.close()
+    }
+  }, [handleKeyDown])
+
   return (
     <dialog
       ref={dialogRef}
       aria-modal="true"
       aria-labelledby="delete-modal-title"
       onClick={handleBackdropClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          e.preventDefault()
+          onClose()
+        }
+      }}
       onCancel={(e) => {
         e.preventDefault()
         onClose()
       }}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') {
-          onClose()
-        }
-      }}
-      className="m-auto rounded-2xl border border-outline-variant bg-surface p-6 shadow-xl backdrop:bg-inverse-surface/40"
+      className="m-auto w-full max-w-sm rounded-2xl border border-outline-variant bg-surface p-6 shadow-xl backdrop:bg-inverse-surface/40 animate-in fade-in zoom-in-95 duration-200 animate-out fade-out zoom-out-95 duration-150"
     >
       <div className="mb-1 flex items-center gap-2">
-        <WarningIcon />
+        <div className="flex size-8 items-center justify-center rounded-lg bg-error/10">
+          <DangerIcon />
+        </div>
         <h2
           id="delete-modal-title"
-          className="font-headline text-base font-bold text-on-surface"
+          className="font-headline text-lg font-bold text-on-surface"
         >
-          Desindexar video
+          Eliminar video
         </h2>
       </div>
 
@@ -110,7 +127,7 @@ export function DeleteVideoModal({
       <p className="mb-3 font-body text-xs text-on-surface-variant">
         Se eliminará permanentemente:
       </p>
-      <ul className="mb-6 space-y-1.5">
+      <ul className="mb-5 space-y-1.5">
         {IMPACT_ITEMS.map((item) => (
           <li
             key={item}
@@ -122,6 +139,37 @@ export function DeleteVideoModal({
         ))}
       </ul>
 
+      <div className="mb-5 rounded-lg bg-error/5 p-3">
+        <label
+          htmlFor="delete-confirm"
+          className="mb-1.5 block font-body text-xs font-medium text-on-surface-variant"
+        >
+          Escribe{' '}
+          <code className="font-mono text-error">
+            "{videoTitle || 'eliminar'}"
+          </code>{' '}
+          para confirmar
+        </label>
+        <input
+          ref={inputRef}
+          id="delete-confirm"
+          type="text"
+          value={confirmText}
+          onChange={(e) => setConfirmText(e.target.value)}
+          disabled={isPending}
+          placeholder={videoTitle || 'eliminar'}
+          className="w-full rounded-md border border-error/30 bg-surface px-3 py-2 font-body text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:border-error focus:outline-none focus:ring-1 focus:ring-error disabled:opacity-50"
+          autoComplete="off"
+          aria-describedby="delete-confirm-hint"
+        />
+        <p
+          id="delete-confirm-hint"
+          className="mt-1.5 font-body text-xs text-on-surface-variant"
+        >
+          Este cambio no se puede deshacer.
+        </p>
+      </div>
+
       <div className="flex justify-end gap-3">
         <button
           type="button"
@@ -132,11 +180,10 @@ export function DeleteVideoModal({
           Cancelar
         </button>
         <button
-          ref={confirmButtonRef}
           type="button"
           onClick={handleConfirm}
-          disabled={isPending}
-          className="inline-flex h-9 items-center gap-2 rounded-lg bg-error px-4 font-body text-sm font-semibold text-on-error transition-colors hover:bg-error/90 disabled:opacity-70"
+          disabled={!canDelete || isPending}
+          className="inline-flex h-9 items-center gap-2 rounded-lg bg-error px-4 font-body text-sm font-semibold text-on-error transition-colors hover:bg-error/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isPending ? <SpinnerIcon /> : null}
           {isPending ? 'Eliminando…' : 'Sí, eliminar'}
@@ -146,20 +193,16 @@ export function DeleteVideoModal({
   )
 }
 
-function WarningIcon() {
+function DangerIcon() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 20 20"
+      viewBox="0 0 24 24"
       fill="currentColor"
       className="size-5 shrink-0 text-error"
       aria-hidden="true"
     >
-      <path
-        fillRule="evenodd"
-        d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z"
-        clipRule="evenodd"
-      />
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v2h-2v-2zm0-8h2v6h-2V9z" />
     </svg>
   )
 }

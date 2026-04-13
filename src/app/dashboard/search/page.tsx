@@ -68,9 +68,6 @@ export default async function SearchPage() {
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
         {/* ── Page header (static, SSR'd) ── */}
         <div className="flex flex-col gap-1.5 border-b border-outline-variant pb-6">
-          <span className="font-headline text-xs font-bold uppercase tracking-widest text-primary">
-            Segundo cerebro
-          </span>
           <h1 className="font-headline text-3xl font-extrabold leading-tight text-on-surface md:text-4xl">
             Buscar en mis videos
           </h1>

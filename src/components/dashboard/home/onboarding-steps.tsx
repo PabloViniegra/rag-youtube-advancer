@@ -15,7 +15,8 @@ const STEPS: OnboardStep[] = [
   {
     number: '02',
     title: 'Lo convertimos en vectores',
-    description: 'Transcript → chunks → embeddings → memoria semántica.',
+    description:
+      'Leemos el video, lo dividimos y lo guardamos para búsqueda instantánea.',
   },
   {
     number: '03',

@@ -17,7 +17,7 @@ interface LibraryStatusProps {
 export function LibraryStatus({ videoCount }: LibraryStatusProps) {
   if (videoCount === 0) {
     return (
-      <div className="flex flex-col gap-3 rounded-xl border border-outline-variant bg-surface-container-low px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 rounded-xl bg-surface-container-low px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-0.5">
           <p className="font-body text-sm font-semibold text-on-surface">
             Tu biblioteca está vacía
