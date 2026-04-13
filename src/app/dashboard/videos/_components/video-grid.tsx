@@ -57,6 +57,8 @@ export function VideoGrid({
                 <VideoCardActions
                   videoId={video.id}
                   videoTitle={video.title}
+                  youtubeId={video.youtube_id}
+                  createdAt={video.created_at}
                   onDeleteOptimistic={() => handleDeleteOptimistic(video.id)}
                 />
               </div>

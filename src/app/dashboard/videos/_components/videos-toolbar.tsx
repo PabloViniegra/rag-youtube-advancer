@@ -1,14 +1,9 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { startTransition, useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
-import {
-  DEFAULT_SORT,
-  isVideoSort,
-  VIDEO_SORT_OPTIONS,
-  type VideoSort,
-} from './video-sort'
+import { VideoSortPills } from './video-sort-pills'
 
 interface VideosToolbarProps {
   onQueryChange: (query: string) => void
@@ -25,10 +20,7 @@ export function VideosToolbar({
 }: VideosToolbarProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const rawSort = searchParams.get('sort')
-  const activeSort: VideoSort = isVideoSort(rawSort) ? rawSort : DEFAULT_SORT
 
-  // Initialise from URL ?q= so the query survives navigation
   const rawQ = searchParams.get('q') ?? ''
   const [query, setQuery] = useState(rawQ)
   const [isFocused, setIsFocused] = useState(false)
@@ -42,12 +34,10 @@ export function VideosToolbar({
   }, [])
 
   // Sync parent state with initial URL value once on mount.
-  // We intentionally only run this on mount — rawQ and onQueryChange are
-  // stable references for the lifetime of the toolbar.
-  const onQueryChangeRef = useRef(onQueryChange)
+  // onQueryChange is the parent's setState dispatcher — stable with React Compiler.
   useEffect(() => {
-    if (rawQ) onQueryChangeRef.current(rawQ)
-  }, [rawQ])
+    if (rawQ) onQueryChange(rawQ)
+  }, [rawQ, onQueryChange])
 
   // Ctrl/Cmd+F → focus the search input
   useEffect(() => {
@@ -71,7 +61,8 @@ export function VideosToolbar({
 
   function handleQueryChange(value: string) {
     setQuery(value)
-    // Persist in URL immediately (no debounce) so it survives navigation
+    // Persist in URL on every keystroke (no debounce) so query survives navigation.
+    // Wrapped in startTransition so list-item ViewTransitions animate during filtering.
     const params = new URLSearchParams(searchParams.toString())
     if (value) {
       params.set('q', value)
@@ -79,23 +70,14 @@ export function VideosToolbar({
       params.delete('q')
     }
     const qs = params.toString()
-    router.replace(qs ? `?${qs}` : '?', { scroll: false })
+    startTransition(() => {
+      router.replace(qs ? `?${qs}` : '?', { scroll: false })
+    })
 
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
       onQueryChange(value)
     }, 250)
-  }
-
-  function handleSortChange(sort: VideoSort) {
-    const params = new URLSearchParams(searchParams.toString())
-    if (sort === DEFAULT_SORT) {
-      params.delete('sort')
-    } else {
-      params.set('sort', sort)
-    }
-    const qs = params.toString()
-    router.push(qs ? `?${qs}` : '?', { scroll: false })
   }
 
   const showShortcutBadge = !isFocused && query === ''
@@ -129,6 +111,7 @@ export function VideosToolbar({
           />
           {showShortcutBadge && (
             <kbd
+              suppressHydrationWarning
               className={cn(
                 'pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2',
                 'inline-flex items-center gap-0.5 rounded-md border border-outline-variant',
@@ -156,34 +139,8 @@ export function VideosToolbar({
         )}
       </div>
 
-      {/* Row 2: sort pill-tabs */}
-      <div
-        role="group"
-        aria-label="Ordenar videos"
-        className="flex flex-wrap items-center gap-1.5"
-      >
-        <span className="mr-1 font-body text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
-          Orden
-        </span>
-        {VIDEO_SORT_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            aria-pressed={activeSort === opt.value}
-            onClick={() => handleSortChange(opt.value)}
-            className={cn(
-              'rounded-lg border px-3 py-1.5',
-              'font-body text-xs font-semibold',
-              'transition-colors',
-              activeSort === opt.value
-                ? 'border-primary bg-primary text-on-primary'
-                : 'border-outline-variant bg-surface-container text-on-surface-variant hover:border-primary/60 hover:text-on-surface',
-            )}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
+      {/* Row 2: sort pill-tabs — self-contained in VideoSortPills */}
+      <VideoSortPills />
     </div>
   )
 }

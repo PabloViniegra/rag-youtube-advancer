@@ -152,12 +152,14 @@ describe('VideosToolbar', () => {
   })
 
   // ── Sort behaviour ─────────────────────────────────────────────────────────
+  // Sort pills use router.replace + startTransition (lateral navigation — no
+  // directional slide) instead of router.push to avoid triggering page-level VTs.
 
-  it('calls router.push with the new sort param when a pill is clicked', () => {
+  it('calls router.replace with the new sort param when a pill is clicked', () => {
     renderToolbar()
     const btn = screen.getByRole('button', { name: 'Más antiguos' })
     fireEvent.click(btn)
-    expect(mockPush).toHaveBeenCalledWith(
+    expect(mockReplace).toHaveBeenCalledWith(
       expect.stringContaining('sort=oldest'),
       expect.objectContaining({ scroll: false }),
     )
@@ -168,7 +170,7 @@ describe('VideosToolbar', () => {
     renderToolbar()
     const btn = screen.getByRole('button', { name: 'Más recientes' })
     fireEvent.click(btn)
-    expect(mockPush).toHaveBeenCalledWith(
+    expect(mockReplace).toHaveBeenCalledWith(
       '?',
       expect.objectContaining({ scroll: false }),
     )

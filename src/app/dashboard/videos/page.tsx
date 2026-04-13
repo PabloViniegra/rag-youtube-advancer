@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { cacheLife, cacheTag } from 'next/cache'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { ViewTransition } from 'react'
@@ -12,6 +13,29 @@ export const metadata: Metadata = {
   title: 'Mis videos — Dashboard',
 }
 
+/**
+ * Fetches the authenticated user's video list with per-user caching.
+ * Tagged with `dashboard-{userId}` so server actions can call updateTag()
+ * to invalidate immediately after mutations (add / delete video).
+ *
+ * Uses 'use cache: private' to allow the Supabase auth cookie context
+ * required by createClient() while still caching the result.
+ */
+async function getUserVideos(userId: string): Promise<VideoRow[]> {
+  'use cache: private'
+  cacheTag(`dashboard-${userId}`)
+  cacheLife('minutes')
+
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('videos')
+    .select('id, youtube_id, title, created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+
+  return (error || !data ? [] : data) as VideoRow[]
+}
+
 export default async function VideosPage() {
   const supabase = await createClient()
 
@@ -23,13 +47,7 @@ export default async function VideosPage() {
     redirect('/login?redirectTo=/dashboard/videos')
   }
 
-  const { data: videos, error } = await supabase
-    .from('videos')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-
-  const videoList = (error || !videos ? [] : videos) as VideoRow[]
+  const videoList = await getUserVideos(user.id)
   const count = videoList.length
 
   return (

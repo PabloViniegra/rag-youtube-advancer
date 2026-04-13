@@ -2,9 +2,9 @@
 
 // ── VideosPageClient ──────────────────────────────────────────────────────────
 // Client wrapper that owns search/sort state and coordinates the toolbar with
-// the video grid. The toolbar lives OUTSIDE the Suspense boundary so it never
-// flickers; the grid is wrapped in Suspense so navigation transitions stay
-// smooth.
+// the video grid. Both toolbar and grid live inside the same Suspense boundary
+// because both rely on useSearchParams(), which requires a Suspense ancestor
+// in the App Router. The fallback skeleton covers both during SSR hydration.
 
 import { useSearchParams } from 'next/navigation'
 import { Suspense, useState } from 'react'

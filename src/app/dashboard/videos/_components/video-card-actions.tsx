@@ -2,28 +2,27 @@
 
 import { startTransition, useState, ViewTransition } from 'react'
 import { DeleteVideoModal } from './delete-video-modal'
+import { VideoPropertiesModal } from './video-properties-modal'
+
+type ActiveModal = 'delete' | 'properties' | null
 
 interface VideoCardActionsProps {
   videoId: string
   videoTitle: string | null
+  youtubeId: string
+  createdAt: string
   onDeleteOptimistic: () => void
 }
 
 export function VideoCardActions({
   videoId,
   videoTitle,
+  youtubeId,
+  createdAt,
   onDeleteOptimistic,
 }: VideoCardActionsProps) {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [modalOpen, setModalOpen] = useState(false)
-
-  function handleDeleteClick() {
-    // Wrap in startTransition: closes menu (exit VT) and opens modal (enter VT)
-    startTransition(() => {
-      setMenuOpen(false)
-      setModalOpen(true)
-    })
-  }
+  const [activeModal, setActiveModal] = useState<ActiveModal>(null)
 
   function handleMenuToggle() {
     startTransition(() => setMenuOpen((prev) => !prev))
@@ -33,8 +32,15 @@ export function VideoCardActions({
     startTransition(() => setMenuOpen(false))
   }
 
+  function handleMenuItemClick(modal: ActiveModal) {
+    startTransition(() => {
+      setMenuOpen(false)
+      setActiveModal(modal)
+    })
+  }
+
   function handleModalClose() {
-    startTransition(() => setModalOpen(false))
+    startTransition(() => setActiveModal(null))
   }
 
   return (
@@ -69,7 +75,16 @@ export function VideoCardActions({
                 <button
                   type="button"
                   role="menuitem"
-                  onClick={handleDeleteClick}
+                  onClick={() => handleMenuItemClick('properties')}
+                  className="flex w-full items-center gap-2.5 px-4 py-2.5 font-body text-sm text-on-surface transition-colors hover:bg-surface-container focus-visible:bg-surface-container"
+                >
+                  <InfoIcon />
+                  Propiedades
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => handleMenuItemClick('delete')}
                   className="flex w-full items-center gap-2.5 px-4 py-2.5 font-body text-sm text-error transition-colors hover:bg-error-container focus-visible:bg-error-container"
                 >
                   <TrashIcon />
@@ -81,14 +96,27 @@ export function VideoCardActions({
         )}
       </div>
 
-      {/* Modal — mounted/unmounted by the parent so ViewTransition can animate */}
-      {modalOpen && (
+      {/* Delete modal */}
+      {activeModal === 'delete' && (
         <ViewTransition enter="fade-in" exit="fade-out" default="none">
           <DeleteVideoModal
             videoId={videoId}
             videoTitle={videoTitle}
             onClose={handleModalClose}
             onDeleteOptimistic={onDeleteOptimistic}
+          />
+        </ViewTransition>
+      )}
+
+      {/* Properties modal */}
+      {activeModal === 'properties' && (
+        <ViewTransition enter="fade-in" exit="fade-out" default="none">
+          <VideoPropertiesModal
+            videoId={videoId}
+            videoTitle={videoTitle}
+            youtubeId={youtubeId}
+            createdAt={createdAt}
+            onClose={handleModalClose}
           />
         </ViewTransition>
       )}
@@ -106,6 +134,24 @@ function DotsIcon() {
       aria-hidden="true"
     >
       <path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM10 8.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM11.5 15.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z" />
+    </svg>
+  )
+}
+
+function InfoIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      className="size-4 shrink-0"
+      aria-hidden="true"
+    >
+      <path
+        fillRule="evenodd"
+        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z"
+        clipRule="evenodd"
+      />
     </svg>
   )
 }

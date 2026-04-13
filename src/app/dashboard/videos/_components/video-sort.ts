@@ -45,24 +45,23 @@ export function filterVideos(videos: VideoRow[], query: string): VideoRow[] {
 }
 
 export function sortVideos(videos: VideoRow[], sort: VideoSort): VideoRow[] {
-  const arr = [...videos]
   switch (sort) {
     case VIDEO_SORT.NEWEST:
-      return arr.sort(
+      return videos.toSorted(
         (a, b) =>
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       )
     case VIDEO_SORT.OLDEST:
-      return arr.sort(
+      return videos.toSorted(
         (a, b) =>
           new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
       )
     case VIDEO_SORT.TITLE_ASC:
-      return arr.sort((a, b) =>
+      return videos.toSorted((a, b) =>
         (a.title ?? '').localeCompare(b.title ?? '', 'es'),
       )
     case VIDEO_SORT.TITLE_DESC:
-      return arr.sort((a, b) =>
+      return videos.toSorted((a, b) =>
         (b.title ?? '').localeCompare(a.title ?? '', 'es'),
       )
   }

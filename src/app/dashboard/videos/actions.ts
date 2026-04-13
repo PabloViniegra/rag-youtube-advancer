@@ -21,6 +21,16 @@ export interface RegenerateReportResult {
   error?: string
 }
 
+export interface VideoSectionStats {
+  sectionCount: number
+  contentSizeChars: number
+}
+
+export interface GetVideoSectionStatsResult {
+  data?: VideoSectionStats
+  error?: string
+}
+
 type VideoRow = Database['public']['Tables']['videos']['Row']
 type SectionRow = Database['public']['Tables']['video_sections']['Row']
 type IntelligenceReportRow =
@@ -243,4 +253,43 @@ export async function regenerateSeoReport(
     )
     return { ok: false, error: 'No se pudo regenerar el SEO Pack.' }
   }
+}
+
+/**
+ * Returns section count and approximate content size for a video.
+ * Validates that the authenticated user owns the video (defence-in-depth with RLS).
+ */
+export async function getVideoSectionStats(
+  videoId: string,
+): Promise<GetVideoSectionStatsResult> {
+  const user = await getCurrentUser()
+  if (!user) return { error: 'No autenticado.' }
+
+  const supabase = await createClient()
+
+  const { data: video, error: videoError } = await supabase
+    .from('videos')
+    .select('id')
+    .eq('id', videoId)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (videoError) return { error: 'Error al verificar el video.' }
+  if (!video) return { error: 'Video no encontrado.' }
+
+  const { data: sections, error: sectionsError } = await supabase
+    .from('video_sections')
+    .select('content')
+    .eq('video_id', videoId)
+
+  if (sectionsError) return { error: 'No se pudieron cargar las estadísticas.' }
+
+  const rows = sections ?? []
+  const sectionCount = rows.length
+  const contentSizeChars = rows.reduce(
+    (acc, s) => acc + (s.content?.length ?? 0),
+    0,
+  )
+
+  return { data: { sectionCount, contentSizeChars } }
 }
