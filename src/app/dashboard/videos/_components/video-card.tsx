@@ -61,6 +61,7 @@ export function VideoCard({ video, variant = 'default' }: VideoCardProps) {
         <div className="absolute inset-0 flex items-end bg-gradient-to-t from-primary/90 via-primary/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <Link
             href={`/dashboard/videos/${video.id}`}
+            transitionTypes={['nav-forward']}
             className="w-full px-4 pb-4 font-headline text-sm font-bold text-on-primary"
             aria-label={`Ver detalles de ${video.title ?? video.youtube_id}`}
             tabIndex={-1}
@@ -108,6 +109,7 @@ export function VideoCard({ video, variant = 'default' }: VideoCardProps) {
           {/* Visible "Ver detalles" link — primary tap target on mobile */}
           <Link
             href={`/dashboard/videos/${video.id}`}
+            transitionTypes={['nav-forward']}
             className="inline-flex min-h-[44px] min-w-[44px] items-center rounded px-1 font-body text-xs font-semibold text-primary underline-offset-2 hover:underline"
           >
             Ver detalles
