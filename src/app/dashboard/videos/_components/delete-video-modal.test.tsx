@@ -73,7 +73,9 @@ describe('DeleteVideoModal', () => {
   it('renders the dialog with video title and impact list', () => {
     render(<DeleteVideoModal {...defaultProps} />)
     expect(screen.getByRole('dialog')).toBeInTheDocument()
-    expect(screen.getByText(/"Mi video de prueba"/)).toBeInTheDocument()
+    expect(
+      screen.getByText(/"Mi video de prueba"/, { selector: 'p' }),
+    ).toBeInTheDocument()
     expect(
       screen.getByText('Transcripción y secciones vectoriales'),
     ).toBeInTheDocument()
@@ -93,6 +95,7 @@ describe('DeleteVideoModal', () => {
     deleteVideoMock.mockResolvedValue({})
     const user = userEvent.setup()
     render(<DeleteVideoModal {...defaultProps} />)
+    await user.type(screen.getByLabelText(/escribe/i), 'Mi video de prueba')
     await user.click(screen.getByRole('button', { name: /eliminar/i }))
     await vi.waitFor(() => {
       expect(deleteVideoMock).toHaveBeenCalledWith('video-1')
@@ -108,6 +111,7 @@ describe('DeleteVideoModal', () => {
     })
     const user = userEvent.setup()
     render(<DeleteVideoModal {...defaultProps} />)
+    await user.type(screen.getByLabelText(/escribe/i), 'Mi video de prueba')
     await user.click(screen.getByRole('button', { name: /eliminar/i }))
     await vi.waitFor(() => {
       expect(sileoErrorMock).toHaveBeenCalledWith(
