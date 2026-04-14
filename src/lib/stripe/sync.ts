@@ -17,9 +17,11 @@
  *   at period end, which is handled by the webhook route.
  */
 
+import { stripeMaxProductId } from '@/lib/env'
 import { logger } from '@/lib/logger'
 import { stripe } from '@/lib/stripe/client'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import type Stripe from 'stripe'
 
 export type SyncResult = { synced: true; active: boolean } | { synced: false }
 
@@ -67,7 +69,7 @@ export async function syncSubscriptionFromStripe(params: {
   // Fetch active and trialing subscriptions.
   // cancel_at_period_end=true still counts as active — user keeps access
   // until the period ends and `customer.subscription.deleted` fires.
-  let isActive = false
+  let activeSub: Stripe.Subscription | null = null
   try {
     const [active, trialing] = await Promise.all([
       stripe.subscriptions.list({
@@ -81,18 +83,24 @@ export async function syncSubscriptionFromStripe(params: {
         limit: 1,
       }),
     ])
-    isActive = active.data.length > 0 || trialing.data.length > 0
+    activeSub = active.data[0] ?? trialing.data[0] ?? null
   } catch {
     return { synced: false }
   }
 
-  if (isActive) {
+  const isActive = activeSub !== null
+
+  if (isActive && activeSub) {
+    const product = activeSub.items.data[0]?.price?.product
+    const productId = typeof product === 'string' ? product : product?.id
+    const role = productId === stripeMaxProductId ? 'max' : 'pro'
+
     const { error } = await supabaseAdmin
       .from('profiles')
       .update({
         stripe_customer_id: customerId,
         subscription_active: true,
-        role: 'pro',
+        role,
       })
       .eq('id', userId)
 

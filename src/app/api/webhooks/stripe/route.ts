@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import type Stripe from 'stripe'
-import { stripeWebhookSecret } from '@/lib/env'
+import { stripeMaxProductId, stripeWebhookSecret } from '@/lib/env'
 import { logger } from '@/lib/logger'
 import { stripe } from '@/lib/stripe/client'
 import { STRIPE_WEBHOOK_EVENT } from '@/lib/stripe/types'
@@ -86,6 +86,21 @@ export async function POST(request: Request) {
   return NextResponse.json({ received: true })
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/** Map a Stripe product ID to the DB role value. */
+function roleForProductId(productId: string | undefined | null): 'max' | 'pro' {
+  return productId === stripeMaxProductId ? 'max' : 'pro'
+}
+
+/** Extract the product ID from the first item of a subscription. */
+function productIdFromSubscription(
+  subscription: Stripe.Subscription,
+): string | undefined {
+  const product = subscription.items.data[0]?.price?.product
+  return typeof product === 'string' ? product : product?.id
+}
+
 // ── Event handlers ───────────────────────────────────────────────────────────
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
@@ -94,13 +109,17 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       ? session.customer
       : session.customer?.id
 
+  // plan_tier is set in session metadata when creating the checkout session
+  const planTier = session.metadata?.plan_tier as 'pro' | 'max' | undefined
+  const role = planTier === 'max' ? 'max' : 'pro'
+
   // Get the Supabase user ID from session metadata
   const userId = session.metadata?.supabase_user_id
 
   if (!userId) {
     // Try to find user by customer ID in our DB
     if (customerId) {
-      await activateByCustomerId(customerId)
+      await activateByCustomerId(customerId, role)
     }
     return
   }
@@ -111,7 +130,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     .update({
       stripe_customer_id: customerId ?? null,
       subscription_active: true,
-      role: 'pro',
+      role,
     })
     .eq('id', userId)
 
@@ -132,16 +151,20 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
   if (!customerId) return
 
-  // cancel_at_period_end=true still counts as active — the user keeps Pro
-  // access until the period ends. Actual downgrade happens via subscription.deleted.
+  // cancel_at_period_end=true still counts as active — the user keeps access
+  // until the period ends. Actual downgrade happens via subscription.deleted.
   const isActive =
     subscription.status === 'active' || subscription.status === 'trialing'
+
+  const role = isActive
+    ? roleForProductId(productIdFromSubscription(subscription))
+    : 'user'
 
   const { error } = await supabaseAdmin
     .from('profiles')
     .update({
       subscription_active: isActive,
-      role: isActive ? 'pro' : 'user',
+      role,
     })
     .eq('stripe_customer_id', customerId)
 
@@ -180,8 +203,21 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
 
   if (!customerId) return
 
-  // Ensure subscription stays active after successful payment
-  await activateByCustomerId(customerId)
+  // Detect role from the active subscription's product
+  let role: 'pro' | 'max' = 'pro'
+  try {
+    const subs = await stripe.subscriptions.list({
+      customer: customerId,
+      status: 'active',
+      limit: 1,
+    })
+    const sub = subs.data[0]
+    if (sub) role = roleForProductId(productIdFromSubscription(sub))
+  } catch {
+    // Fall back to 'pro' — activateByCustomerId will keep the subscription live
+  }
+
+  await activateByCustomerId(customerId, role)
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
@@ -199,12 +235,13 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   // exhausts retries.
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-async function activateByCustomerId(customerId: string) {
+async function activateByCustomerId(
+  customerId: string,
+  role: 'pro' | 'max' = 'pro',
+) {
   const { error } = await supabaseAdmin
     .from('profiles')
-    .update({ subscription_active: true, role: 'pro' })
+    .update({ subscription_active: true, role })
     .eq('stripe_customer_id', customerId)
 
   if (error) {

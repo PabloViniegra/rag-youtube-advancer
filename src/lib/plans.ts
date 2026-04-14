@@ -7,6 +7,7 @@ import type { Database } from '@/lib/supabase/types'
 
 export const PLAN = {
   ADMIN: 'admin',
+  MAX: 'max',
   PRO: 'pro',
   FREE: 'free',
 } as const
@@ -17,6 +18,7 @@ export type PlanKey = (typeof PLAN)[keyof typeof PLAN]
 
 export const PLAN_LABEL: Record<PlanKey, string> = {
   [PLAN.ADMIN]: 'Admin',
+  [PLAN.MAX]: 'Max',
   [PLAN.PRO]: 'Pro',
   [PLAN.FREE]: 'Free',
 } as const
@@ -26,8 +28,11 @@ export const PLAN_LABEL: Record<PlanKey, string> = {
 /** Maximum videos a free-tier user can index (trial). */
 export const FREE_VIDEO_LIMIT = 1
 
-/** Pro and Admin have no video cap. */
-export const PRO_VIDEO_LIMIT = Infinity
+/** Pro plan cap. */
+export const PRO_VIDEO_LIMIT = 25
+
+/** Max plan cap. */
+export const MAX_VIDEO_LIMIT = 100
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -38,6 +43,7 @@ export function resolvePlan(
   profile: Pick<Profile, 'role' | 'subscription_active'>,
 ): PlanKey {
   if (profile.role === 'admin') return PLAN.ADMIN
+  if (profile.role === 'max' && profile.subscription_active) return PLAN.MAX
   if (profile.subscription_active) return PLAN.PRO
   return PLAN.FREE
 }
@@ -45,7 +51,9 @@ export function resolvePlan(
 /** Return the video limit for a given plan. */
 export function videoLimitForPlan(plan: PlanKey): number {
   if (plan === PLAN.FREE) return FREE_VIDEO_LIMIT
-  return PRO_VIDEO_LIMIT
+  if (plan === PLAN.PRO) return PRO_VIDEO_LIMIT
+  if (plan === PLAN.MAX) return MAX_VIDEO_LIMIT
+  return Infinity // admin
 }
 
 /**
@@ -55,7 +63,7 @@ export function videoLimitForPlan(plan: PlanKey): number {
  * is set to `true` (after the first successful ingestion), the quota is gone
  * even if they later delete the video.
  *
- * Pro and Admin users are unlimited.
+ * Pro users are capped at 25 videos, Max at 100, Admin unlimited.
  */
 export function canIndexVideo(
   plan: PlanKey,

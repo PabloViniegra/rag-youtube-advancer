@@ -83,7 +83,7 @@ export default async function TermsOfService() {
               </h2>
               <ul className="list-disc pl-6 space-y-2 text-on-surface-variant">
                 <li>
-                  El servicio se ofrece por $5.99 USD/mes (o equivalente en tu
+                  El servicio se ofrece por €5.99/mes (o equivalente en tu
                   moneda local).
                 </li>
                 <li>Se ofrece una prueba gratuita de 14 días.</li>

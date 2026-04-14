@@ -57,6 +57,15 @@ export const stripeProProductId = (() => {
   return v
 })()
 
+export const stripeMaxProductId = (() => {
+  const v = process.env.NEXT_STRIPE_MAX_PRODUCT_ID
+  if (!v)
+    throw new Error(
+      'Missing required environment variable: NEXT_STRIPE_MAX_PRODUCT_ID',
+    )
+  return v
+})()
+
 /** Webhook signing secret — optional in dev, required in production. */
 export const stripeWebhookSecret = (() => {
   return process.env.STRIPE_WEBHOOK_SECRET ?? ''

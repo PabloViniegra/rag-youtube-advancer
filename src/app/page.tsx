@@ -5,6 +5,7 @@ import { Footer } from '@/components/landing/footer'
 import { HeroSection } from '@/components/landing/hero-section'
 import { InsightSection } from '@/components/landing/insight-section'
 import { Navbar } from '@/components/landing/navbar'
+import { PricingSection } from '@/components/landing/pricing-section'
 import { ProcessSection } from '@/components/landing/process-section'
 import { JsonLd } from '@/components/seo/json-ld'
 import { getCurrentUser } from '@/lib/auth/actions'
@@ -87,6 +88,7 @@ export default async function Home() {
         <ProcessSection />
         <BentoGrid />
         <InsightSection />
+        <PricingSection />
         <CtaSection isAuthenticated={isAuthenticated} />
       </main>
       <Footer />
