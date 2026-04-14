@@ -31,7 +31,7 @@ export function CtaSection({ isAuthenticated }: CtaSectionProps) {
 
         {/* Price anchor — visible, specific, removes anxiety */}
         <p className="text-xl sm:text-2xl font-headline font-bold text-on-primary/90 mb-6 sm:mb-8">
-          $5.99/mes.{' '}
+          €5.99/mes.{' '}
           <span className="font-body font-normal text-base sm:text-xl text-on-primary/70">
             Sin sorpresas. Cancela cuando quieras.
           </span>
@@ -40,7 +40,7 @@ export function CtaSection({ isAuthenticated }: CtaSectionProps) {
         {/* Feature list */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10 text-on-primary/80">
           {[
-            'Análisis ilimitado de videos',
+            'Análisis completo de cada video',
             'Hook Generator + SEO Optimizer',
             'Insights de monetización personalizados',
           ].map((feature) => (
@@ -72,8 +72,10 @@ export function CtaSection({ isAuthenticated }: CtaSectionProps) {
 
         <p className="mt-6 text-on-primary/55 font-label text-sm">
           1 video gratis{' '}
-          <span className="text-on-primary/40">·&nbsp;·&nbsp;</span>
-          Sin límite con Pro
+          <span className="text-on-primary/40">·</span>{' '}
+          25 videos con Pro{' '}
+          <span className="text-on-primary/40">·</span>{' '}
+          100 videos con Max
         </p>
       </div>
     </section>

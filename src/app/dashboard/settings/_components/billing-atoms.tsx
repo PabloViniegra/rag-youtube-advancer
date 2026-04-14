@@ -7,6 +7,7 @@
 
 export const PLAN_LABEL = {
   admin: 'Admin',
+  max: 'Max',
   pro: 'Pro',
   free: 'Free',
 } as const
@@ -30,6 +31,7 @@ export function PlanBadge({ plan }: { plan: PlanKey }) {
   const styles: Record<PlanKey, string> = {
     admin:
       'bg-primary-container text-on-primary-container border border-primary/20',
+    max: 'bg-tertiary-container text-on-tertiary-container border border-tertiary/20',
     pro: 'bg-secondary-container text-on-secondary-container border border-secondary/20',
     free: 'bg-surface-container text-on-surface-variant border border-outline-variant',
   }

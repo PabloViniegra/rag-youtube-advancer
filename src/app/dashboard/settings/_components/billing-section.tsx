@@ -9,7 +9,7 @@ import { AdminNotice, FeedbackBanner, PlanBadge } from './billing-atoms'
 
 const CHECKOUT_STATUS = {
   success: {
-    text: 'Tu suscripcion Pro esta activa. Bienvenido.',
+    text: 'Tu suscripcion esta activa. Bienvenido.',
     variant: 'success',
   },
   cancelled: {
