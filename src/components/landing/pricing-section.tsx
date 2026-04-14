@@ -1,5 +1,5 @@
-import { PLANS } from './pricing-data'
 import { PricingCard } from './pricing-card'
+import { PLANS } from './pricing-data'
 
 export function PricingSection() {
   return (
@@ -33,7 +33,9 @@ export function PricingSection() {
 
         <p className="mt-10 text-center text-on-surface-variant/60 font-label text-xs">
           Sin contratos. Cancela cuando quieras.{' '}
-          <span className="text-on-surface-variant/40" aria-hidden="true">·</span>{' '}
+          <span className="text-on-surface-variant/40" aria-hidden="true">
+            ·
+          </span>{' '}
           Pagos seguros con Stripe.
         </p>
       </div>

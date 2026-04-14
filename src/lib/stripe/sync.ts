@@ -17,11 +17,11 @@
  *   at period end, which is handled by the webhook route.
  */
 
+import type Stripe from 'stripe'
 import { stripeMaxProductId } from '@/lib/env'
 import { logger } from '@/lib/logger'
 import { stripe } from '@/lib/stripe/client'
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import type Stripe from 'stripe'
 
 export type SyncResult = { synced: true; active: boolean } | { synced: false }
 

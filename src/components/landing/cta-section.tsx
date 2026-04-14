@@ -71,11 +71,9 @@ export function CtaSection({ isAuthenticated }: CtaSectionProps) {
         </div>
 
         <p className="mt-6 text-on-primary/55 font-label text-sm">
-          1 video gratis{' '}
-          <span className="text-on-primary/40">·</span>{' '}
-          25 videos con Pro{' '}
-          <span className="text-on-primary/40">·</span>{' '}
-          100 videos con Max
+          1 video gratis <span className="text-on-primary/40">·</span> 25 videos
+          con Pro <span className="text-on-primary/40">·</span> 100 videos con
+          Max
         </p>
       </div>
     </section>

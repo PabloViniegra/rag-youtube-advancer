@@ -103,7 +103,8 @@ export const VARIANT_STYLES: Record<PlanVariant, VariantStyle> = {
     name: 'text-on-surface-variant',
     price: 'text-on-surface',
     period: 'text-on-surface-variant',
-    videoBadge: 'bg-surface-container-highest border-outline-variant/40 text-on-surface-variant',
+    videoBadge:
+      'bg-surface-container-highest border-outline-variant/40 text-on-surface-variant',
     desc: 'text-on-surface-variant',
     divider: 'border-outline-variant/30',
     check: 'text-primary',
@@ -131,7 +132,8 @@ export const VARIANT_STYLES: Record<PlanVariant, VariantStyle> = {
     name: 'text-inverse-on-surface/55',
     price: 'text-inverse-on-surface',
     period: 'text-inverse-on-surface/55',
-    videoBadge: 'bg-inverse-on-surface/10 border-inverse-on-surface/15 text-inverse-on-surface/75',
+    videoBadge:
+      'bg-inverse-on-surface/10 border-inverse-on-surface/15 text-inverse-on-surface/75',
     desc: 'text-inverse-on-surface/65',
     divider: 'border-inverse-on-surface/15',
     check: 'text-secondary',

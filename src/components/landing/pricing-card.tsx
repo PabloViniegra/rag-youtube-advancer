@@ -1,7 +1,11 @@
 import { Check, Crown, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { VARIANT_STYLES, type PlanVariant, type PricingPlan } from './pricing-data'
+import {
+  type PlanVariant,
+  type PricingPlan,
+  VARIANT_STYLES,
+} from './pricing-data'
 
 // ─── Plan Icon ───────────────────────────────────────────────────────────────
 function PlanIcon({ variant }: { variant: PlanVariant }) {
@@ -39,7 +43,6 @@ export function PricingCard({ plan }: PricingCardProps) {
             'absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[10px] font-label font-bold uppercase tracking-wider whitespace-nowrap',
             s.badgePill,
           )}
-          aria-label={`Etiqueta: ${plan.badge}`}
         >
           {plan.badge}
         </span>
@@ -47,7 +50,12 @@ export function PricingCard({ plan }: PricingCardProps) {
 
       {/* Plan header */}
       <div className="flex items-center justify-between mb-4">
-        <span className={cn('font-label text-xs font-semibold uppercase tracking-widest', s.name)}>
+        <span
+          className={cn(
+            'font-label text-xs font-semibold uppercase tracking-widest',
+            s.name,
+          )}
+        >
           {plan.name}
         </span>
         <PlanIcon variant={plan.variant} />
@@ -65,7 +73,9 @@ export function PricingCard({ plan }: PricingCardProps) {
           {plan.price}
         </span>
         {plan.period && (
-          <span className={cn('font-body text-base font-normal', s.period)}>{plan.period}</span>
+          <span className={cn('font-body text-base font-normal', s.period)}>
+            {plan.period}
+          </span>
         )}
       </div>
 
@@ -79,16 +89,24 @@ export function PricingCard({ plan }: PricingCardProps) {
         {plan.videos}
       </span>
 
-      <p className={cn('mt-4 font-body text-sm leading-relaxed', s.desc)}>{plan.description}</p>
+      <p className={cn('mt-4 font-body text-sm leading-relaxed', s.desc)}>
+        {plan.description}
+      </p>
 
-      <div className={cn('border-t my-6', s.divider)} role="separator" />
+      <div className={cn('border-t my-6', s.divider)} aria-hidden="true" />
 
       {/* Feature list */}
-      <ul className="flex flex-col gap-3 mb-8" role="list">
+      <ul className="flex flex-col gap-3 mb-8">
         {plan.features.map((feature) => (
           <li key={feature} className="flex items-start gap-2.5">
-            <Check size={15} className={cn('shrink-0 mt-0.5', s.check)} aria-hidden="true" />
-            <span className={cn('font-body text-sm', s.feature)}>{feature}</span>
+            <Check
+              size={15}
+              className={cn('shrink-0 mt-0.5', s.check)}
+              aria-hidden="true"
+            />
+            <span className={cn('font-body text-sm', s.feature)}>
+              {feature}
+            </span>
           </li>
         ))}
       </ul>
@@ -106,7 +124,12 @@ export function PricingCard({ plan }: PricingCardProps) {
 
       {/* Trust signal — shown only on paid plans (/harden) */}
       {isPaid && s.trustColor && (
-        <p className={cn('mt-2.5 text-center text-[11px] font-label', s.trustColor)}>
+        <p
+          className={cn(
+            'mt-2.5 text-center text-[11px] font-label',
+            s.trustColor,
+          )}
+        >
           Sin compromiso · Stripe seguro
         </p>
       )}

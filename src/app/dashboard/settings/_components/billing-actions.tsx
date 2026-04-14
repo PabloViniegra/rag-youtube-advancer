@@ -8,8 +8,8 @@
 import { useTransition } from 'react'
 import {
   redirectToCheckout,
-  redirectToUpgradeMax,
   redirectToPortal,
+  redirectToUpgradeMax,
 } from '@/lib/stripe/actions'
 import type { PlanKey } from './billing-atoms'
 import { StripeIcon } from './billing-atoms'
@@ -113,12 +113,13 @@ interface PlanActionsProps {
 
 export function PlanActions({ plan }: PlanActionsProps) {
   if (plan === 'max') return <ManageSubscription />
-  if (plan === 'pro') return (
-    <div className="flex flex-col gap-3">
-      <UpgradeToMax />
-      <ManageSubscription />
-    </div>
-  )
+  if (plan === 'pro')
+    return (
+      <div className="flex flex-col gap-3">
+        <UpgradeToMax />
+        <ManageSubscription />
+      </div>
+    )
   if (plan === 'free') return <UpgradeToPro />
   return null
 }

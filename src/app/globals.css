@@ -527,9 +527,6 @@
   }
 }
 
-@layer utilities {
-}
-
 /* ============================================================
    Motion — Respect user preferences
    Suppress all animation/transition for users who prefer

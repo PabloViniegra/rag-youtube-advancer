@@ -3,8 +3,8 @@
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { stripeMaxProductId, stripeProProductId } from '@/lib/env'
-import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
 import { stripe } from './client'
 import type { CheckoutResult, PortalResult } from './types'
@@ -274,8 +274,7 @@ export async function upgradeToMax(): Promise<UpgradeResult> {
   if (!matchingPrice) {
     return {
       ok: false,
-      message:
-        'No hay precio Max disponible en tu moneda. Contacta soporte.',
+      message: 'No hay precio Max disponible en tu moneda. Contacta soporte.',
     }
   }
 
@@ -285,10 +284,7 @@ export async function upgradeToMax(): Promise<UpgradeResult> {
     metadata: { plan_tier: 'max', supabase_user_id: user.id },
   })
 
-  await supabaseAdmin
-    .from('profiles')
-    .update({ role: 'max' })
-    .eq('id', user.id)
+  await supabaseAdmin.from('profiles').update({ role: 'max' }).eq('id', user.id)
 
   return { ok: true }
 }
