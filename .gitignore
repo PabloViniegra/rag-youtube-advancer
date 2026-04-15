@@ -47,6 +47,7 @@ src/**/*.js
 /.agents/
 /.claude/
 /.opencode/
+.atl/
 opencode.jsonc
 skills-lock.json
 /.superpowers/
