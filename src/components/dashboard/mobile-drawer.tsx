@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 import { signOut } from '@/lib/auth/actions'
 import { cn } from '@/lib/utils'
+import { BugReportButton } from './bug-report-button'
 import {
   CloseIcon,
   HomeIcon,
@@ -163,9 +164,12 @@ export function MobileDrawer({
           })}
         </div>
 
-        {/* Logout */}
+        {/* Bug report + Logout */}
         <div className="p-3">
-          <div className="mb-2 border-t border-inverse-on-surface/10 pt-3">
+          <div className="mb-1 border-t border-inverse-on-surface/10 pt-3">
+            <BugReportButton variant="drawer" />
+          </div>
+          <div className="mb-2">
             <p className="px-3 font-body text-xs text-on-surface-variant/60">
               {displayName}
             </p>

@@ -1,6 +1,7 @@
 'use client'
 
 import { signOut } from '@/lib/auth/actions'
+import { BugReportButton } from './bug-report-button'
 import {
   HomeIcon,
   LogOutIcon,
@@ -58,6 +59,11 @@ export function DashboardSidebar({
           icon={SettingsIcon}
         />
       </nav>
+
+      {/* ── Bug report ── */}
+      <div className="px-3 pb-1">
+        <BugReportButton />
+      </div>
 
       {/* ── User footer ── */}
       <div className="p-3">
