@@ -40,7 +40,7 @@ export function VideoCardActions({
   }
 
   function handleModalClose() {
-    startTransition(() => setActiveModal(null))
+    setActiveModal(null)
   }
 
   return (
@@ -98,27 +98,23 @@ export function VideoCardActions({
 
       {/* Delete modal */}
       {activeModal === 'delete' && (
-        <ViewTransition enter="fade-in" exit="fade-out" default="none">
-          <DeleteVideoModal
-            videoId={videoId}
-            videoTitle={videoTitle}
-            onClose={handleModalClose}
-            onDeleteOptimistic={onDeleteOptimistic}
-          />
-        </ViewTransition>
+        <DeleteVideoModal
+          videoId={videoId}
+          videoTitle={videoTitle}
+          onClose={handleModalClose}
+          onDeleteOptimistic={onDeleteOptimistic}
+        />
       )}
 
       {/* Properties modal */}
       {activeModal === 'properties' && (
-        <ViewTransition enter="fade-in" exit="fade-out" default="none">
-          <VideoPropertiesModal
-            videoId={videoId}
-            videoTitle={videoTitle}
-            youtubeId={youtubeId}
-            createdAt={createdAt}
-            onClose={handleModalClose}
-          />
-        </ViewTransition>
+        <VideoPropertiesModal
+          videoId={videoId}
+          videoTitle={videoTitle}
+          youtubeId={youtubeId}
+          createdAt={createdAt}
+          onClose={handleModalClose}
+        />
       )}
     </>
   )

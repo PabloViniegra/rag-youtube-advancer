@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import type { VideoSectionStats } from '../actions'
 import { getVideoSectionStats } from '../actions'
 
+const CLOSE_ANIMATION_MS = 150
+
 interface VideoPropertiesModalProps {
   videoId: string
   videoTitle: string | null
@@ -71,9 +73,23 @@ export function VideoPropertiesModal({
   onClose,
 }: VideoPropertiesModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [isPending, startTransition] = useTransition()
   const [stats, setStats] = useState<VideoSectionStats | null>(null)
   const [statsError, setStatsError] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
+
+  const handleClose = useCallback(() => {
+    if (isClosing) return
+    setIsClosing(true)
+    closeTimerRef.current = setTimeout(onClose, CLOSE_ANIMATION_MS)
+  }, [isClosing, onClose])
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
+    }
+  }, [])
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -84,7 +100,7 @@ export function VideoPropertiesModal({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault()
-        onClose()
+        handleClose()
       }
     }
 
@@ -94,7 +110,7 @@ export function VideoPropertiesModal({
       dialog.removeEventListener('keydown', handleKeyDown)
       dialog.close()
     }
-  }, [onClose])
+  }, [handleClose])
 
   useEffect(() => {
     startTransition(async () => {
@@ -110,7 +126,7 @@ export function VideoPropertiesModal({
   const youtubeUrl = `https://www.youtube.com/watch?v=${youtubeId}`
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
-    if (e.target === dialogRef.current) onClose()
+    if (e.target === dialogRef.current) handleClose()
   }
 
   const isLoading = isPending && !stats
@@ -125,13 +141,17 @@ export function VideoPropertiesModal({
       aria-labelledby="properties-modal-title"
       onClick={handleBackdropClick}
       onKeyDown={(e) => {
-        if (e.key === 'Escape') onClose()
+        if (e.key === 'Escape') handleClose()
       }}
       onCancel={(e) => {
         e.preventDefault()
-        onClose()
+        handleClose()
       }}
-      className="m-auto w-full max-w-md rounded-2xl border border-outline-variant bg-surface p-6 shadow-xl backdrop:bg-inverse-surface/40 animate-in fade-in zoom-in-95 duration-200 animate-out fade-out zoom-out-95 duration-150"
+      className={`m-auto w-full max-w-md rounded-2xl border border-outline-variant bg-surface p-6 shadow-xl backdrop:bg-inverse-surface/40 ${
+        isClosing
+          ? 'animate-out fade-out zoom-out-95 duration-150'
+          : 'animate-in fade-in zoom-in-95 duration-200'
+      }`}
     >
       <div className="mb-5 flex items-center gap-2">
         <div className="flex size-8 items-center justify-center rounded-lg bg-primary-container">
@@ -207,7 +227,7 @@ export function VideoPropertiesModal({
       <div className="mt-6 flex justify-end">
         <button
           type="button"
-          onClick={onClose}
+          onClick={handleClose}
           className="h-9 rounded-lg px-4 font-body text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline"
         >
           Cerrar
