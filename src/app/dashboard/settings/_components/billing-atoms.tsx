@@ -21,7 +21,7 @@ export function AdminNotice() {
     <div className="rounded-xl bg-primary-container/40 px-5 py-4">
       <p className="font-body text-sm text-on-primary-container">
         Eres administrador — tienes acceso completo sin necesidad de
-        suscripcion.
+        suscripción.
       </p>
     </div>
   )
@@ -50,14 +50,16 @@ export interface FeedbackBannerProps {
   text: string
 }
 
+// /normalize — uses design tokens exclusively; no hardcoded Tailwind color classes.
+// Dark mode handled automatically via CSS variable inversion in .dark.
 export function FeedbackBanner({ variant, text }: FeedbackBannerProps) {
   const styles: Record<FeedbackBannerProps['variant'], string> = {
     success:
-      'bg-green-50 border-green-200 text-green-800 dark:bg-green-950/30 dark:border-green-800 dark:text-green-300',
+      'bg-primary-container/40 border-primary/20 text-on-primary-container',
     neutral:
       'bg-surface-container border-outline-variant text-on-surface-variant',
     error:
-      'bg-red-50 border-red-200 text-red-800 dark:bg-red-950/30 dark:border-red-800 dark:text-red-300',
+      'bg-error-container border-error/20 text-on-error-container',
   }
 
   return (

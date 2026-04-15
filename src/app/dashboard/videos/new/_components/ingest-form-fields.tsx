@@ -20,7 +20,7 @@ export function YouTubeIcon() {
   )
 }
 
-export function SparkIcon() {
+export function SparkIcon({ className }: { className?: string }) {
   return (
     <svg
       width="16"
@@ -28,6 +28,7 @@ export function SparkIcon() {
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden="true"
+      className={className}
     >
       <path
         d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z"
@@ -152,9 +153,9 @@ export function SubmitButton({ disabled }: { disabled: boolean }) {
     <button
       type="submit"
       disabled={disabled}
-      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-4 font-body text-base font-semibold text-on-primary transition-all hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+      className="btn-cta group w-full inline-flex items-center justify-center gap-2.5 rounded-xl px-6 py-4 font-body text-base font-semibold text-on-primary shadow-[0_4px_20px_-4px_color-mix(in_oklch,var(--color-primary)_50%,transparent)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
     >
-      <SparkIcon />
+      <SparkIcon className="transition-[transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1 group-hover:rotate-[15deg] group-hover:scale-[1.25]" />
       Analizar video
     </button>
   )

@@ -9,7 +9,7 @@ import { AdminNotice, FeedbackBanner, PlanBadge } from './billing-atoms'
 
 const CHECKOUT_STATUS = {
   success: {
-    text: 'Tu suscripcion esta activa. Bienvenido.',
+    text: 'Tu suscripción está activa. Bienvenido.',
     variant: 'success',
   },
   cancelled: {
@@ -51,7 +51,7 @@ export function BillingSection({ plan }: BillingSectionProps) {
         id="billing-heading"
         className="font-headline text-base font-bold text-on-surface"
       >
-        Plan y facturacion
+        Plan y facturación
       </h2>
 
       {/* Current plan row */}
