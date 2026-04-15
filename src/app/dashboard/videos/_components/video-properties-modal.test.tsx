@@ -105,7 +105,9 @@ describe('VideoPropertiesModal', () => {
     const onClose = vi.fn()
     render(<VideoPropertiesModal {...defaultProps} onClose={onClose} />)
     await user.click(screen.getByRole('button', { name: 'Cerrar' }))
-    expect(onClose).toHaveBeenCalledOnce()
+    await waitFor(() => {
+      expect(onClose).toHaveBeenCalledOnce()
+    })
   })
 
   it('renders "Sin título" when videoTitle is null', () => {
