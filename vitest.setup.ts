@@ -16,3 +16,5 @@ process.env.NEXT_STRIPE_MAX_PRODUCT_ID =
   process.env.NEXT_STRIPE_MAX_PRODUCT_ID ?? 'prod_max_test_123'
 process.env.SUPABASE_SERVICE_ROLE_KEY =
   process.env.SUPABASE_SERVICE_ROLE_KEY ?? 'service-role-test-key'
+process.env.STRIPE_WEBHOOK_SECRET =
+  process.env.STRIPE_WEBHOOK_SECRET ?? 'whsec_test_secret'

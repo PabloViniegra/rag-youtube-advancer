@@ -16,6 +16,7 @@ describe('env module', () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://example.supabase.co'
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'anon-key'
     process.env.NEXT_VERCEL_AI_GATEWAY_API_KEY = 'gateway-key'
+    process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test'
 
     const env = await importEnvModule()
 

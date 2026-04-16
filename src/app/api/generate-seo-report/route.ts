@@ -33,6 +33,8 @@ const GENERATE_SEO_REPORT_ERROR = {
   UNAUTHORIZED: 'unauthorized',
   /** The request body is missing required fields or is not valid JSON. */
   INVALID_BODY: 'invalid_body',
+  /** The video does not belong to the authenticated user. */
+  FORBIDDEN: 'forbidden',
   /** The SEO report could not be persisted to the database. */
   STORE_FAILED: 'store_failed',
   /** The LLM generation call failed. */
@@ -121,6 +123,22 @@ export async function POST(
       'Invalid request body. Expected: { videoId: string; transcript: string; title?: string }.',
       GENERATE_SEO_REPORT_ERROR.INVALID_BODY,
       400,
+    )
+  }
+
+  // Ownership check — prevent IDOR
+  const { data: video, error: ownershipError } = await supabase
+    .from('videos')
+    .select('id')
+    .eq('id', body.videoId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (ownershipError || !video) {
+    return errorResponse(
+      'Video not found or access denied.',
+      GENERATE_SEO_REPORT_ERROR.FORBIDDEN,
+      403,
     )
   }
 

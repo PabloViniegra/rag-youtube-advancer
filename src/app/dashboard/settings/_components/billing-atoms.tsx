@@ -58,8 +58,7 @@ export function FeedbackBanner({ variant, text }: FeedbackBannerProps) {
       'bg-primary-container/40 border-primary/20 text-on-primary-container',
     neutral:
       'bg-surface-container border-outline-variant text-on-surface-variant',
-    error:
-      'bg-error-container border-error/20 text-on-error-container',
+    error: 'bg-error-container border-error/20 text-on-error-container',
   }
 
   return (

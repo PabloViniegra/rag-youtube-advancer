@@ -66,9 +66,14 @@ export const stripeMaxProductId = (() => {
   return v
 })()
 
-/** Webhook signing secret — optional in dev, required in production. */
+/** Webhook signing secret — required in all environments. */
 export const stripeWebhookSecret = (() => {
-  return process.env.STRIPE_WEBHOOK_SECRET ?? ''
+  const v = process.env.STRIPE_WEBHOOK_SECRET
+  if (!v)
+    throw new Error(
+      'Missing required environment variable: STRIPE_WEBHOOK_SECRET',
+    )
+  return v
 })()
 
 // ── Supabase service role (server-only, bypasses RLS) ─────────────────────────

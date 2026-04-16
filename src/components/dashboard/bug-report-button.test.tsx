@@ -8,12 +8,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 // ─── Mocks ───────────────────────────────────────────────────────────────────
 
-const { getFeedbackMock, getClientMock, feedbackIntegrationMock } =
-  vi.hoisted(() => ({
+const { getFeedbackMock, getClientMock, feedbackIntegrationMock } = vi.hoisted(
+  () => ({
     getFeedbackMock: vi.fn(),
     getClientMock: vi.fn(),
     feedbackIntegrationMock: vi.fn(),
-  }))
+  }),
+)
 
 vi.mock('@sentry/nextjs', () => ({
   getFeedback: getFeedbackMock,

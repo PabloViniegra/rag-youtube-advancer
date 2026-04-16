@@ -130,9 +130,7 @@ export function UpgradeToMax() {
         className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-tertiary px-6 py-3.5 font-body text-sm font-semibold text-on-tertiary transition-opacity duration-150 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <StripeIcon />
-        {isPending
-          ? 'Redirigiendo a Stripe…'
-          : 'Actualizar a Max — €15.99/mes'}
+        {isPending ? 'Redirigiendo a Stripe…' : 'Actualizar a Max — €15.99/mes'}
       </button>
     </div>
   )

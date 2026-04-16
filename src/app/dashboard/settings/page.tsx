@@ -193,10 +193,18 @@ function AccountSection({
               ) : (
                 <span
                   className="font-body text-xs font-semibold tabular-nums"
-                  style={{ color: usagePct >= 1 ? 'var(--color-error)' : 'var(--color-on-surface)' }}
+                  style={{
+                    color:
+                      usagePct >= 1
+                        ? 'var(--color-error)'
+                        : 'var(--color-on-surface)',
+                  }}
                 >
                   {videoCount}
-                  <span className="font-normal text-on-surface-variant"> / {videoLimit}</span>
+                  <span className="font-normal text-on-surface-variant">
+                    {' '}
+                    / {videoLimit}
+                  </span>
                 </span>
               )}
             </div>
@@ -210,7 +218,10 @@ function AccountSection({
               >
                 <div
                   className="h-full rounded-full transition-all duration-500"
-                  style={{ width: `${usagePct * 100}%`, backgroundColor: barColor }}
+                  style={{
+                    width: `${usagePct * 100}%`,
+                    backgroundColor: barColor,
+                  }}
                 />
               </div>
             )}

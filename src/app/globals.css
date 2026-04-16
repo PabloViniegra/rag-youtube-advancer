@@ -534,14 +534,17 @@
 
 @layer base {
   @keyframes cta-pulse {
-    0%, 100% {
+    0%,
+    100% {
       box-shadow:
-        0 6px 28px -4px color-mix(in oklch, var(--color-primary) 60%, transparent),
+        0 6px 28px -4px
+        color-mix(in oklch, var(--color-primary) 60%, transparent),
         0 0 0 0px color-mix(in oklch, var(--color-primary) 22%, transparent);
     }
     55% {
       box-shadow:
-        0 8px 36px -4px color-mix(in oklch, var(--color-primary) 65%, transparent),
+        0 8px 36px -4px
+        color-mix(in oklch, var(--color-primary) 65%, transparent),
         0 0 0 10px color-mix(in oklch, var(--color-primary) 0%, transparent);
     }
   }

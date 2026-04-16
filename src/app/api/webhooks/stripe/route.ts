@@ -22,21 +22,7 @@ export async function POST(request: Request) {
   let event: Stripe.Event
 
   try {
-    if (stripeWebhookSecret) {
-      event = stripe.webhooks.constructEvent(
-        body,
-        signature,
-        stripeWebhookSecret,
-      )
-    } else {
-      // Dev fallback: parse raw body without signature verification.
-      // This should NEVER happen in production.
-      logger.warn(
-        'stripe-webhook',
-        'No STRIPE_WEBHOOK_SECRET — skipping signature verification',
-      )
-      event = JSON.parse(body) as Stripe.Event
-    }
+    event = stripe.webhooks.constructEvent(body, signature, stripeWebhookSecret)
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     logger.error('stripe-webhook', 'Signature verification failed:', message)
