@@ -1,27 +1,33 @@
 import type { MetadataRoute } from 'next'
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://youtube-intelligence.app'
+/**
+ * Resolve the site base URL.
+ * Empty string env vars are treated as "not set" and fall back to the
+ * production default so tests can stub the env without breaking the fallback.
+ */
+export function resolveSiteUrl(): string {
+  const env = process.env.NEXT_PUBLIC_SITE_URL
+  return env && env.length > 0 ? env : 'https://youtube-intelligence.app'
+}
 
 /**
  * Generates /sitemap.xml via the Next.js App Router Metadata API.
  *
- * Only public, indexable pages are included.
- * Authenticated dashboard routes are intentionally excluded.
+ * Rules:
+ * - Only public, indexable pages are listed here.
+ * - noindex pages (/login, /auth/error) are intentionally excluded.
+ * - Authenticated dashboard routes are intentionally excluded.
+ * - API routes are intentionally excluded.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
+  const baseUrl = resolveSiteUrl()
+
   return [
     {
-      url: siteUrl,
+      url: baseUrl,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 1.0,
-    },
-    {
-      url: `${siteUrl}/login`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.3,
     },
   ]
 }
