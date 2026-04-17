@@ -42,11 +42,12 @@ export default async function DashboardLayout({
       <Toaster
         position="bottom-right"
         theme="system"
+        offset={16}
         options={{
-          roundness: 12,
+          roundness: 16,
           styles: {
-            title: 'font-headline! font-bold!',
-            description: 'font-body! text-sm!',
+            title: 'font-headline! font-bold! tracking-tight!',
+            description: 'font-body! text-sm! leading-snug!',
           },
         }}
       />

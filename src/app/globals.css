@@ -684,15 +684,71 @@
 }
 
 /* ============================================================
-   Sileo — toast state colors aligned with the design system
+   Sileo — toast state colors & overrides aligned with design system
+   Bold. Precise. Relentless. Editorial Crimson / Amber / Slate.
+
+   Sileo renders an INVERSE-SURFACE toast:
+     • Light mode → dark toast (charcoal bg) → state colors need HIGH lightness
+     • Dark mode  → light toast (cream bg)   → state colors need LOW lightness
+
+   CSS overrides here take precedence because our stylesheet loads
+   after Sileo's injected styles.
    ============================================================ */
+
+/* Light mode: dark (charcoal) toast background.
+   State colors must be bright/light enough to read on dark surface. */
 :root {
-  /* Success — muted olive-green, editorial not playful */
-  --sileo-state-success: oklch(0.5 0.14 142);
-  /* Error — mirrors --color-error (light mode) */
+  /* Success — editorial green, lighter for dark bg */
+  --sileo-state-success: oklch(0.72 0.18 142);
+  /* Loading — warm neutral, aligns with --color-outline */
+  --sileo-state-loading: oklch(0.62 0.015 35);
+  /* Error — lighter crimson for dark bg, aligns with --color-inverse-primary hue */
+  --sileo-state-error: oklch(0.65 0.22 30);
+  /* Warning — lighter amber for dark bg, same hue as --color-secondary */
+  --sileo-state-warning: oklch(0.78 0.18 70);
+  /* Info — lighter slate for dark bg, same hue as --color-tertiary */
+  --sileo-state-info: oklch(0.64 0.08 260);
+  /* Action — lighter primary crimson for dark bg */
+  --sileo-state-action: oklch(0.65 0.20 25);
+}
+
+/* Dark mode: light (cream) toast background.
+   State colors must be dark/saturated enough to read on light surface. */
+.dark {
+  /* Success — muted olive green on cream bg */
+  --sileo-state-success: oklch(0.50 0.14 142);
+  /* Loading — warm neutral mid-dark */
+  --sileo-state-loading: oklch(0.44 0.02 35);
+  /* Error — mirrors --color-error dark mode */
   --sileo-state-error: oklch(0.42 0.22 30);
-  /* Warning — amber, mirrors --color-secondary */
+  /* Warning — mirrors --color-secondary */
   --sileo-state-warning: oklch(0.55 0.16 70);
-  /* Info — slate-blue, mirrors --color-tertiary */
+  /* Info — mirrors --color-tertiary */
   --sileo-state-info: oklch(0.42 0.06 260);
+  /* Action — mirrors --color-primary */
+  --sileo-state-action: oklch(0.42 0.20 25);
+}
+
+/* ── Description text ─────────────────────────────────────────
+   Replace generic rgba() with warm tones from the design system.
+   ─────────────────────────────────────────────────────────── */
+
+/* Light mode: dark toast → warm near-white description */
+[data-sileo-viewport][data-theme="light"] [data-sileo-description] {
+  color: oklch(93% 0.01 80 / 0.78);
+}
+
+/* Dark mode: light (cream) toast → warm mid-dark description */
+[data-sileo-viewport][data-theme="dark"] [data-sileo-description] {
+  color: oklch(38% 0.02 35 / 0.88);
+}
+
+/* ── Title ────────────────────────────────────────────────────
+   Sileo default: text-transform: capitalize — breaks Spanish.
+   Remove it. Bump weight to semibold — tighter, more editorial.
+   ─────────────────────────────────────────────────────────── */
+[data-sileo-title] {
+  text-transform: none;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
