@@ -34,10 +34,10 @@ export function DashboardSidebar({
         <div className="h-8 w-1 shrink-0 rounded-full bg-primary" />
         <div className="min-w-0 flex flex-col leading-none">
           <span className="font-headline text-xs font-bold uppercase tracking-widest text-on-surface-variant/60">
-            YouTube
+            for YouTube
           </span>
           <span className="font-headline text-base font-extrabold text-inverse-on-surface">
-            Intelligence
+            Second Brain
           </span>
         </div>
       </div>
