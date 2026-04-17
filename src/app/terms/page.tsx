@@ -49,10 +49,9 @@ export default async function TermsOfService() {
           title="Aceptación de los Términos"
         >
           <p>
-            Al acceder y utilizar Second Brain (&quot;la
-            Plataforma&quot;), aceptas de forma vinculante estos Términos de
-            Uso. Si no estás de acuerdo con alguna disposición, no debes
-            utilizar la Plataforma.
+            Al acceder y utilizar Second Brain (&quot;la Plataforma&quot;),
+            aceptas de forma vinculante estos Términos de Uso. Si no estás de
+            acuerdo con alguna disposición, no debes utilizar la Plataforma.
           </p>
         </LegalSection>
 
@@ -62,10 +61,10 @@ export default async function TermsOfService() {
           title="Descripción del Servicio"
         >
           <p>
-            Second Brain es una plataforma SaaS que permite a creadores
-            de contenido transformar videos de YouTube en conocimiento
-            accionable mediante tecnologías de IA, incluyendo búsqueda
-            semántica, resúmenes automáticos y análisis de optimización.
+            Second Brain es una plataforma SaaS que permite a creadores de
+            contenido transformar videos de YouTube en conocimiento accionable
+            mediante tecnologías de IA, incluyendo búsqueda semántica, resúmenes
+            automáticos y análisis de optimización.
           </p>
         </LegalSection>
 
@@ -130,10 +129,10 @@ export default async function TermsOfService() {
           title="Limitación de Responsabilidad"
         >
           <p>
-            Second Brain se proporciona &quot;como está&quot;. No
-            garantizamos que el servicio esté libre de errores o disponible el
-            100% del tiempo. No somos responsables de decisiones que tomes
-            basándote en los análisis o sugerencias de la Plataforma.
+            Second Brain se proporciona &quot;como está&quot;. No garantizamos
+            que el servicio esté libre de errores o disponible el 100% del
+            tiempo. No somos responsables de decisiones que tomes basándote en
+            los análisis o sugerencias de la Plataforma.
           </p>
         </LegalSection>
 

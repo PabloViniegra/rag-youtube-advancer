@@ -7,7 +7,9 @@ interface VideoEmptyStateProps {
   trialExhausted?: boolean
 }
 
-export function VideoEmptyState({ trialExhausted = false }: VideoEmptyStateProps) {
+export function VideoEmptyState({
+  trialExhausted = false,
+}: VideoEmptyStateProps) {
   if (trialExhausted) {
     return <UpgradeEmptyState />
   }
@@ -171,19 +173,56 @@ function ProcessStep({ number, title, description, accent }: ProcessStepProps) {
 
 function PlusIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M12 5v14M5 12h14"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
     </svg>
   )
 }
 
 function LockIllustration({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 200 200" fill="none" className={className} aria-hidden="true">
-      <rect x="50" y="90" width="100" height="80" rx="12" stroke="currentColor" strokeWidth="8" />
-      <path d="M70 90V65a30 30 0 0 1 60 0v25" stroke="currentColor" strokeWidth="8" strokeLinecap="round" />
+    <svg
+      viewBox="0 0 200 200"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <rect
+        x="50"
+        y="90"
+        width="100"
+        height="80"
+        rx="12"
+        stroke="currentColor"
+        strokeWidth="8"
+      />
+      <path
+        d="M70 90V65a30 30 0 0 1 60 0v25"
+        stroke="currentColor"
+        strokeWidth="8"
+        strokeLinecap="round"
+      />
       <circle cx="100" cy="130" r="10" fill="currentColor" />
-      <line x1="100" y1="140" x2="100" y2="155" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+      <line
+        x1="100"
+        y1="140"
+        x2="100"
+        y2="155"
+        stroke="currentColor"
+        strokeWidth="6"
+        strokeLinecap="round"
+      />
     </svg>
   )
 }

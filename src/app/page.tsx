@@ -10,8 +10,7 @@ import { ProcessSection } from '@/components/landing/process-section'
 import { JsonLd } from '@/components/seo/json-ld'
 import { getCurrentUser } from '@/lib/auth/actions'
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://second-brain.app'
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://second-brain.app'
 
 export const metadata: Metadata = {
   title: 'Second Brain — Crece más rápido con IA',

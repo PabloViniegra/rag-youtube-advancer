@@ -19,8 +19,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: 'swap',
 })
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://second-brain.app'
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://second-brain.app'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

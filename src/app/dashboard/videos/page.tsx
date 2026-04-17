@@ -41,7 +41,10 @@ async function getUserVideos(userId: string): Promise<VideoRow[]> {
 
 async function getUserProfile(
   userId: string,
-): Promise<Pick<Profile, 'role' | 'subscription_active' | 'trial_used'> | null> {
+): Promise<Pick<
+  Profile,
+  'role' | 'subscription_active' | 'trial_used'
+> | null> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('profiles')

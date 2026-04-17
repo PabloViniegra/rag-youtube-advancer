@@ -69,7 +69,10 @@ const GRID_SKELETON_KEYS = [
   'sk-6',
 ] as const
 
-export function VideosPageClient({ initialVideos, canIndex }: VideosPageClientProps) {
+export function VideosPageClient({
+  initialVideos,
+  canIndex,
+}: VideosPageClientProps) {
   return (
     <Suspense
       fallback={

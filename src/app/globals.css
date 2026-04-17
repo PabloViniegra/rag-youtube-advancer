@@ -438,6 +438,39 @@
   .animate-live-pulse {
     animation: live-pulse 2.5s ease-in-out infinite;
   }
+
+  /* Pop burst — for milestone number animations */
+  .animate-pop {
+    animation: pop var(--duration-normal) var(--ease-out-expo) both;
+  }
+
+  /* Brain pulse — neural rhythmic effect */
+  .animate-brain-pulse {
+    animation: brain-pulse 2s ease-in-out infinite;
+  }
+
+  /* Brain signal — signal propagation from neural node */
+  .animate-brain-signal {
+    animation: brain-signal 1.5s ease-out both;
+  }
+
+  /* Confetti particles — 3 directional drift variants */
+  .animate-confetti-drift-left {
+    animation: confetti-drift-left 2.5s ease-out both;
+  }
+
+  .animate-confetti-drift-center {
+    animation: confetti-drift-center 2.5s ease-out both;
+  }
+
+  .animate-confetti-drift-right {
+    animation: confetti-drift-right 2.5s ease-out both;
+  }
+
+  /* Shape utilities — for confetti particles */
+  .clip-path-triangle {
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  }
 }
 
 /* ============================================================
@@ -512,6 +545,80 @@
     50% {
       transform: scale(1.5);
       opacity: 0.45;
+    }
+  }
+
+  /* Pop — scale burst for count-up milestone animations */
+  @keyframes pop {
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.15);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Brain pulse — rhythmic neural pulsation for brain icon */
+  @keyframes brain-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.08);
+      opacity: 0.85;
+    }
+  }
+
+  /* Brain signal — signal wave propagation from center node */
+  @keyframes brain-signal {
+    0% {
+      stroke-width: 2px;
+      opacity: 1;
+    }
+    100% {
+      stroke-width: 0.5px;
+      opacity: 0;
+    }
+  }
+
+  /* Confetti drift — 3 directional variants for particle spread */
+  @keyframes confetti-drift-left {
+    0% {
+      transform: translateX(0) translateY(-10px) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(-40px) translateY(80px) rotate(-360deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes confetti-drift-center {
+    0% {
+      transform: translateY(-10px) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(90px) rotate(360deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes confetti-drift-right {
+    0% {
+      transform: translateX(0) translateY(-10px) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(40px) translateY(80px) rotate(360deg);
+      opacity: 0;
     }
   }
 }
@@ -709,14 +816,14 @@
   /* Info — lighter slate for dark bg, same hue as --color-tertiary */
   --sileo-state-info: oklch(0.64 0.08 260);
   /* Action — lighter primary crimson for dark bg */
-  --sileo-state-action: oklch(0.65 0.20 25);
+  --sileo-state-action: oklch(0.65 0.2 25);
 }
 
 /* Dark mode: light (cream) toast background.
    State colors must be dark/saturated enough to read on light surface. */
 .dark {
   /* Success — muted olive green on cream bg */
-  --sileo-state-success: oklch(0.50 0.14 142);
+  --sileo-state-success: oklch(0.5 0.14 142);
   /* Loading — warm neutral mid-dark */
   --sileo-state-loading: oklch(0.44 0.02 35);
   /* Error — mirrors --color-error dark mode */
@@ -726,7 +833,7 @@
   /* Info — mirrors --color-tertiary */
   --sileo-state-info: oklch(0.42 0.06 260);
   /* Action — mirrors --color-primary */
-  --sileo-state-action: oklch(0.42 0.20 25);
+  --sileo-state-action: oklch(0.42 0.2 25);
 }
 
 /* ── Description text ─────────────────────────────────────────

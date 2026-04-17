@@ -49,10 +49,10 @@ export default async function PrivacyPolicy() {
       >
         <LegalSection id="introduccion" num="01" title="Introducción">
           <p>
-            En Second Brain (&quot;nosotros&quot;, &quot;nos&quot; o
-            &quot;la Plataforma&quot;), nos comprometemos a proteger tu
-            privacidad. Esta Política explica cómo recopilamos, usamos,
-            divulgamos y protegemos tu información personal.
+            En Second Brain (&quot;nosotros&quot;, &quot;nos&quot; o &quot;la
+            Plataforma&quot;), nos comprometemos a proteger tu privacidad. Esta
+            Política explica cómo recopilamos, usamos, divulgamos y protegemos
+            tu información personal.
           </p>
         </LegalSection>
 

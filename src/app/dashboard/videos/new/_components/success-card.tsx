@@ -15,6 +15,7 @@
 import { useRouter } from 'next/navigation'
 import { IntelligenceReportView } from '@/app/dashboard/videos/_components/intelligence-report'
 import type { IntelligenceReport } from '@/lib/intelligence/types'
+import { useCountUp } from '@/components/landing/use-count-up'
 import { BrainCapacityMeter } from './brain-capacity-meter'
 import { BrainNodesViz } from './brain-nodes-viz'
 import { ConfettiParticles } from './confetti-particles'
@@ -82,45 +83,53 @@ function SuccessHeader({
   newSectionCount,
   totalVideoCount,
 }: SuccessHeaderProps) {
-  return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-outline-variant bg-background p-6 text-center shadow-sm">
-      {/* Animated checkmark */}
-      <div className="flex h-14 w-14 items-center justify-center self-center rounded-full bg-primary/10 animate-fade-in">
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
-          className="text-primary"
-        >
-          <path
-            d="M20 6L9 17l-5-5"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            pathLength="1"
-            strokeDasharray="1"
-            className="[stroke-dashoffset:1] [animation:stroke-draw_0.5s_var(--ease-out-expo)_0.15s_both] motion-reduce:animation-none"
-          />
-        </svg>
-      </div>
+  const countValue = useCountUp(sectionCount, 900)
 
-      <div className="flex flex-col gap-2">
+  return (
+    <div className="flex flex-col overflow-hidden rounded-2xl border border-outline-variant bg-background shadow-sm">
+      {/* ── Zone A: Celebration ─────────────────────────────────── */}
+      <div className="flex flex-col items-center gap-5 px-6 pt-8 pb-7 text-center">
+        {/* Checkmark — solid primary with pop + stroke-draw */}
+        <div
+          className="flex h-16 w-16 items-center justify-center self-center rounded-full bg-primary animate-pop"
+          aria-hidden="true"
+        >
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+            className="text-on-primary"
+          >
+            <path
+              d="M20 6L9 17l-5-5"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              pathLength="1"
+              strokeDasharray="1"
+              className="[stroke-dashoffset:1] [animation:stroke-draw_0.5s_var(--ease-out-expo)_0.35s_both] motion-reduce:animation-none"
+            />
+          </svg>
+        </div>
+
         <h2
           id="success-heading"
-          className="font-headline text-xl font-bold text-on-surface"
+          className="font-headline text-2xl font-bold text-on-surface"
         >
           ¡Video indexado!
         </h2>
 
-        <div className="inline-flex items-baseline gap-1.5 self-center rounded-xl bg-primary-container px-4 py-2">
+        {/* Count-up badge */}
+        <div className="inline-flex items-baseline gap-2 self-center rounded-xl bg-primary-container px-5 py-2.5">
           <span
             data-tabular-nums
-            className="font-headline text-3xl font-extrabold text-primary"
+            aria-label={`${sectionCount} fragmentos`}
+            className="font-headline text-4xl font-extrabold text-primary"
           >
-            {sectionCount}
+            {countValue}
           </span>
           <span className="font-body text-sm text-on-primary-container">
             fragmentos en memoria
@@ -128,16 +137,19 @@ function SuccessHeader({
         </div>
       </div>
 
-      {/* Brain visualization */}
-      <div className="flex justify-center">
-        <BrainNodesViz />
-      </div>
+      {/* ── Separator ───────────────────────────────────────────── */}
+      <div className="mx-4 h-px bg-outline-variant/40" aria-hidden="true" />
 
-      {/* Capacity meter */}
-      <BrainCapacityMeter
-        newSectionCount={newSectionCount}
-        totalVideoCount={totalVideoCount}
-      />
+      {/* ── Zone B: Brain state ─────────────────────────────────── */}
+      <div className="flex flex-col gap-4 px-6 py-6">
+        <div className="flex justify-center">
+          <BrainNodesViz />
+        </div>
+        <BrainCapacityMeter
+          newSectionCount={newSectionCount}
+          totalVideoCount={totalVideoCount}
+        />
+      </div>
     </div>
   )
 }

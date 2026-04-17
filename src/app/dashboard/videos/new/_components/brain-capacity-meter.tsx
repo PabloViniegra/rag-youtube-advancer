@@ -41,7 +41,7 @@ export function BrainCapacityMeter({
       {/* Label row */}
       <div className="flex items-center justify-between">
         <span className="font-body text-xs font-semibold text-on-surface-variant">
-          Capacidad del cerebro
+          Conocimiento activo
         </span>
         <span className="font-body text-xs text-primary font-semibold">
           +{newSectionCount} nuevos fragmentos
@@ -51,7 +51,7 @@ export function BrainCapacityMeter({
       {/* Bar track */}
       <div
         role="meter"
-        aria-label="Capacidad del cerebro"
+        aria-label="Conocimiento activo"
         aria-valuenow={Math.round(fillPercent)}
         aria-valuemin={0}
         aria-valuemax={100}
@@ -59,10 +59,12 @@ export function BrainCapacityMeter({
       >
         <div
           aria-hidden="true"
-          className="h-full rounded-full bg-primary motion-reduce:transition-none"
+          className="h-full rounded-full motion-reduce:transition-none"
           style={{
             width: `${fillPercent}%`,
             transition: 'width 1.2s cubic-bezier(0.22,1,0.36,1)',
+            background:
+              'linear-gradient(to right, var(--color-secondary), var(--color-primary))',
           }}
         />
       </div>
