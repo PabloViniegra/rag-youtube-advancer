@@ -56,7 +56,7 @@ export function LegalLayout({
 
       {/* Two-column layout: sidebar TOC + main content */}
       <div className="max-w-6xl mx-auto px-6 py-12 md:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-10 xl:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-10 xl:gap-16">
           <aside className="hidden lg:block">
             <LegalToc sections={sections} />
           </aside>

@@ -25,7 +25,7 @@ export function DashboardSidebar({
 }: DashboardSidebarProps) {
   return (
     <aside
-      className="hidden w-56 shrink-0 flex-col bg-on-surface md:flex"
+      className="hidden w-56 shrink-0 flex-col bg-on-surface md:flex sticky top-0 h-svh overflow-y-auto"
       style={{ viewTransitionName: 'dashboard-sidebar' }}
     >
       {/* ── Brand mark ── */}
