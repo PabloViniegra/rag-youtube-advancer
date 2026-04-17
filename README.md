@@ -1,4 +1,4 @@
-# RAG YouTube Advancer
+# Second Brain
 
 A SaaS platform that transforms YouTube videos into a searchable "Second Brain" using Retrieval-Augmented Generation (RAG). Content creators can index video transcripts, generate AI-powered summaries, social media hooks, and contextual insights.
 

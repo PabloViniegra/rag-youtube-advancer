@@ -14,7 +14,7 @@ export function Footer() {
           href="/"
           className="text-lg font-extrabold text-inverse-on-surface uppercase tracking-tighter font-headline hover:text-inverse-on-surface/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inverse-on-surface/40 rounded"
         >
-          YouTube Intelligence
+          Second Brain
         </Link>
 
         <nav aria-label="Pie de página">
@@ -33,7 +33,7 @@ export function Footer() {
         </nav>
 
         <div className="font-label text-xs text-inverse-on-surface/50">
-          © {new Date().getFullYear()} YouTube Intelligence
+          © {new Date().getFullYear()} Second Brain
         </div>
       </div>
     </footer>

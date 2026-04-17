@@ -20,13 +20,13 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 })
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://youtube-intelligence.app'
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://second-brain.app'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    template: '%s — YouTube Intelligence',
-    default: 'YouTube Intelligence — Tu Segundo Cerebro para YouTube',
+    template: '%s — Second Brain',
+    default: 'Second Brain — La IA para creadores de YouTube',
   },
   description:
     'Analiza cualquier video de YouTube con IA RAG. Optimiza tu hook, retención y monetización en segundos. Prueba gratis durante 14 días.',
@@ -42,8 +42,8 @@ export const metadata: Metadata = {
     'búsqueda semántica',
     'transcripciones YouTube',
   ],
-  authors: [{ name: 'YouTube Intelligence', url: siteUrl }],
-  creator: 'YouTube Intelligence',
+  authors: [{ name: 'Second Brain', url: siteUrl }],
+  creator: 'Second Brain',
   robots: {
     index: true,
     follow: true,
@@ -57,9 +57,9 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    siteName: 'YouTube Intelligence',
+    siteName: 'Second Brain',
     locale: 'es_ES',
-    title: 'YouTube Intelligence — Tu Segundo Cerebro para YouTube',
+    title: 'Second Brain — La IA para creadores de YouTube',
     description:
       'Analiza cualquier video de YouTube con IA RAG. Optimiza tu hook, retención y monetización en segundos.',
     images: [
@@ -67,13 +67,13 @@ export const metadata: Metadata = {
         url: '/opengraph-image',
         width: 1200,
         height: 630,
-        alt: 'YouTube Intelligence — Tu Segundo Cerebro para YouTube',
+        alt: 'Second Brain — La IA para creadores de YouTube',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'YouTube Intelligence — Tu Segundo Cerebro para YouTube',
+    title: 'Second Brain — La IA para creadores de YouTube',
     description:
       'Analiza cualquier video de YouTube con IA RAG. Optimiza tu hook, retención y monetización en segundos.',
     images: ['/opengraph-image'],

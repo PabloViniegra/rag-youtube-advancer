@@ -6,8 +6,8 @@ import type { MetadataRoute } from 'next'
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'YouTube Intelligence',
-    short_name: 'YT Intelligence',
+    name: 'Second Brain',
+    short_name: 'Second Brain',
     description:
       'Tu segundo cerebro para YouTube. Analiza videos con IA RAG, genera resúmenes y extrae insights en segundos.',
     start_url: '/',

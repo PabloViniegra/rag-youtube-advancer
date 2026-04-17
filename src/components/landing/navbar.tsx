@@ -56,7 +56,7 @@ export function Navbar({ isAuthenticated }: NavbarProps) {
             href="/"
             className="text-lg lg:text-xl font-extrabold tracking-tighter text-on-surface uppercase font-headline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded"
           >
-            YouTube Intelligence
+            Second Brain
           </Link>
 
           <NavLinks />
@@ -93,7 +93,7 @@ export function Navbar({ isAuthenticated }: NavbarProps) {
             href="/"
             className="text-base font-extrabold tracking-tight text-on-surface uppercase font-headline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded"
           >
-            YouTube Intelligence
+            Second Brain
           </Link>
 
           <div className="flex items-center gap-1">

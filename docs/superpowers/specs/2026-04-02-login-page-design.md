@@ -12,7 +12,7 @@ Split horizontal 50/50 en desktop. En mobile: panel derecho ocupa toda la pantal
 ### Panel izquierdo — Crimson (brand)
 - Fondo: `bg-primary` (crimson)
 - Blob de acento amber en esquina inferior derecha (`blur-3xl`, 30% opacity)
-- **Logo + wordmark:** icono cuadrado glass + "YouTube Intelligence" en mayúsculas, `font-headline font-extrabold`
+- **Logo + wordmark:** icono cuadrado glass + "Second Brain" en mayúsculas, `font-headline font-extrabold`
 - **Headline:** "Tu segundo cerebro para YouTube" — `text-4xl font-extrabold text-white`
 - **Subheadline:** descripción breve en `text-white/65`
 - **3 feature bullets:** dot amber + texto `text-white/75`

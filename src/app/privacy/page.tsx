@@ -23,9 +23,9 @@ import {
 } from '@/components/legal/privacy-data'
 
 export const metadata: Metadata = {
-  title: 'Política de Privacidad — YouTube Intelligence',
+  title: 'Política de Privacidad — Second Brain',
   description:
-    'Política de privacidad de YouTube Intelligence. Descubre cómo protegemos tus datos y tu privacidad.',
+    'Política de privacidad de Second Brain. Descubre cómo protegemos tus datos y tu privacidad.',
 }
 
 const PRIVACY_EMAIL = 'privacy@youtube-intelligence.app'
@@ -49,7 +49,7 @@ export default async function PrivacyPolicy() {
       >
         <LegalSection id="introduccion" num="01" title="Introducción">
           <p>
-            En YouTube Intelligence (&quot;nosotros&quot;, &quot;nos&quot; o
+            En Second Brain (&quot;nosotros&quot;, &quot;nos&quot; o
             &quot;la Plataforma&quot;), nos comprometemos a proteger tu
             privacidad. Esta Política explica cómo recopilamos, usamos,
             divulgamos y protegemos tu información personal.

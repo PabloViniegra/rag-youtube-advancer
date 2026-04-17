@@ -11,10 +11,10 @@ import { JsonLd } from '@/components/seo/json-ld'
 import { getCurrentUser } from '@/lib/auth/actions'
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://youtube-intelligence.app'
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://second-brain.app'
 
 export const metadata: Metadata = {
-  title: 'YouTube Intelligence — Crece más rápido con IA',
+  title: 'Second Brain — Crece más rápido con IA',
   description:
     'Transforma cualquier video de YouTube en conocimiento accionable. Búsqueda semántica, resúmenes IA y análisis RAG para creadores de contenido. 1 video gratis con cuenta free.',
   alternates: {
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     url: '/',
-    title: 'YouTube Intelligence — Crece más rápido con IA',
+    title: 'Second Brain — Crece más rápido con IA',
     description:
       'Transforma cualquier video de YouTube en conocimiento accionable con búsqueda semántica y análisis RAG.',
   },
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  name: 'YouTube Intelligence',
+  name: 'Second Brain',
   url: siteUrl,
   description:
     'Transforma cualquier video de YouTube en conocimiento accionable con búsqueda semántica y análisis RAG.',
@@ -49,7 +49,7 @@ const websiteSchema = {
 const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'YouTube Intelligence',
+  name: 'Second Brain',
   url: siteUrl,
   logo: `${siteUrl}/opengraph-image`,
   sameAs: [],
@@ -58,7 +58,7 @@ const organizationSchema = {
 const softwareSchema = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
-  name: 'YouTube Intelligence',
+  name: 'Second Brain',
   applicationCategory: 'BusinessApplication',
   operatingSystem: 'Web',
   url: siteUrl,

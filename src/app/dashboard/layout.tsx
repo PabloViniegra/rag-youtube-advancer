@@ -8,7 +8,7 @@ import { getCurrentUser } from '@/lib/auth/actions'
 export const metadata: Metadata = {
   title: {
     template: '%s — Dashboard',
-    default: 'Dashboard — YouTube Intelligence',
+    default: 'Dashboard — Second Brain',
   },
   // Exclude all authenticated dashboard routes from search engine indexing.
   // These contain personal user data and have no public SEO value.

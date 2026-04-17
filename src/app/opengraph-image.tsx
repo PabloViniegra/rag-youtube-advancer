@@ -9,7 +9,7 @@ import { ImageResponse } from 'next/og'
  */
 export const runtime = 'edge'
 
-export const alt = 'YouTube Intelligence — Tu Segundo Cerebro para YouTube'
+export const alt = 'Second Brain — La IA para creadores de YouTube'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -68,7 +68,7 @@ export default function OgImage() {
           fill="none"
           aria-hidden="true"
         >
-          <title>YouTube Intelligence logo</title>
+          <title>Second Brain logo</title>
           <path
             d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2Z"
             stroke="white"
@@ -97,7 +97,7 @@ export default function OgImage() {
           color: 'rgba(255,255,255,0.6)',
         }}
       >
-        YouTube Intelligence
+        Second Brain
       </div>
 
       {/* Main headline */}

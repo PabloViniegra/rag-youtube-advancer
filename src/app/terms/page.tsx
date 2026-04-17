@@ -7,9 +7,9 @@ import { LegalSection, LegalList } from '@/components/legal/legal-section'
 import { LegalContactCard } from '@/components/legal/legal-contact-card'
 
 export const metadata: Metadata = {
-  title: 'Términos de Uso — YouTube Intelligence',
+  title: 'Términos de Uso — Second Brain',
   description:
-    'Términos y condiciones de uso de YouTube Intelligence. Lee nuestras políticas antes de usar la plataforma.',
+    'Términos y condiciones de uso de Second Brain. Lee nuestras políticas antes de usar la plataforma.',
 }
 
 const SECTIONS = [
@@ -39,7 +39,7 @@ export default async function TermsOfService() {
       <Navbar isAuthenticated={user !== null} />
       <LegalLayout
         title="Términos de Uso"
-        description="Condiciones que rigen el uso de la plataforma YouTube Intelligence."
+        description="Condiciones que rigen el uso de la plataforma Second Brain."
         lastUpdated={lastUpdated}
         sections={SECTIONS}
       >
@@ -49,7 +49,7 @@ export default async function TermsOfService() {
           title="Aceptación de los Términos"
         >
           <p>
-            Al acceder y utilizar YouTube Intelligence (&quot;la
+            Al acceder y utilizar Second Brain (&quot;la
             Plataforma&quot;), aceptas de forma vinculante estos Términos de
             Uso. Si no estás de acuerdo con alguna disposición, no debes
             utilizar la Plataforma.
@@ -62,7 +62,7 @@ export default async function TermsOfService() {
           title="Descripción del Servicio"
         >
           <p>
-            YouTube Intelligence es una plataforma SaaS que permite a creadores
+            Second Brain es una plataforma SaaS que permite a creadores
             de contenido transformar videos de YouTube en conocimiento
             accionable mediante tecnologías de IA, incluyendo búsqueda
             semántica, resúmenes automáticos y análisis de optimización.
@@ -116,7 +116,7 @@ export default async function TermsOfService() {
         <LegalSection id="propiedad" num="06" title="Propiedad Intelectual">
           <LegalList
             items={[
-              'La Plataforma y todo su contenido son propiedad de YouTube Intelligence.',
+              'La Plataforma y todo su contenido son propiedad de Second Brain.',
               'Los resultados generados por IA son tuyos para usar como desees.',
               'No puedes copiar, modificar o distribuir nuestro código sin autorización.',
               'Las marcas de terceros (incluyendo YouTube) pertenecen a sus respectivos propietarios.',
@@ -130,7 +130,7 @@ export default async function TermsOfService() {
           title="Limitación de Responsabilidad"
         >
           <p>
-            YouTube Intelligence se proporciona &quot;como está&quot;. No
+            Second Brain se proporciona &quot;como está&quot;. No
             garantizamos que el servicio esté libre de errores o disponible el
             100% del tiempo. No somos responsables de decisiones que tomes
             basándote en los análisis o sugerencias de la Plataforma.
@@ -168,7 +168,7 @@ export default async function TermsOfService() {
           <LegalContactCard
             question="¿Tienes preguntas sobre estos Términos?"
             description="Contáctanos a través de nuestro sitio web o por email."
-            email="legal@youtube-intelligence.app"
+            email="legal@second-brain.app"
           />
         </LegalSection>
       </LegalLayout>

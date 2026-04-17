@@ -4,7 +4,7 @@ import { Suspense } from 'react'
 import { LoginForm } from '@/components/auth/login-form'
 
 export const metadata: Metadata = {
-  title: 'Acceder — YouTube Intelligence',
+  title: 'Acceder — Second Brain',
   description: 'Inicia sesión para acceder a tu segundo cerebro para YouTube.',
   // Login page should not be indexed — it has no SEO value and may confuse
   // search engines with session-dependent content.
@@ -67,7 +67,7 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
             </svg>
           </div>
           <span className="font-headline text-sm font-extrabold uppercase tracking-widest text-on-primary/80">
-            YouTube Intelligence
+            Second Brain
           </span>
         </div>
 
@@ -149,7 +149,7 @@ export default function LoginPage({ searchParams }: LoginPageProps) {
               </svg>
             </div>
             <span className="font-headline text-sm font-extrabold uppercase tracking-widest text-on-surface">
-              YouTube Intelligence
+              Second Brain
             </span>
           </div>
 
