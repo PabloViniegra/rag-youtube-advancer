@@ -22,12 +22,13 @@ type VideoRow = Database['public']['Tables']['videos']['Row']
 
 interface VideosPageClientProps {
   initialVideos: VideoRow[]
+  canIndex: boolean
 }
 
 // Inner component that reads search params — must be inside Suspense when used
 // in the App Router. We keep it as a separate function to isolate the
 // useSearchParams call.
-function VideosPageInner({ initialVideos }: VideosPageClientProps) {
+function VideosPageInner({ initialVideos, canIndex }: VideosPageClientProps) {
   const searchParams = useSearchParams()
   const rawSort = searchParams.get('sort')
   const activeSort = isVideoSort(rawSort) ? rawSort : DEFAULT_SORT
@@ -53,6 +54,7 @@ function VideosPageInner({ initialVideos }: VideosPageClientProps) {
         hasActiveSearch={hasActiveSearch}
         searchQuery={searchQuery}
         onClearSearch={() => setSearchQuery('')}
+        canIndex={canIndex}
       />
     </>
   )
@@ -67,7 +69,7 @@ const GRID_SKELETON_KEYS = [
   'sk-6',
 ] as const
 
-export function VideosPageClient({ initialVideos }: VideosPageClientProps) {
+export function VideosPageClient({ initialVideos, canIndex }: VideosPageClientProps) {
   return (
     <Suspense
       fallback={
@@ -84,7 +86,7 @@ export function VideosPageClient({ initialVideos }: VideosPageClientProps) {
         </div>
       }
     >
-      <VideosPageInner initialVideos={initialVideos} />
+      <VideosPageInner initialVideos={initialVideos} canIndex={canIndex} />
     </Suspense>
   )
 }

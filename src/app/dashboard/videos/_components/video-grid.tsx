@@ -16,6 +16,7 @@ interface VideoGridProps {
   hasActiveSearch: boolean
   searchQuery: string
   onClearSearch: () => void
+  canIndex: boolean
 }
 
 export function VideoGrid({
@@ -24,6 +25,7 @@ export function VideoGrid({
   hasActiveSearch,
   searchQuery,
   onClearSearch,
+  canIndex,
 }: VideoGridProps) {
   const [videos, removeVideo] = useOptimistic(
     initialVideos,
@@ -37,7 +39,7 @@ export function VideoGrid({
     })
   }
 
-  if (videos.length === 0) return <VideoEmptyState />
+  if (videos.length === 0) return <VideoEmptyState trialExhausted={!canIndex} />
 
   if (sortedFilteredVideos.length === 0 && hasActiveSearch) {
     return <VideoSearchEmptyState query={searchQuery} onClear={onClearSearch} />

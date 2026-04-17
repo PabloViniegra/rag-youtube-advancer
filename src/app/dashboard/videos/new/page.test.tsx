@@ -1,9 +1,12 @@
 // @vitest-environment jsdom
 /**
- * Tests for NuevoVideoPage — Client Component
+ * Tests for the video ingestion form (NewVideoOrchestrator).
  *
  * Uses React Testing Library + jsdom.
- * `ingestVideo` is mocked via vi.mock so we can control Server Action responses.
+ * NuevoVideoPage became an async Server Component after adding auth/plan guards.
+ * We test NewVideoOrchestrator directly — it holds all client-side behavior.
+ *
+ * `ingestVideo` is mocked so we can control Server Action responses.
  */
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -39,7 +42,7 @@ vi.mock('@/lib/pipeline/ingest', () => ({
 
 // ─── Import (after mocks) ─────────────────────────────────────────────────────
 
-import NuevoVideoPage from './page'
+import { NewVideoOrchestrator } from './_components/new-video-orchestrator'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -51,7 +54,7 @@ function resolveWith(result: IngestResult) {
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
-describe('NuevoVideoPage', () => {
+describe('NewVideoOrchestrator (ingest form)', () => {
   afterEach(() => {
     cleanup()
     vi.useRealTimers()
@@ -62,11 +65,8 @@ describe('NuevoVideoPage', () => {
   // ── Idle state ──────────────────────────────────────────────────────────────
 
   it('renders the idle form state', () => {
-    render(<NuevoVideoPage />)
+    render(<NewVideoOrchestrator />)
 
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-      'Añadir video',
-    )
     expect(screen.getByLabelText(/URL de YouTube/i)).toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: /analizar video/i }),
@@ -75,7 +75,7 @@ describe('NuevoVideoPage', () => {
 
   it('enables the submit button when a URL is typed', async () => {
     const user = userEvent.setup()
-    render(<NuevoVideoPage />)
+    render(<NewVideoOrchestrator />)
 
     await user.type(screen.getByLabelText(/URL de YouTube/i), VALID_URL)
 
@@ -91,7 +91,7 @@ describe('NuevoVideoPage', () => {
     // Never-resolving promise keeps loading state indefinitely
     mockIngestVideo.mockReturnValueOnce(new Promise(() => {}))
 
-    render(<NuevoVideoPage />)
+    render(<NewVideoOrchestrator />)
 
     await user.type(screen.getByLabelText(/URL de YouTube/i), VALID_URL)
     await user.click(screen.getByRole('button', { name: /analizar video/i }))
@@ -182,7 +182,7 @@ describe('NuevoVideoPage', () => {
       },
     })
 
-    render(<NuevoVideoPage />)
+    render(<NewVideoOrchestrator />)
 
     await user.type(screen.getByLabelText(/URL de YouTube/i), VALID_URL)
     await user.click(screen.getByRole('button', { name: /analizar video/i }))
@@ -277,7 +277,7 @@ describe('NuevoVideoPage', () => {
       },
     })
 
-    render(<NuevoVideoPage />)
+    render(<NewVideoOrchestrator />)
 
     await user.type(screen.getByLabelText(/URL de YouTube/i), VALID_URL)
     await user.click(screen.getByRole('button', { name: /analizar video/i }))
@@ -306,7 +306,7 @@ describe('NuevoVideoPage', () => {
       message: 'Invalid transcript response.',
     })
 
-    render(<NuevoVideoPage />)
+    render(<NewVideoOrchestrator />)
 
     await user.type(screen.getByLabelText(/URL de YouTube/i), VALID_URL)
     await user.click(screen.getByRole('button', { name: /analizar video/i }))
@@ -326,7 +326,7 @@ describe('NuevoVideoPage', () => {
       message: 'Transcript extraction failed.',
     })
 
-    render(<NuevoVideoPage />)
+    render(<NewVideoOrchestrator />)
 
     await user.type(screen.getByLabelText(/URL de YouTube/i), VALID_URL)
     await user.click(screen.getByRole('button', { name: /analizar video/i }))
@@ -346,7 +346,7 @@ describe('NuevoVideoPage', () => {
       message: '',
     })
 
-    render(<NuevoVideoPage />)
+    render(<NewVideoOrchestrator />)
 
     await user.type(screen.getByLabelText(/URL de YouTube/i), VALID_URL)
     await user.click(screen.getByRole('button', { name: /analizar video/i }))
@@ -366,7 +366,7 @@ describe('NuevoVideoPage', () => {
       message: '',
     })
 
-    render(<NuevoVideoPage />)
+    render(<NewVideoOrchestrator />)
 
     await user.type(screen.getByLabelText(/URL de YouTube/i), VALID_URL)
     await user.click(screen.getByRole('button', { name: /analizar video/i }))
@@ -388,7 +388,7 @@ describe('NuevoVideoPage', () => {
       message: 'Custom upstream error from the store API.',
     })
 
-    render(<NuevoVideoPage />)
+    render(<NewVideoOrchestrator />)
 
     await user.type(screen.getByLabelText(/URL de YouTube/i), VALID_URL)
     await user.click(screen.getByRole('button', { name: /analizar video/i }))
@@ -409,7 +409,7 @@ describe('NuevoVideoPage', () => {
       message: '',
     })
 
-    render(<NuevoVideoPage />)
+    render(<NewVideoOrchestrator />)
 
     await user.type(screen.getByLabelText(/URL de YouTube/i), VALID_URL)
     await user.click(screen.getByRole('button', { name: /analizar video/i }))
@@ -427,7 +427,7 @@ describe('NuevoVideoPage', () => {
     const user = userEvent.setup()
     mockIngestVideo.mockRejectedValueOnce(new Error('boom'))
 
-    render(<NuevoVideoPage />)
+    render(<NewVideoOrchestrator />)
 
     await user.type(screen.getByLabelText(/URL de YouTube/i), VALID_URL)
     await user.click(screen.getByRole('button', { name: /analizar video/i }))

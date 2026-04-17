@@ -3,11 +3,14 @@ import { cacheLife, cacheTag } from 'next/cache'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { ViewTransition } from 'react'
+import { canIndexVideo, PLAN, resolvePlan } from '@/lib/plans'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/types'
+import { UpgradeHeaderButton } from './_components/video-upgrade-header-button'
 import { VideosPageClient } from './_components/videos-page-client'
 
 type VideoRow = Database['public']['Tables']['videos']['Row']
+type Profile = Database['public']['Tables']['profiles']['Row']
 
 export const metadata: Metadata = {
   title: 'Mis videos — Dashboard',
@@ -36,6 +39,23 @@ async function getUserVideos(userId: string): Promise<VideoRow[]> {
   return (error || !data ? [] : data) as VideoRow[]
 }
 
+async function getUserProfile(
+  userId: string,
+): Promise<Pick<Profile, 'role' | 'subscription_active' | 'trial_used'> | null> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('role, subscription_active, trial_used')
+    .eq('id', userId)
+    .single()
+
+  if (error || !data) return null
+  return data as unknown as Pick<
+    Profile,
+    'role' | 'subscription_active' | 'trial_used'
+  >
+}
+
 export default async function VideosPage() {
   const supabase = await createClient()
 
@@ -47,8 +67,15 @@ export default async function VideosPage() {
     redirect('/login?redirectTo=/dashboard/videos')
   }
 
-  const videoList = await getUserVideos(user.id)
+  const [videoList, profile] = await Promise.all([
+    getUserVideos(user.id),
+    getUserProfile(user.id),
+  ])
+
   const count = videoList.length
+  const plan = profile ? resolvePlan(profile) : PLAN.FREE
+  const trialUsed = profile?.trial_used ?? false
+  const canIndex = canIndexVideo(plan, count, trialUsed)
 
   return (
     <ViewTransition
@@ -84,18 +111,22 @@ export default async function VideosPage() {
             </p>
           </div>
 
-          <Link
-            href="/dashboard/videos/new"
-            transitionTypes={['nav-forward']}
-            className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 font-body text-sm font-bold text-on-primary shadow-sm transition-all hover:bg-primary-dim active:scale-[0.98]"
-          >
-            <PlusIcon />
-            Añadir video
-          </Link>
+          {canIndex ? (
+            <Link
+              href="/dashboard/videos/new"
+              transitionTypes={['nav-forward']}
+              className="inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 font-body text-sm font-bold text-on-primary shadow-sm transition-all hover:bg-primary-dim active:scale-[0.98]"
+            >
+              <PlusIcon />
+              Añadir video
+            </Link>
+          ) : (
+            <UpgradeHeaderButton />
+          )}
         </div>
 
         {/* ── Content ── */}
-        <VideosPageClient initialVideos={videoList} />
+        <VideosPageClient initialVideos={videoList} canIndex={canIndex} />
       </div>
     </ViewTransition>
   )
